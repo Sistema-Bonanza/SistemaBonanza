@@ -1,0 +1,16 @@
+CREATE DATABASE sistema_bonanza
+
+USE sistema_bonanza;
+CREATE TABLE usuarios (
+id INT AUTO_INCREMENT PRIMARY KEY,
+username VARCHAR(100) NOT NULL UNIQUE,
+password_hash VARCHAR (255) NOT NULL,
+last_connection DATETIME,
+rol VARCHAR(10) NOT NULL,
+is_active TINYINT DEFAULT 1
+);
+
+
+USE sistema_bonanza;
+INSERT INTO usuarios (username, password_hash, rol) 
+VALUES ('admin' , 'hash_pendiente', 'admin');
