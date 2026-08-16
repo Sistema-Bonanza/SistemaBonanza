@@ -1,0 +1,34 @@
+1. Módulo de Gestión de Usuarios y Roles (Tu siguiente paso)
+Ya tienes la puerta blindada (el login), pero ahora necesitas gestionar a quién le das las llaves.
+
+Qué incluye: Un CRUD (Crear, Leer, Actualizar, Eliminar) para registrar a los empleados y asignarles niveles de acceso (ej. Administrador, Almacenista, Vendedor).
+
+Por qué es clave: El cuaderno del proyecto exige un control de usuarios basado en roles para garantizar la integridad de los datos. Necesitas esta base antes de crear los módulos operativos para que el sistema sepa quién tiene permiso para alterar el inventario y quién no.
+
+2. Módulo de Catálogo de Productos
+Es el corazón del sistema. No puedes registrar movimientos sin antes tener la mercancía parametrizada en la base de datos.
+
+Qué incluye: Registro de los alimentos, unidades de medida, categorías y, muy importante, la configuración de las alertas de stock mínimo para evitar el desabastecimiento.
+
+Por qué es clave: Aquí es donde implementarás la gestión detallada de precios, costos de adquisición y márgenes de ganancia que requiere la distribuidora.
+
+3. Módulo de Movimientos de Inventario (Entradas)
+Aquí entra en juego la dinámica diaria del almacén con los proveedores.
+
+Qué incluye: Formularios para registrar la entrada de nueva mercancía (compras) y ajustes excepcionales.
+
+Por qué es clave: Garantizar la sincronización del stock en tiempo real. Cuando el almacenista registra la llegada de un lote de alimentos, el sistema debe sumar las cantidades automáticamente sin intervención manual.
+
+4. Módulo de Facturación y Salidas (Notas de Entrega)
+El punto de contacto con el cliente final y la salida principal de la mercancía.
+
+Qué incluye: La interfaz de ventas o despacho para seleccionar productos, calcular totales y procesar la salida.
+
+Por qué es clave: Cubre un requerimiento crítico del proyecto: la generación obligatoria de facturas o notas de entrega digitales ante cada salida de mercancía, descontando el stock automáticamente al instante de emitir el documento.
+
+5. Módulo de Reportes Gerenciales
+La herramienta visual para la toma de decisiones administrativas.
+
+Qué incluye: Pantallas con tablas dinámicas y filtros por fechas para consultar métricas de inventario y ventas.
+
+Por qué es clave: Es la cristalización del objetivo del sistema. Permite a la gerencia de Bonanza C.A. auditar qué entró, qué salió y cuánto se facturó en un periodo determinado sin revisar papeles.

@@ -13,7 +13,7 @@ class Database{
        $this->connect();
     }
 
-    private function connect(){
+    public function connect(){
         $dsn = "mysql:host={$this->host};dbname={$this->db};charset={$this->charset}";
 
         $options = [

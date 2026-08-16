@@ -26,7 +26,7 @@ class UsuarioModel{
             return $stmt->fetch();
 
     } catch(PDOException $e){
-        //EN PRODUCCION ESTO IRIA A UN ARCHIVO DE TEXTO (LOG)
+            
         echo "Error en la Base de Datos " . $e->getMessage();
         return false;
 

@@ -222,7 +222,7 @@ if (!isset($_SESSION['user_id'])) {
                 <li class="nav-item active"><a href="#">📊 Inicio</a></li>
                 <li class="nav-item"><a href="#">📦 Productos</a></li>
                 <li class="nav-item"><a href="#">🔄 Movimientos</a></li>
-                <li class="nav-item"><a href="#">👥 Usuarios</a></li>
+                <li class="nav-item"><a href="index.php?controller=usuario&action=crear">👥 Usuarios</a></li>
                 <li class="nav-item"><a href="#">⚙️ Configuración</a></li>
             </ul>
         </div>
