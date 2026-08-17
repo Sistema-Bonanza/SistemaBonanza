@@ -1,6 +1,6 @@
 <?php
 
-class UsuarioModel{
+class usuarioModel{
     private $pdo;
 
     public function __construct($pdo){

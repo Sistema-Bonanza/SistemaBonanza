@@ -13,7 +13,7 @@ class SistemaController{
         $database = new Database();
         $pdo = $database->getConnection();
         //inyectar la coneccion en el modelo.
-        $this->model = new UsuarioModel($pdo);
+        $this->model = new SistemaModel($pdo);
     }
 
 
