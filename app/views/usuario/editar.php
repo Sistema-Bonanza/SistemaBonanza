@@ -95,20 +95,20 @@ if (!isset($_SESSION['user_id'])) {
             
             <!-- PANEL DEL FORMULARIO -->
             <div class="data-panel">
-                <h3>Registrar Nuevo Usuario</h3>
-                <p>Complete los datos para dar acceso a un nuevo trabajador.</p>
+                <h3>Editar Datos de Usuario</h3>
+                <p>Complete los datos para actualizar la información del usuario.</p>
 
                 <!-- El atributo action apuntará a nuestro futuro Controlador -->
-                <form action="index.php?controller=usuario&action=guardar" method="POST">
+                <form action="index.php?controller=usuario&action=editar" method="POST">
                     
                     <div class="form-group">
                         <label class="form-label" for="username">Nombre de Usuario</label>
-                        <input type="text" id="username" name="username" class="form-control" required placeholder="Ej: m_pacheco">
+                        <input type="text" id="username" name="username" class="form-control" value="<?= htmlspecialchars($usuario['username'] ?? '') ?>">
                     </div>
 
                     <div class="form-group">
                         <label class="form-label" for="password">Contraseña</label>
-                        <input type="password" id="password" name="password" class="form-control" required placeholder="Ingrese una contraseña segura">
+                        <input type="password" id="password" name="password" class="form-control" value="<?= htmlspecialchars($usuario['password'] ?? '') ?>">
                     </div>
 
                     <div class="form-group">
@@ -120,7 +120,7 @@ if (!isset($_SESSION['user_id'])) {
                         </select>
                     </div>
 
-                    <button type="submit" class="btn-primary">Guardar Usuario</button>
+                    <button type="submit" class="btn-primary">Actualizar Datos de  Usuario</button>
                 </form>
             </div>
 

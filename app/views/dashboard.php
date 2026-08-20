@@ -219,10 +219,10 @@ if (!isset($_SESSION['user_id'])) {
                 <h2>Inventario <span>Bonanza</span></h2>
             </div>
             <ul class="nav-menu">
-                <li class="nav-item active"><a href="#">📊 Inicio</a></li>
+                <li class="nav-item active"><a href="index.php?controller=sistema&action=dashboard">📊 Inicio</a></li>
                 <li class="nav-item"><a href="#">📦 Productos</a></li>
                 <li class="nav-item"><a href="#">🔄 Movimientos</a></li>
-                <li class="nav-item"><a href="index.php?controller=usuario&action=crear">👥 Usuarios</a></li>
+                <li class="nav-item"><a href="index.php?controller=usuario&action=formusuario">👥 Usuarios</a></li>
                 <li class="nav-item"><a href="#">⚙️ Configuración</a></li>
             </ul>
         </div>
