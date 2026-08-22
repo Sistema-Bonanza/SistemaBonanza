@@ -14,3 +14,76 @@ is_active TINYINT DEFAULT 1
 USE sistema_bonanza;
 INSERT INTO usuarios (username, password_hash, rol) 
 VALUES ('admin' , 'hash_pendiente', 'admin');
+
+
+Modulo de Productos:
+La propuesta final (Estructura de la Tabla)
+Traduciendo tu idea a lenguaje SQL profesional, tu tabla productos debería verse así:
+
+id (INT, Primary Key, Auto Increment)
+
+codigo (VARCHAR, Único) - El código de barras o código interno.
+
+nombre (VARCHAR) - Ej: Harina de Maíz Precocida 1Kg.
+
+categoria_id (INT) - Mejor que poner el nombre directo, lo enlazamos con una tabla de categorías.
+
+proveedor_id (INT) - Igual, enlazado a la tabla de proveedores.
+
+precio_compra (DECIMAL) - Lo que te cuesta.
+
+precio_venta (DECIMAL) - A lo que lo vendes.
+
+aplica_iva (BOOLEAN/TINYINT) - 1 si lleva IVA (16%), 0 si es Exento (muy importante en distribuidoras de alimentos).
+
+stock_actual (INT) - Cantidad disponible.
+
+stock_minimo (INT) - Para que el dashboard te alerte si quedan pocos.
+
+is_active (TINYINT) - 1=Activo, 0=Descontinuado.
+
+created_at (TIMESTAMP) - Fecha de ingreso al sistema (Automático).
+
+
+PROVEEDORES:
+CREATE TABLE proveedores (
+    id_proveedor INT AUTO_INCREMENT PRIMARY KEY,
+    rif VARCHAR(20) NOT NULL UNIQUE, -- Documento fiscal importante para registros formales
+    razon_social VARCHAR(100) NOT NULL,
+    nombre_contacto VARCHAR(100),
+    telefono VARCHAR(20),
+    email VARCHAR(100),
+    direccion TEXT,
+    estado TINYINT(1) DEFAULT 1
+);
+
+
+
+CATEGORIAS:
+CREATE TABLE categorias (
+    id_categoria INT AUTO_INCREMENT PRIMARY KEY,
+    nombre VARCHAR(50) NOT NULL,
+    descripcion VARCHAR(255),
+    estado TINYINT(1) DEFAULT 1 -- 1 para activo, 0 para inactivo
+);
+
+PRODUCTOS:
+USE sistema_bonanza;
+CREATE TABLE productos(
+id_producto INT AUTO_INCREMENT PRIMARY KEY,
+codigo VARCHAR(50) NOT NULL UNIQUE,
+nombre VARCHAR(150) NOT NULL,
+id_categoria INT NOT NULL,
+id_proveedor INT NOT NULL,
+unidad_media VARCHAR(20) NOT NULL,
+unidades_por_empaque INT DEFAULT 1,
+precio_compra DECIMAL(10,2) NOT NULL,
+precio_venta DECIMAL(10,2) NOT NULL,
+aplica_iva TINYINT(1) DEFAULT 1,
+stock_actual INT DEFAULT 0,
+stock_minimo INT DEFAULT 5,
+estado TINYINT(1) DEFAULT 1,
+create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria) ON UPDATE CASCADE ON DELETE RESTRICT,
+FOREIGN KEY (id_proveedor) REFERENCES proveedores(id_proveedor) ON UPDATE CASCADE ON DELETE RESTRICT
+);

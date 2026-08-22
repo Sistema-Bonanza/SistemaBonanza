@@ -101,6 +101,8 @@ if (!isset($_SESSION['user_id'])) {
                 <!-- El atributo action apuntará a nuestro futuro Controlador -->
                 <form action="index.php?controller=usuario&action=editar" method="POST">
                     
+                    <input type="hidden" name="id" value="<?= htmlspecialchars($usuario['id'] ?? '') ?>">
+                    
                     <div class="form-group">
                         <label class="form-label" for="username">Nombre de Usuario</label>
                         <input type="text" id="username" name="username" class="form-control" value="<?= htmlspecialchars($usuario['username'] ?? '') ?>">

@@ -1,0 +1,30 @@
+muy bien, ya cree las tablas, ahora quiero avanzar con el codigo del modulo, quiero añadir los productos pero ya directamente de la interfaz de sistema web,
+
+con el modulo de usuario, creamos primero nuestro archivo model, luego el controller y por ultimo la view, seguiremos el mismo patron aca? 
+
+
+¡Excelente noticia! Eso merece una pequeña celebración. Ahora que la base de datos de la Distribuidora Bonanza está lista, la transición hacia el código debe ser impecable.
+
+Y sí, tu instinto analítico sigue siendo muy agudo. Debemos mantener exactamente el mismo patrón MVC (Modelo -> Controlador -> Vista) que usaste en el módulo de usuarios. Mantener la consistencia estructural es la piedra angular del desarrollo de software profesional.
+
+Sin embargo, debido a que este módulo es "relacional" (depende de otras tablas), el orden de ejecución será un poquito diferente para que no te estanques al programar la Vista.
+
+
+El Plan de Acción (MVC para Productos)
+1.Modelos Auxiliares (Categoría y Proveedor):Paso previo obligatorio.Antes de poder guardar un producto, la interfaz necesitará mostrarle al usuario las opciones 
+en los campos select (<select>). Por lo tanto, necesitaremos crear dos modelos muy pequeños y rápidos (CategoriaModel.php y ProveedorModel.php) que solo tengan una función: obtenerTodos().
+
+
+2.El Modelo Principal (ProductoModel):Aquí escribiremos la lógica pesada de la base de datos. Crearemos el archivo ProductoModel.php con su método crearProducto(), el cual recibirá todos los datos del formulario
+(código, nombre, categoría, stock mínimo, etc.) y los enviará mediante una sentencia INSERT INTO usando PDO para evitar inyecciones SQL.
+
+
+3.El Controlador (ProductoController):Este archivo (ProductoController.php) será el cerebro.Recibirá el POST del formulario.Llamará a los modelos auxiliares para cargar las categorías y proveedores.Llamará al modelo principal para guardar la información en la tabla productos.
+
+
+4.La Vista (crear_producto.php):Finalmente, diseñaremos la interfaz. Usando Bootstrap y Bulma (como sé que te gusta combinar), armaremos un formulario dividido en secciones (Datos básicos, Clasificación, 
+Precios, Inventario). Los campos desplegables (Categoría y Proveedor) se llenarán automáticamente gracias al Controlador.¿Por dónde quieres empezar?El primer paso lógico es armar los pequeños modelos que nos 
+traigan la información de las categorías y los proveedores para poder usarlos en el formulario.
+
+
+¿Quieres que empecemos creando los archivos CategoriaModel.php y ProveedorModel.php? Si te parece bien, dime en qué carpeta los sueles guardar y comenzamos a escribir la estructura.

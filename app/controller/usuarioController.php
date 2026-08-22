@@ -93,7 +93,7 @@ require_once __DIR__.'/../model/usuarioModel.php';
         exit;
     }
 
-    
+        
 }
 
 ?>
