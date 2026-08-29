@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Dashboard · POS & Inventario</title>
+    <!-- CSS externo -->
+    <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+    <!-- ========== SIDEBAR ========== -->
+    <aside class="sidebar">
+        <div class="logo">✨ <span>Stock</span>it</div>
+        <nav>
+            <a href="#" class="active"><i>📊</i> Dashboard</a>
+            <a href="#"><i>🛒</i> POS</a>
+            <a href="#"><i>📦</i> Mi inventario</a>
+            <a href="#"><i>📋</i> Reportes</a>
+            <a href="#"><i>👥</i> Proveedores</a>
+            <a href="#"><i>⚙️</i> Configuración</a>
+        </nav>
+        <div class="sidebar-footer">
+            <p>👤 Jordan M.</p>
+            <small>Turno: 9:02 AM · Caja: $220.00</small>
+        </div>
+    </aside>
+
+    <!-- ========== MAIN ========== -->
+    <main class="main">
+
+        <!-- Stats -->
+        <section class="stats-grid" id="statsGrid">
+            <div class="stat-card">
+                <div class="number" id="totalProducts">0</div>
+                <div class="label">Productos en total</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="availableProducts">0</div>
+                <div class="label">Productos disponibles</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="totalStock">0</div>
+                <div class="label">Cantidad total en stock</div>
+            </div>
+            <div class="stat-card">
+                <div class="number" id="totalSuppliers">0</div>
+                <div class="label">Total de proveedores</div>
+            </div>
+        </section>
+
+        <!-- POS Row: Product List + Cart -->
+        <section class="pos-row">
+            <!-- Product list -->
+            <div class="product-list">
+                <h2>
+                    Productos
+                    <small>haz clic en ➕ para agregar</small>
+                </h2>
+                <div id="productList">
+                    <!-- Los productos se inyectan desde JS -->
+                </div>
+            </div>
+
+            <!-- Shopping Cart -->
+            <div class="cart-panel">
+                <h2>🛒 Carrito</h2>
+                <div class="cart-items" id="cartItems">
+                    <div class="empty-cart">El carrito está vacío</div>
+                </div>
+                <div class="cart-total">
+                    <span>Total</span>
+                    <span id="cartTotal">$0.00</span>
+                </div>
+                <div class="cart-actions">
+                    <button class="btn-reset" id="resetCartBtn">⟳ Reset Order</button>
+                    <button class="btn-end" id="endShiftBtn">⏻ End Shift</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Inventory Table -->
+        <section class="inventory-section">
+            <h2>
+                📋 Inventario completo
+                <span class="text-muted">todos los productos</span>
+            </h2>
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Precio</th>
+                            <th>Cantidad</th>
+                            <th>Talla</th>
+                            <th>Proveedor</th>
+                            <th>Categoría</th>
+                            <th>Disponibilidad</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inventoryTableBody">
+                        <!-- Datos desde JS -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="table-actions">
+                <button class="btn-download">⬇ Descargar inventario</button>
+                <button class="btn-add">➕ Añadir producto</button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- JavaScript externo -->
+    <script src="app.js"></script>
+</body>
+</html>
+
