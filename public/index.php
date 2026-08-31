@@ -1,5 +1,16 @@
 <?php
 
+ // 1. Permiso para archivos estáticos (CSS, JS, Imágenes) en servidor local
+if (php_sapi_name() === 'cli-server') {
+    $rutaArchivo = __DIR__ . parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
+    if (is_file($rutaArchivo)) {
+        return false; // El Front Controller ignora la petición y deja pasar el CSS
+    }
+}
+
+// ... Aquí debajo continúa el resto de tu código normal del index.php
+// (Require de archivos, inicialización de controladores, etc.)
+
 // Inicia la sesión global
 session_start();
 
