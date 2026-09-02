@@ -3,7 +3,7 @@
     <div class="logo">✨ <span>Bonanza</span></div>
     <nav>
         <!-- Rutas apuntando a tu index.php -->
-        <a href="index.php?controller=dashboard&action=inicio"><i>📊</i> Dashboard</a>
+        <a href="index.php?controller=sistema&action=dashboard"><i>📊</i> Dashboard</a>
         <a href="#"><i>🛒</i> POS</a>
         <!-- Este es el módulo donde estamos trabajando -->
         <a href="index.php?controller=producto&action=TablaProductos" class="active"><i>📦</i> Mi inventario</a>

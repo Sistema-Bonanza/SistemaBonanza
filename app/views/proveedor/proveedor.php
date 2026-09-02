@@ -18,16 +18,16 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gestión de Usuarios · POS & Inventario</title>
+    <title>Gestión de Proveedores · POS & Inventario</title>
     <!-- CSS externo del dashboard -->
     <link rel="stylesheet" href="assets/css/dashboard.css" />
     
     <style>
-        /* --- ESTILOS ADICIONALES PARA GESTIÓN DE USUARIOS --- */
+        /* --- ESTILOS ADICIONALES PARA GESTIÓN DE PROVEEDORES --- */
         /* Estos estilos complementan dashboard.css manteniendo coherencia visual */
 
-        /* SECCIÓN DE USUARIOS - GRID */
-        .users-section {
+        /* SECCIÓN DE PROVEEDORES - GRID */
+        .providers-section {
             display: grid;
             grid-template-columns: 1fr 2fr;
             gap: 25px;
@@ -342,29 +342,29 @@ if (!isset($_SESSION['user_id'])) {
 
         <!-- WELCOME CARD -->
         <div class="welcome-card">
-            <h1>👥 Gestión de Usuarios</h1>
-            <p>Administra los usuarios del sistema. Solo los administradores pueden realizar cambios.</p>
+            <h1>👥 Gestión de Proveedores</h1>
+            <p>Administra los proveedores del sistema. Solo los administradores pueden realizar cambios.</p>
         </div>
 
-        <!-- SECCIÓN DE USUARIOS: BOTONES + LISTA -->
-        <div class="users-section">
+        <!-- SECCIÓN DE PROVEEDORES: BOTONES + LISTA -->
+        <div class="providers-section">
 
             <!-- PANEL IZQUIERDO: BOTONES DE ACCIÓN -->
             <div class="actions-panel">
                 <h3>📌 Acciones rápidas</h3>
                 <div class="btn-group">
-                    <a href="index.php?controller=usuario&action=formcrear" class="btn-action btn-add-user">
-                        <span class="icon-add"></span> Añadir Usuario
+                    <a href="index.php?controller=proveedor&action=formcrearproveedor" class="btn-action btn-add-provider">
+                        <span class="icon-add"></span> Añadir Proveedor
                     </a>
                 </div>
             </div>
 
-            <!-- PANEL DERECHO: LISTA DE USUARIOS -->
-            <div class="users-list-panel">
+            <!-- PANEL DERECHO: LISTA DE PROVEEDORES -->
+            <div class="providers-list-panel">
                 <h3>
-                    📋 Usuarios del Sistema
-                    <span class="user-counter">
-                        <?php echo isset($usuarios) ? count($usuarios) : 0; ?>
+                    📋 Proveedores del Sistema
+                    <span class="provider-counter">
+                        <?php echo isset($proveedores) ? count($proveedores) : 0; ?>
                     </span>
                 </h3>
 
@@ -372,14 +372,14 @@ if (!isset($_SESSION['user_id'])) {
                     <table class="users-table">
                         <thead>
                             <tr>
-                                <th>Usuario</th>
+                                <th>Proveedor</th>
                                 <th>Rol</th>
                                 <th style="text-align: center;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php if (!empty($usuarios)): ?>
-                                <?php foreach ($usuarios as $a): ?>
+                            <?php if (!empty($proveedores)): ?>
+                                <?php foreach ($proveedores as $a): ?>
                                     <tr>
                                         <td>
                                             <div class="user-name-display">
