@@ -8,7 +8,7 @@
         <!-- Este es el módulo donde estamos trabajando -->
         <a href="index.php?controller=producto&action=TablaProductos" class="active"><i>📦</i> Mi inventario</a>
         <a href="#"><i>📋</i> Reportes</a>
-        <a href="#"><i>👥</i> Proveedores</a>
+        <a href="index.php?controller=proveedor&action=tablaProveedores"><i>👥</i> Proveedores</a>
         <a href="index.php?controller=usuario&action=formusuario"><i>⚙️</i> Usuarios</a>
     </nav>
     <div class="sidebar-footer">

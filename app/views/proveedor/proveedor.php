@@ -337,7 +337,7 @@ if (!isset($_SESSION['user_id'])) {
     <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
     
 
-    <!-- ========== MAIN ========== -->
+   <!-- ========== MAIN ========== -->
     <main class="main">
 
         <!-- WELCOME CARD -->
@@ -369,52 +369,55 @@ if (!isset($_SESSION['user_id'])) {
                 </h3>
 
                 <div class="table-container">
+                    <!-- Mantenemos la clase users-table para conservar tu CSS -->
                     <table class="users-table">
                         <thead>
                             <tr>
-                                <th>Proveedor</th>
-                                <th>Rol</th>
+                                <th>Razón Social</th>
+                                <th>RIF</th>
+                                <th>Contacto</th>
+                                <th>Teléfono</th>
                                 <th style="text-align: center;">Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
                             <?php if (!empty($proveedores)): ?>
-                                <?php foreach ($proveedores as $a): ?>
+                                <!-- Cambié $a por $p para que lógicamente signifique Proveedor -->
+                                <?php foreach ($proveedores as $p): ?>
                                     <tr>
                                         <td>
                                             <div class="user-name-display">
                                                 <div class="user-avatar">
-                                                    <?= strtoupper(substr(htmlspecialchars($a['username'] ?? 'U'), 0, 1)) ?>
+                                                    <!-- Extraemos la primera letra de la Razón Social -->
+                                                    <?= strtoupper(substr(htmlspecialchars($p['razon_social'] ?? 'P'), 0, 1)) ?>
                                                 </div>
-                                                <span><?= htmlspecialchars($a['username'] ?? '') ?></span>
+                                                <span><?= htmlspecialchars($p['razon_social'] ?? 'Sin Nombre') ?></span>
                                             </div>
                                         </td>
                                         <td>
-                                            <?php 
-                                                $rol = $a['rol'] ?? '';
-                                                $badgeClass = 'badge-user';
-                                                
-                                                if (strtolower($rol) === 'admin' || strtolower($rol) === 'administrador') {
-                                                    $badgeClass = 'badge-admin';
-                                                } elseif (strtolower($rol) === 'operator' || strtolower($rol) === 'operador') {
-                                                    $badgeClass = 'badge-operator';
-                                                }
-                                            ?>
-                                            <span class="badge <?= $badgeClass ?>">
-                                                <?= htmlspecialchars($rol) ?>
+                                            <!-- Reutilizamos tu estilo de badge para resaltar el RIF -->
+                                            <span class="badge badge-operator">
+                                                <?= htmlspecialchars($p['rif'] ?? 'N/A') ?>
                                             </span>
                                         </td>
                                         <td>
+                                            <?= htmlspecialchars($p['nombre_contacto'] ?? 'N/A') ?>
+                                        </td>
+                                        <td>
+                                            <?= htmlspecialchars($p['telefono'] ?? 'N/A') ?>
+                                        </td>
+                                        <td>
                                             <div class="actions-cell">
-                                                <a href="index.php?controller=usuario&action=formeditar&id=<?= $a['id'] ?>" 
+                                                <!-- Actualizados los controladores y el parámetro ID (asumiendo id_proveedor) -->
+                                                <a href="index.php?controller=proveedor&action=formeditar&id=<?= $p['id_proveedor'] ?? $p['id'] ?? '' ?>" 
                                                    class="btn-table btn-edit" 
-                                                   title="Editar usuario">
+                                                   title="Editar proveedor">
                                                     <span class="icon-edit"></span>
                                                 </a>
-                                                <a href="index.php?controller=usuario&action=eliminar&id=<?= $a['id'] ?>" 
+                                                <a href="index.php?controller=proveedor&action=eliminar&id=<?= $p['id_proveedor'] ?? $p['id'] ?? '' ?>" 
                                                    class="btn-table btn-delete-table" 
-                                                   title="Eliminar usuario"
-                                                   onclick="return confirm('¿Estás seguro de eliminar este usuario?');">
+                                                   title="Eliminar proveedor"
+                                                   onclick="return confirm('¿Estás seguro de eliminar a este proveedor del sistema?');">
                                                     <span class="icon-delete-table"></span>
                                                 </a>
                                             </div>
@@ -423,11 +426,12 @@ if (!isset($_SESSION['user_id'])) {
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="3">
+                                    <!-- colspan=5 porque ahora tenemos 5 columnas -->
+                                    <td colspan="5">
                                         <div class="empty-state">
-                                            <i>👥</i>
-                                            <h4>No hay usuarios registrados</h4>
-                                            <p style="font-size: 14px;">Haz clic en "Añadir Usuario" para crear el primero.</p>
+                                            <i>🏢</i>
+                                            <h4>No hay proveedores registrados</h4>
+                                            <p style="font-size: 14px;">Haz clic en "Añadir Proveedor" para registrar el primero.</p>
                                         </div>
                                     </td>
                                 </tr>
@@ -439,6 +443,3 @@ if (!isset($_SESSION['user_id'])) {
         </div>
 
     </main>
-
-</body>
-</html>
