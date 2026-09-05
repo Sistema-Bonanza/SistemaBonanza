@@ -1,13 +1,11 @@
 <?php
 require_once __DIR__ . '/../../config/database.php';
-require_once __DIR__ . '/../model/categoriaModel.php';
 require_once __DIR__ . '/../model/proveedorModel.php';
 require_once __DIR__ . '/../model/productoModel.php';
 
 
 Class productoController{
 
-    private $categoriaModel;
     private $proveedorModel;
     private $productoModel;
 
@@ -17,8 +15,7 @@ Class productoController{
         $pdo = $database->getConnection();
     
         //Se instancia los 3 modelos porque se necesitan para guardar un producto.
-        $this->categoriaModel = new CategoriaModel($pdo);
-        $this->proveedorModel = new ProveedorModel($pdo);
+       $this->proveedorModel = new ProveedorModel($pdo);
         $this->productoModel = new ProductoModel($pdo);
 
     }
