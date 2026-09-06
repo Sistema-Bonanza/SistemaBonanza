@@ -374,6 +374,7 @@ if (!isset($_SESSION['user_id'])) {
                             <tr>
                                 <th>Categoría</th>
                                 <th>Descripción</th>
+                                <th>Acciones</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -390,6 +391,12 @@ if (!isset($_SESSION['user_id'])) {
                                         </td>
                                         <td>
                                             <?= htmlspecialchars($categoria['descripcion'] ?? '') ?>
+                                        </td>
+                                        <td>
+                                            <a href="index.php?controller=categoria&action=editarCategoria&id=<?= $categoria['id'] ?>"
+                                                class="btn-table btn-edit" title="Editar Categoría">
+                                                <span class="icon-edit"></span>
+                                            </a>
                                         </td>
                                     </tr>
                                 <?php endforeach; ?>
