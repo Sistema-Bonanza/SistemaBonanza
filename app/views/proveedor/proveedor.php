@@ -409,7 +409,7 @@ if (!isset($_SESSION['user_id'])) {
                                         <td>
                                             <div class="actions-cell">
                                                 <!-- Actualizados los controladores y el parámetro ID (asumiendo id_proveedor) -->
-                                                <a href="index.php?controller=proveedor&action=formeditar&id=<?= $p['id_proveedor'] ?? $p['id'] ?? '' ?>" 
+                                                <a href="index.php?controller=proveedor&action=formEdit&id=<?= $p['id_proveedor'] ?? $p['id'] ?? '' ?>" 
                                                    class="btn-table btn-edit" 
                                                    title="Editar proveedor">
                                                     <span class="icon-edit"></span>

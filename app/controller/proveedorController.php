@@ -40,6 +40,24 @@ class ProveedorController {
         require_once __DIR__ . '/../views/proveedor/crearProveedor.php';
     }
 
+    public function formEdit(){ 
+        //VERIFICAMOS QUE LLEGUE EL ID POR URL (ej: index.php?controller=proveedor&action=editar&id=5)
+        if(isset($_GET['id'])){
+            $id = $_GET['id'];
+
+            //BUSCAMOS LOS DATOS ACTUALES DE ESE PROVEEDOR.
+            $proveedor = $this->proveedorModel->obtenerPorId($id);
+
+            //SI EL PROVEEDOR EXISTE, CARGAMOS LA VISTA DE EDITAR.
+            if($proveedor){
+                require_once __DIR__ . '/../views/proveedor/editarProveedor.php';
+            } else {
+                //SI ALGUIEN PONE UN ID QUE NO EXISTE, LO DEVOLVEMOS A LA TABLA DE PROVEEDORES.
+                header("location: index.php?controller=proveedor&action=tablaProveedores");
+            }
+        }
+    }
+
     // Acción para recibir los datos del formulario por POST y guardarlos
     public function guardar() {
         if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -60,6 +78,30 @@ class ProveedorController {
                 exit();
             } else {
                 echo "Hubo un error al registrar el proveedor.";
+            }
+        }
+    }
+
+
+    public function actualizar(){
+        //COMPROBAMOS QUE LOS DATOS VENGAN POR EL METODO POST.
+        if($_SERVER['REQUEST_METHOD'] === 'POST'){
+            $id = $_POST['id_proveedor'];
+
+            //SOLO CAPTURAMOS LOS DATOS QUE SE PUEDEN EDITAR (CONTACTO,TELEFONO,EMAIL).
+            $nombre_contacto = $_POST['nombre_contacto'];
+            $telefono = $_POST['telefono'];
+            $email = $_POST['email'];
+
+            // USAMOS EL MODELO DEL CONSTRUCTOR PARA ACTUALIZAR
+            $resultado = $this->proveedorModel->actualizarProveedor($id, $nombre_contacto, $telefono, $email);
+
+            if($resultado){
+                // SI TODO SALE BIEN, REGRESAMOS A LA TABLA
+                header("location: index.php?controller=proveedor&action=tablaProveedores");
+                exit();
+            } else {
+                echo "Hubo un error al actualizar el proveedor.";
             }
         }
     }
