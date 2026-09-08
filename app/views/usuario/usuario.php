@@ -353,7 +353,7 @@ if (!isset($_SESSION['user_id'])) {
             <div class="actions-panel">
                 <h3>📌 Acciones rápidas</h3>
                 <div class="btn-group">
-                    <a href="index.php?controller=usuario&action=formcrear" class="btn-action btn-add-user">
+                    <a href="index.php?controller=usuario&action=formusuariocrear" class="btn-action btn-add-user">
                         <span class="icon-add"></span> Añadir Usuario
                     </a>
                 </div>
@@ -406,7 +406,7 @@ if (!isset($_SESSION['user_id'])) {
                                         </td>
                                         <td>
                                             <div class="actions-cell">
-                                                <a href="index.php?controller=usuario&action=formeditar&id=<?= $a['id'] ?>" 
+                                                <a href="index.php?controller=usuario&action=formusuarioeditar&id=<?= $a['id'] ?>" 
                                                    class="btn-table btn-edit" 
                                                    title="Editar usuario">
                                                     <span class="icon-edit"></span>

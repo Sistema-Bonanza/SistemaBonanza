@@ -178,27 +178,25 @@ if (!isset($_SESSION['user_id'])) {
 
             <!-- El atributo action apuntará a nuestro futuro Controlador -->
             <form action="index.php?controller=categoria&action=actualizarCategoria" method="POST">
+
                 <input type="hidden" name="id" value="<?= htmlspecialchars($categoria['id'] ?? '') ?>">
 
                 <div class="form-group">
-                    <label class="form-label" for="nombre">
-                        Nombre de la Categoría
-                        <span class="required">*</span>
-                    </label>
+                    <label class="form-label" for="nombre">Nombre de Categoría</label>
                     <input type="text" id="nombre" name="nombre" class="form-control" 
-                           required placeholder="Ej: Bebidas, Electrónica, Ropa"> 
+                           value="<?= htmlspecialchars($categoria['nombre'] ?? '') ?>" 
+                           placeholder="Ingrese el nombre de la categoría" required>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="descripcion" 
-                     required>Descripción de la Categoría</label>
+                    <label class="form-label" for="descripcion">Descripción</label>
                     <input type="text" id="descripcion" name="descripcion" class="form-control" 
-                           placeholder="Descripción de la categoría">
-                    </label>
+                           value="<?= htmlspecialchars($categoria['descripcion'] ?? '') ?>" 
+                           placeholder="Ingrese la descripción de la categoría" required>
                 </div>
 
                 <button type="submit" class="btn-primary">Guardar Cambios</button>
-                <a href="index.php?controller=categoria&action=formcategorias"> 
+                
             </div>
             </form>
         </div>

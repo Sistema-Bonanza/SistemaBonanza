@@ -20,12 +20,12 @@ require_once __DIR__.'/../model/usuarioModel.php';
     }
 
   
-    public function formcrear(){
+    public function formusuariocrear(){
         //Este metodo solo sirve para mostrar la vista de crear usuario.
         require_once '../app/views/usuario/crear.php';
     }
 
-   public function formeditar(){
+   public function formusuarioeditar(){
     $id = (int)($_GET['id'] ?? 0);
     if($id <= 0){
         header("Location: index.php?controller=usuario&action=formusuario");
@@ -53,7 +53,7 @@ require_once __DIR__.'/../model/usuarioModel.php';
 
         //verificación de campos
     if(!empty($username) && !empty($password_hash) && !empty($rol)){
-        $this->model->crearUsuario($username, $password_hash, $rol);
+        $this->model->createUsuario($username, $password_hash, $rol);
     }
     //Redireccionamiento
     header("Location: index.php?controller=usuario&action=formusuario");
@@ -72,7 +72,7 @@ require_once __DIR__.'/../model/usuarioModel.php';
 
         //verificación de campos
         if(!empty($id) && !empty($username) && !empty($password_hash) && !empty($rol)){
-            $this->model->actualizarUsuario($id, $username, $password_hash, $rol);
+            $this->model->updateUsuario($id, $username, $password_hash, $rol);
         }
 
         //Redireccionamiento
@@ -85,7 +85,7 @@ require_once __DIR__.'/../model/usuarioModel.php';
         $id = (int) ($_GET['id'] ?? 0);
 
         if ($id > 0) {
-        $this->model->eliminarUsuario($id);
+        $this->model->deleteUsuario($id);
         }
 
         //Redireccionamiento

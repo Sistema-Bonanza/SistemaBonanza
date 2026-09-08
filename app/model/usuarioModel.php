@@ -18,7 +18,7 @@ class usuarioModel{
         return $stmt->fetch();
     }    
 
-    public function crearUsuario($username, $password_hash, $rol){
+    public function createUsuario($username, $password_hash, $rol){
         
         try{
             // Sentencia para crear al nuevo usuario.
@@ -39,7 +39,7 @@ class usuarioModel{
         }
     }
 
-    public function actualizarUsuario($id, $username, $password_hash='null', $rol){
+    public function updateUsuario($id, $username, $password_hash='null', $rol){
             
           // Si no se proporciona contraseña, mantener la existente
             if(empty($password_hash)){
@@ -60,7 +60,7 @@ class usuarioModel{
             ]);
     }
 
-    public function eliminarUsuario($id){
+    public function deleteUsuario($id){
             $stmt = $this->pdo->prepare("DELETE FROM usuarios WHERE id = :id");
             $stmt->execute([':id' => $id]);
             return true; //usuario eliminado exitosamente.

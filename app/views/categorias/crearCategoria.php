@@ -197,7 +197,7 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
 
                 <button type="submit" class="btn-primary">Guardar Categoría</button>
-                <a href="index.php?controller=categoria&action=formcategorias"> 
+                 
             </div>
             </form>
         </div>

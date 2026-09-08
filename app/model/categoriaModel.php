@@ -12,13 +12,13 @@
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
         }
 
-        public function getActivos(){ //funcion para obtener todas las categorias activas.
-            $stmt = $this->pdo->query("SELECT id_categoria, nombre FROM categorias WHERE estado = 1 ORDER BY nombre ASC");
-            return $stmt->fetchAll(PDO::FETCH_ASSOC);
-            }
-    
+        public function getById($id){ //funcion para obtener una categoria por su id.
+            $stmt = $this->pdo->prepare("SELECT * FROM categorias WHERE id_categoria = :id");
+            $stmt->execute([':id' => $id]);
+            return $stmt->fetch(PDO::FETCH_ASSOC);
+        }
 
-        public function crearCategoria($nombre, $descripcion){
+        public function createCategoria($nombre, $descripcion){
 
         try{
             //sentencia para crear la nueva categoria..
@@ -36,6 +36,17 @@
                 echo "error en la Base de Datos " . $e->getMessage();
                 return false; //Error al crear la categoria.
         }
+    }
+
+    public function updateCategoria($id, $nombre, $descripcion){
+        //sentencia para actualizar la categoria.
+        $sql = "UPDATE categorias SET nombre = :nombre, descripcion = :descripcion WHERE id_categoria = :id";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([
+            ':id' => $id,
+            ':nombre' => $nombre,
+            ':descripcion' => $descripcion,
+        ]);
     }
 }
 

@@ -16,11 +16,11 @@ class CategoriaController {
         require_once __DIR__ . '/../../app/views/categorias/categorias.php';
     }
 
-    public function crearCategoria() {
+    public function fromcrearCategoria() {
         require_once __DIR__ . '/../../app/views/categorias/crearCategoria.php';
     }
 
-    public function editarCategoria() {
+    public function fromeditarCategoria() {
         $id = $_GET['id'] ?? '';
         if (!empty($id)) {
             $categoria = $this->categoriaModel->getById($id);
@@ -39,7 +39,7 @@ class CategoriaController {
         $descripcion = trim($_POST['descripcion'] ?? '');
 
         if (!empty($nombre)) {
-            $this->categoriaModel->crearCategoria($nombre, $descripcion);
+            $this->categoriaModel->createCategoria($nombre, $descripcion);
         }
 
         header("Location: index.php?controller=categoria&action=formcategoria");
@@ -47,12 +47,12 @@ class CategoriaController {
     }
 
     public function actualizarCategoria() {
-        $id = $_POST['id'] ?? '';
+        $id = (int)$_POST['id'] ?? 0;
         $nombre = trim($_POST['nombre'] ?? '');
         $descripcion = trim($_POST['descripcion'] ?? '');
 
-        if (!empty($id) && !empty($nombre)) {
-            $this->categoriaModel->actualizarCategoria($id, $nombre, $descripcion);
+        if (!empty($id) && !empty($nombre) && !empty($descripcion)) {
+            $this->categoriaModel->updateCategoria($id, $nombre, $descripcion);
         }
 
         header("Location: index.php?controller=categoria&action=formcategoria");

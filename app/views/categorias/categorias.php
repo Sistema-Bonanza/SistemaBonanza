@@ -353,7 +353,7 @@ if (!isset($_SESSION['user_id'])) {
             <div class="actions-panel">
                 <h3>📌 Acciones rápidas</h3>
                 <div class="btn-group">
-                    <a href="index.php?controller=categoria&action=crearCategoria" class="btn-action btn-add-user">
+                    <a href="index.php?controller=categoria&action=fromcrearCategoria" class="btn-action btn-add-user">
                         <span class="icon-add"></span> Añadir Categoría
                     </a>
                 </div>
@@ -393,9 +393,10 @@ if (!isset($_SESSION['user_id'])) {
                                             <?= htmlspecialchars($categoria['descripcion'] ?? '') ?>
                                         </td>
                                         <td>
-                                            <a href="index.php?controller=categoria&action=editarCategoria&id=<?= $categoria['id'] ?>"
-                                                class="btn-table btn-edit" title="Editar Categoría">
-                                                <span class="icon-edit"></span>
+                                            <a href="index.php?controller=categoria&action=fromeditarCategoria&id=<?= $categoria['id_categoria'] ?? '' ?>" 
+                                                   class="btn-table btn-edit" 
+                                                   title="Editar categoría">
+                                                    <span class="icon-edit"></span>
                                             </a>
                                         </td>
                                     </tr>
