@@ -13,7 +13,8 @@
         }
 
         public function getById($id){ //funcion para obtener una categoria por su id.
-            $stmt = $this->pdo->prepare("SELECT * FROM categorias WHERE id_categoria = :id");
+            $sql = "SELECT id_categoria as id, nombre, descripcion FROM categorias WHERE id_categoria = :id";
+            $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':id' => $id]);
             return $stmt->fetch(PDO::FETCH_ASSOC);
         }
@@ -40,10 +41,10 @@
 
     public function updateCategoria($id, $nombre, $descripcion){
         //sentencia para actualizar la categoria.
-        $sql = "UPDATE categorias SET nombre = :nombre, descripcion = :descripcion WHERE id_categoria = :id";
+        $sql = "UPDATE categorias SET nombre = :nombre, descripcion = :descripcion WHERE id_categoria = :id_categoria";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([
-            ':id' => $id,
+            ':id_categoria' => $id,
             ':nombre' => $nombre,
             ':descripcion' => $descripcion,
         ]);

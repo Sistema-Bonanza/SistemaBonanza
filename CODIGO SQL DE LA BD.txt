@@ -87,3 +87,12 @@ create_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
 FOREIGN KEY (id_categoria) REFERENCES categorias(id_categoria) ON UPDATE CASCADE ON DELETE RESTRICT,
 FOREIGN KEY (id_proveedor) REFERENCES proveedores(id_proveedor) ON UPDATE CASCADE ON DELETE RESTRICT
 );
+
+CLIENTES:
+USE sistema_bonanza;
+CREATE TABLE clientes(
+id_clientes int  AUTO_INCREMENT PRIMARY KEY,
+nombre text (150),
+tlf int (10),
+direccion text (150)
+);

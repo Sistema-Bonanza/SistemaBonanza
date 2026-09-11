@@ -197,10 +197,9 @@ if (!isset($_SESSION['user_id'])) {
 
                 <button type="submit" class="btn-primary">Guardar Cambios</button>
                 
-            </div>
+             
             </form>
-        </div>
-
+            </div>
     </main>
 
 </body>
