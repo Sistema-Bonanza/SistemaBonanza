@@ -208,7 +208,7 @@ if (!isset($_SESSION['user_id'])) {
             <form action="index.php?controller=cliente&action=actualizar" method="POST">
                 
                 <!-- ID / RIF OCULTO PARA EL CONTROLADOR -->
-                <input type="hidden" name="id_cliente" value="<?= $cliente['id_cliente'] ?? '' ?>">
+                <input type="hidden" name="id_clientes" value="<?= $cliente['id_clientes'] ?? '' ?>">
 
                 <!-- CAMPO BLOQUEADO: RIF -->
                 <div class="form-group">

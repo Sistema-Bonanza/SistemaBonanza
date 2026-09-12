@@ -94,7 +94,7 @@ if (!isset($_SESSION['user_id'])) {
                                         </td>
                                         <td>
                                             <div class="actions-cell">
-                                                <a href="index.php?controller=cliente&action=formeditarcliente&id=<?= $c['id_cliente'] ?? $c['id'] ?? '' ?>" 
+                                                <a href="index.php?controller=cliente&action=formeditarcliente&id=<?= $c['id_clientes'] ?? $c['id'] ?? '' ?>" 
                                                    class="btn-table btn-edit" 
                                                    title="Editar cliente">
                                                     <span class="icon-edit"></span>

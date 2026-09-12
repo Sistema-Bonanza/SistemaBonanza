@@ -11,7 +11,7 @@ public function getAll(){   //Funcion para obtener todos los clientes.
 }
 
 public function getById($id){ //funcion para obtener un cliente por su id.
-    $sql = "SELECT id_cliente as id, nombre, cedula, telefono, direccion FROM clientes WHERE id_cliente = :id";
+    $sql = "SELECT id_clientes as id, nombre, cedula, telefono, direccion FROM clientes WHERE id_clientes = :id";
     $stmt = $this->pdo->prepare($sql);
     $stmt->execute([':id' => $id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -43,7 +43,7 @@ public function createcliente($nombre, $cedula, $telefono, $direccion){
 public function updatecliente($id, $nombre, $cedula, $telefono, $direccion){
     try{
         //sentencia para actualizar el cliente.
-        $sql = "UPDATE clientes SET nombre = :nombre, cedula = :cedula, telefono = :telefono, direccion = :direccion WHERE id_cliente = :id";
+        $sql = "UPDATE clientes SET nombre = :nombre, cedula = :cedula, telefono = :telefono, direccion = :direccion WHERE id_clientes = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
             ':id' => $id,
