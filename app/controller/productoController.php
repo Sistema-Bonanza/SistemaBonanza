@@ -25,11 +25,11 @@ Class productoController{
 
     public function TablaProductos(){
         $productos = $this->productoModel->obtenerProductos();
-        require_once __DIR__.'/../app/views/producto/productos.php';
+        require_once __DIR__.'/../app/views/producto/producto.php';
     }
-    public function formproduc(){
+    public function formproduct(){
         //Este metodo solo sirve para mostrar la vista de crear producto.
-        require_once __DIR__.'/../../app/views/producto/crear.php';
+        require_once __DIR__.'/../../app/views/producto/producto.php';
     }
     public function formcategoria(){
         //Este metodo solo sirve para mostrar la vista de crear categoria.
@@ -39,6 +39,7 @@ Class productoController{
         //Este metodo solo sirve para mostrar la vista de crear proveedor.
         require_once __DIR__.'/../../app/views/crearProveedor.php';
     }
+
 
     //metodos relacionados a productos
     public function guardarProducto(){

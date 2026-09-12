@@ -4,8 +4,7 @@
     <nav>
         <!-- Rutas apuntando a tu index.php -->
         <a href="index.php?controller=sistema&action=dashboard"><i>📊</i> Dashboard</a>
-        <a href="#"><i>🛒</i> POS</a>
-        <!-- Este es el módulo donde estamos trabajando -->
+        <a href="index.php?controller=producto&action=formproduct"><i>🛒</i> Productos</a>
         <a href="index.php?controller=producto&action=TablaProductos" class="active"><i>📦</i> Mi inventario</a>
         <a href="index.php?controller=categoria&action=formcategoria"><i>🏷️</i> Categorías</a>
         <a href="#"><i>📋</i> Reportes</a>
