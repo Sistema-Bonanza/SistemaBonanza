@@ -140,31 +140,28 @@ if (!isset($_SESSION['user_id'])) {
         }
 
         /* Botón Cancelar */
-.btn-primary.btn-cancelar {
-    background-color: #d81f1f;
-    text-decoration: none;
-    text-align: center;
-    display: inline-block;
-    width: auto;
-    padding: 12px 20px;
-    border-radius: 6px;
-    color: var(--white);
-    font-weight: 600;
-    font-size: 15px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    border: none;
-}
+        .btn-primary.btn-cancelar {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 15px;
+        }
 
-.btn-primary.btn-cancelar:hover {
-    background-color: #d81f1f;
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(216, 31, 31, 0.3);
-}
+        .btn-primary.btn-cancelar:hover {
+            background-color: #d81f1f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(216, 31, 31, 0.3);
+        }
 
-.btn-primary.btn-cancelar:active {
-    transform: translateY(0);
-}
+        .btn-primary.btn-cancelar:active {
+            transform: translateY(0);
+        }
 
         /* RESPONSIVE */
         @media (max-width: 768px) {
@@ -225,24 +222,22 @@ if (!isset($_SESSION['user_id'])) {
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="telefono">Teléfono de Contacto</label>
+                    <label class="form-label" for="telefono">Teléfono de Contacto<span class="required">*</span></label>
                     <input type="text" id="telefono" name="telefono" class="form-control" 
-                           placeholder="Ej: 0414-1234567">
+                           required placeholder="Ej: 0414-1234567">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" for="direccion">Dirección Fiscal</label>
+                    <label class="form-label" for="direccion">Dirección Fiscal<span class="required">*</span></label>
                     <input type="text" id="direccion" name="direccion" class="form-control" 
-                           placeholder="Ej: Av. Principal, Zona Industrial...">
+                           required placeholder="Ej: Av. Principal, Zona Industrial...">
                 </div>
 
                <div style="display: flex; gap: 10px; margin-top: 20px;">
-    <button type="submit" class="btn-primary">Guardar Cliente</button>
-    <a href="index.php?controller=cliente&action=TablaClientes" 
-       class="btn-primary btn-cancelar">
-        Cancelar
-    </a>
-</div>
+                    <button type="submit" class="btn-primary">Guardar Cliente</button>
+                    <a href="index.php?controller=cliente&action=TablaClientes" 
+                    class="btn-primary btn-cancelar"><center>Cancelar</center></a>
+                </div>
 
             </form>
         </div>

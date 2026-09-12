@@ -139,6 +139,29 @@ if (!isset($_SESSION['user_id'])) {
             transform: translateY(0);
         }
 
+        .btn-primary.btn-cancelar {
+            background-color: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 12px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            font-size: 15px;
+        }
+
+        .btn-primary.btn-cancelar:hover {
+            background-color: #d81f1f;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(216, 31, 31, 0.3);
+        }
+
+        .btn-primary.btn-cancelar:active {
+            transform: translateY(0);
+        }
+
         /* RESPONSIVE */
         @media (max-width: 768px) {
             .data-panel {
@@ -249,10 +272,7 @@ if (!isset($_SESSION['user_id'])) {
                 <div style="display: flex; gap: 10px; margin-top: 20px;">
                     <button type="submit" class="btn-primary">Actualizar Cambios</button>
                     <a href="index.php?controller=proveedor&action=TablaProveedores" 
-                       class="btn-action" 
-                       style="background-color: #6c757d; color: white; text-decoration: none; text-align: center; display: inline-block;">
-                        Cancelar
-                    </a>
+                       class="btn-primary btn-cancelar"><center>Cancelar</center></a>
                 </div>
 
             </form>
