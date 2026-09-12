@@ -93,6 +93,7 @@ USE sistema_bonanza;
 CREATE TABLE clientes(
 id_clientes int  AUTO_INCREMENT PRIMARY KEY,
 nombre text (150),
+cedula int(10),
 telefono int (10),
 direccion text (150)
 );
