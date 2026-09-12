@@ -8,6 +8,7 @@
         <a href="index.php?controller=producto&action=TablaProductos" class="active"><i>📦</i> Mi inventario</a>
         <a href="index.php?controller=categoria&action=formcategoria"><i>🏷️</i> Categorías</a>
         <a href="#"><i>📋</i> Reportes</a>
+        <a href="index.php?controller=cliente&action=tablaClientes"><i>👥</i> Clientes</a>
         <a href="index.php?controller=proveedor&action=tablaProveedores"><i>👥</i> Proveedores</a>
         <a href="index.php?controller=usuario&action=formusuario"><i>⚙️</i> Usuarios</a>
     </nav>
