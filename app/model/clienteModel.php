@@ -43,10 +43,10 @@ public function createcliente($nombre, $cedula, $telefono, $direccion){
 public function updatecliente($id, $nombre, $cedula, $telefono, $direccion){
     try{
         //sentencia para actualizar el cliente.
-        $sql = "UPDATE clientes SET nombre = :nombre, cedula = :cedula, telefono = :telefono, direccion = :direccion WHERE id_clientes = :id";
+        $sql = "UPDATE clientes SET nombre = :nombre, cedula = :cedula, telefono = :telefono, direccion = :direccion WHERE id_clientes = :id_clientes";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':id' => $id,
+            ':id_clientes' => $id,
             ':nombre' => $nombre,
             ':cedula' => $cedula,
             ':telefono' => $telefono,

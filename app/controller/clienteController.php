@@ -19,22 +19,18 @@ public function formcrearcliente(){
 
 }
 
-public function formeditarcliente($id){
-      // Verificar que el ID no esté vacío
-    if (!empty($id)) {
-        // Obtener el cliente desde el modelo (SINGULAR)
-        $clientes = $this->clienteModel->getById($id);
-        
-        if ($clientes) {
-            // Cargar la vista (verifica el nombre exacto de la carpeta)
-            require_once __DIR__ . '/../views/clientes/editarcliente.php';
-            return;
+public function formeditarcliente(){
+     $id = $_GET['id'] ?? '';
+        if (!empty($id)) {
+            $clientes = $this->clienteModel->getById($id);
+            if ($clientes) {
+                require_once __DIR__ . '/../../app/views/clientes/editarcliente.php';
+                return;
+            }
         }
-    }
-    
-    // Si no se encuentra el cliente, redirigir a la lista
-    header("Location: index.php?controller=cliente&action=tablaClientes");
-    exit;
+        // Si no se encuentra la categoría, redirigir a la lista de categorías
+        header("Location: index.php?controller=cliente&action=tablaClientes");
+        exit;
 }
 
 
@@ -62,16 +58,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 public function actualizar(){
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         // Recibimos los datos del formulario
-        $id = $_POST['id'] ?? '';
+        $id = $_POST['id_clientes'] ?? '';
         $nombre = $_POST['nombre'] ?? '';
         $cedula = $_POST['cedula'] ?? '';
         $telefono = $_POST['telefono'] ?? '';
         $direccion = $_POST['direccion'] ?? '';
 
         // Enviamos los datos al modelo para hacer el UPDATE
-        $exito = $this->clienteModel->updatecliente($id, $nombre, $cedula, $telefono, $direccion);
+        $resultado = $this->clienteModel->updatecliente($id, $nombre, $cedula, $telefono, $direccion);
 
-        if ($exito) {
+        if ($resultado) {
             // Si se actualizó, redirigimos al dashboard de clientes
             header("Location: index.php?controller=cliente&action=tablaClientes");
             exit();

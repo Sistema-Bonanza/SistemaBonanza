@@ -195,7 +195,7 @@ if (!isset($_SESSION['user_id'])) {
     <!-- WELCOME CARD -->
     <div class="welcome-card">
         <h1>✏️ Editar Cliente</h1>
-        <p>Actualice los datos de contacto del cliente. Los datos fiscales y de ubicación permanecen protegidos por integridad del sistema.</p>
+        <p>Actualice los datos de contacto del cliente. Los datos como Cédula de Identidad y Nombre permanecen protegidos por integridad del sistema.</p>
     </div>
 
     <!-- SECCIÓN PRINCIPAL: FORMULARIO + PANEL DE INFORMACIÓN -->
@@ -203,20 +203,20 @@ if (!isset($_SESSION['user_id'])) {
 
         <!-- PANEL IZQUIERDO: FORMULARIO DE EDICIÓN -->
         <div class="data-panel" style="flex: 2;">
-            <h3>Modificar Información de Contacto</h3>
+            <h3>Modificar Información de Cliente</h3>
 
             <form action="index.php?controller=cliente&action=actualizar" method="POST">
                 
                 <!-- ID / RIF OCULTO PARA EL CONTROLADOR -->
-                <input type="hidden" name="id_clientes" value="<?= $cliente['id_clientes'] ?? '' ?>">
+                <input type="hidden" name="id_clientes" value="<?= $clientes['id_clientes'] ?? '' ?>">
 
                 <!-- CAMPO BLOQUEADO: RIF -->
                 <div class="form-group">
                     <label class="form-label" for="rif">
-                        RIF / Identificación Fiscal 🔒
+                        Nombre 🔒
                     </label>
-                    <input type="text" id="rif" name="rif" class="form-control" 
-                           value="<?= $cliente['rif'] ?? '' ?>" 
+                    <input type="text" id="nombre" name="nombre" class="form-control" 
+                           value="<?= $clientes['nombre'] ?? '' ?>" 
                            readonly 
                            style="background-color: #e9ecef; cursor: not-allowed; color: #495057;">
                 </div>
@@ -224,34 +224,12 @@ if (!isset($_SESSION['user_id'])) {
                 <!-- CAMPO BLOQUEADO: RAZÓN SOCIAL -->
                 <div class="form-group">
                     <label class="form-label" for="razon_social">
-                        Razón Social / Nombre Comercial 🔒
+                        Cédula / RIF 🔒
                     </label>
-                    <input type="text" id="razon_social" name="razon_social" class="form-control" 
-                           value="<?= $cliente['razon_social'] ?? '' ?>" 
+                    <input type="text" id="cedula" name="cedula" class="form-control" 
+                           value="<?= $clientes['cedula'] ?? '' ?>" 
                            readonly 
                            style="background-color: #e9ecef; cursor: not-allowed; color: #495057;">
-                </div>
-
-                <!-- CAMPO BLOQUEADO: DIRECCIÓN FISCAL -->
-                <div class="form-group">
-                    <label class="form-label" for="direccion">
-                        Dirección Fiscal 🔒
-                    </label>
-                    <textarea id="direccion" name="direccion" class="form-control" rows="2" 
-                              readonly 
-                              style="background-color: #e9ecef; cursor: not-allowed; color: #495057;"><?= $cliente ['direccion'] ?? '' ?></textarea>
-                </div>
-
-                <hr style="border: 0; border-top: 1px solid #dee2e6; margin: 20px 0;">
-
-                <!-- CAMPO EDITABLE: NOMBRE DE CONTACTO -->
-                <div class="form-group">
-                    <label class="form-label" for="nombre_contacto">
-                        Nombre del Contacto <span class="required">*</span>
-                    </label>
-                    <input type="text" id="nombre_contacto" name="nombre_contacto" class="form-control" 
-                           value="<?= $cliente['nombre_contacto'] ?? '' ?>" 
-                           required placeholder="Ej: Carlos Pérez" autofocus>
                 </div>
 
                 <!-- CAMPO EDITABLE: TELÉFONO -->
@@ -260,16 +238,18 @@ if (!isset($_SESSION['user_id'])) {
                         Teléfono de Contacto <span class="required">*</span>
                     </label>
                     <input type="text" id="telefono" name="telefono" class="form-control" 
-                           value="<?= $cliente['telefono'] ?? '' ?>" 
+                           value="<?= htmlspecialchars($clientes['telefono'] ?? '') ?>" 
                            required placeholder="Ej: 0414-1234567">
                 </div>
 
-                <!-- CAMPO EDITABLE: CORREO ELECTRÓNICO -->
+                    <!-- CAMPO EDITABLE: DIRECCIÓN -->
                 <div class="form-group">
-                    <label class="form-label" for="email">Correo Electrónico de Contacto</label>
-                    <input type="email" id="email" name="email" class="form-control" 
-                           value="<?= $cliente['email'] ?? '' ?>" 
-                           placeholder="Ej: contacto@cliente.com">
+                    <label class="form-label" for="direccion">
+                        Dirección <span class="required">*</span>
+                    </label>
+                    <input type="text" id="direccion" name="direccion" class="form-control" 
+                           value="<?= htmlspecialchars($clientes['direccion'] ?? '') ?>" 
+                           required placeholder="Ej: Calle Principal, Ciudad, País">
                 </div>
 
                 <!-- BOTONES DE ACCIÓN -->
@@ -303,14 +283,3 @@ if (!isset($_SESSION['user_id'])) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-?>
