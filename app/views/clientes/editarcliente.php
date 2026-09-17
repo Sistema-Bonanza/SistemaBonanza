@@ -207,10 +207,10 @@ if (!isset($_SESSION['user_id'])) {
 
             <form action="index.php?controller=cliente&action=actualizar" method="POST">
                 
-                <!-- ID / RIF OCULTO PARA EL CONTROLADOR -->
-                <input type="hidden" name="id_clientes" value="<?= $clientes['id_clientes'] ?? '' ?>">
+                <!-- ID OCULTO PARA EL CONTROLADOR -->
+                <input type="hidden" name="id" value="<?= $clientes['id'] ?? '' ?>">
 
-                <!-- CAMPO BLOQUEADO: RIF -->
+                <!-- CAMPO BLOQUEADO: NOMBRE -->
                 <div class="form-group">
                     <label class="form-label" for="rif">
                         Nombre 🔒
@@ -221,10 +221,10 @@ if (!isset($_SESSION['user_id'])) {
                            style="background-color: #e9ecef; cursor: not-allowed; color: #495057;">
                 </div>
 
-                <!-- CAMPO BLOQUEADO: RAZÓN SOCIAL -->
+                <!-- CAMPO BLOQUEADO: CÉDULA -->
                 <div class="form-group">
-                    <label class="form-label" for="razon_social">
-                        Cédula / RIF 🔒
+                    <label class="form-label" for="cedula">
+                        Cédula 🔒
                     </label>
                     <input type="text" id="cedula" name="cedula" class="form-control" 
                            value="<?= $clientes['cedula'] ?? '' ?>" 

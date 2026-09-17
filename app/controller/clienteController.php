@@ -56,26 +56,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 public function actualizar(){
-    if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        // Recibimos los datos del formulario
-        $id = $_POST['id_clientes'] ?? '';
-        $nombre = $_POST['nombre'] ?? '';
-        $cedula = $_POST['cedula'] ?? '';
-        $telefono = $_POST['telefono'] ?? '';
-        $direccion = $_POST['direccion'] ?? '';
-
-        // Enviamos los datos al modelo para hacer el UPDATE
-        $resultado = $this->clienteModel->updatecliente($id, $nombre, $cedula, $telefono, $direccion);
-
-        if ($resultado) {
-            // Si se actualizó, redirigimos al dashboard de clientes
-            header("Location: index.php?controller=cliente&action=tablaClientes");
-            exit();
-        } else {
-            echo "Hubo un error al actualizar el cliente.";
+//Recibimos los datos del formulario
+        $id = (int) ($_POST['id'] ?? 0);
+        $nombre= trim($_POST['nombre'] ?? '');
+        $cedula= trim ($_POST['cedula'] ?? '');
+        $telefono= trim ($_POST['telefono'] ?? '');
+        $direccion= trim ($_POST['direccion'] ?? '');
+         
+        //verificación de campos
+        if(!empty($id) && !empty($nombre) && !empty($cedula) && !empty($telefono) && !empty($direccion)){
+            $this->clienteModel->updatecliente($id, $nombre, $cedula, $telefono, $direccion);
         }
-    }
+
+        //Redireccionamiento
+        header("Location: index.php?controller=cliente&action=tablaClientes");
+        exit;
 }
+
 }
 
 ?>
