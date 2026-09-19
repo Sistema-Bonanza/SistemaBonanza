@@ -83,29 +83,29 @@ if (!isset($_SESSION['user_id'])) {
                                                     <!-- Extraemos la primera letra del nombre del producto -->
                                                     <?= strtoupper(substr(htmlspecialchars($p['nombre_producto'] ?? 'P'), 0, 1)) ?>
                                                 </div>
-                                                <strong><?= htmlspecialchars($p['nombre_producto'] ?? 'Sin Nombre') ?></strong>
+                                                <strong><?= htmlspecialchars($p['nombre'] ?? 'Sin Nombre') ?></strong>
                                             </div>
                                         </td>
                                         
                                         <td>
                                             <span class="badge badge-code">
-                                                <?= htmlspecialchars($p['codigo_barras'] ?? 'N/A') ?>
+                                                <?= htmlspecialchars($p['codigo'] ?? 'N/A') ?>
                                             </span>
                                         </td>
                                         
                                         <td>
-                                            $<?= number_format($p['costo'] ?? 0, 2) ?>
+                                            $<?= number_format($p['precio_compra'] ?? 0, 2) ?>
                                         </td>
                                         
                                         <td>
                                             <!-- Lógica visual de Stock -->
-                                            <?php if (isset($p['stock']) && isset($p['stock_minimo']) && $p['stock'] <= $p['stock_minimo']): ?>
+                                            <?php if (isset($p['stock_actual']) && isset($p['stock_minimo']) && $p['stock_actual'] <= $p['stock_minimo']): ?>
                                                 <span class="badge badge-stock-low" title="Stock por debajo del mínimo">
-                                                    ⚠️ <?= htmlspecialchars($p['stock']) ?>
+                                                    ⚠️ <?= htmlspecialchars($p['stock_actual']) ?>
                                                 </span>
                                             <?php else: ?>
                                                 <span class="badge badge-stock-ok">
-                                                    <?= htmlspecialchars($p['stock'] ?? 0) ?>
+                                                    <?= htmlspecialchars($p['stock_actual'] ?? 0) ?>
                                                 </span>
                                             <?php endif; ?>
                                         </td>
