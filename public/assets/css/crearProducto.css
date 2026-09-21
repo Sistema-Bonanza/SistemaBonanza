@@ -1,0 +1,192 @@
+/* assets/css/crearProducto.css */
+
+.main {
+    flex: 1;
+    padding: 30px;
+    box-sizing: border-box;
+    min-height: 100vh;
+}
+
+/* --- TARJETA DE BIENVENIDA (Azul Bonanza) --- */
+.welcome-card-product {
+    background: #2563eb; /* Azul característico de la Imagen 2 */
+    color: #ffffff;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 40px; /* Empuja el formulario más hacia abajo */
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.welcome-card-product h1 {
+    font-size: 22px;
+    margin-bottom: 8px;
+    margin-top: 0;
+}
+
+.welcome-card-product p {
+    opacity: 0.9;
+    font-size: 14px;
+    margin: 0;
+}
+
+.form-wrapper {
+    width: 92%; /* Esto genera la "sangría" horizontal en los lados */
+    max-width: 850px; /* Evita que sea exageradamente ancho en monitores grandes */
+    margin: 0 auto 60px auto; /* Centra horizontalmente (auto) y da espacio abajo */
+    background-color: #ffffff;
+    border-radius: 8px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08); /* Sombra un poco más pronunciada para resaltar */
+    overflow: hidden; 
+}
+
+/* Encabezado azul del formulario */
+.form-header {
+    background-color: #2563eb; /* Azul similar al de tu diseño */
+    color: #ffffff;
+    padding: 15px 25px;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+/* Cuerpo del formulario */
+.form-body {
+    padding: 25px;
+}
+
+/* Títulos de sección (Datos Indispensables, etc.) */
+.form-section-title {
+    color: #475569;
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 15px;
+    margin-top: 0;
+}
+
+/* Sistema de cuadrículas (Grids) para las columnas */
+.grid-2-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.grid-3-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+/* Grupos de inputs */
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.form-group label {
+    font-size: 13px;
+    color: #334155;
+    font-weight: 500;
+}
+
+/* Asterisco rojo para campos obligatorios */
+.required {
+    color: #ef4444;
+}
+
+/* Estilos de los Inputs y Selects */
+.form-control {
+    padding: 10px 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    font-size: 14px;
+    color: #0f172a;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    background-color: #ffffff;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.form-control::placeholder {
+    color: #94a3b8;
+}
+
+/* Línea divisoria */
+.form-divider {
+    border: none;
+    border-top: 1px solid #e2e8f0;
+    margin: 25px 0;
+}
+
+/* Checkbox (Aplica IVA) */
+.checkbox-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 100%;
+    margin-top: 15px; /* Para alinearlo con los inputs que tienen label arriba */
+    cursor: pointer;
+}
+
+.checkbox-group input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+}
+
+.checkbox-group span {
+    font-size: 14px;
+    color: #334155;
+}
+
+/* Footer de botones */
+.form-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn-form {
+    padding: 10px 20px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s ease;
+    text-decoration: none;
+}
+
+.btn-cancel {
+    background-color: #64748b;
+    color: white;
+}
+
+.btn-cancel:hover {
+    background-color: #475569;
+}
+
+.btn-submit {
+    background-color: #0066ff;
+    color: white;
+}
+
+.btn-submit:hover {
+    background-color: #0052cc;
+}
+
+/* Responsivo para móviles */
+@media (max-width: 768px) {
+    .grid-2-cols, .grid-3-cols {
+        grid-template-columns: 1fr;
+        gap: 15px;
+    }
+}

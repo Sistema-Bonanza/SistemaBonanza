@@ -21,6 +21,7 @@ Class productoModel{
                     c.nombre AS nombre_categoria,
                     prov.razon_social AS razon_social_proveedor,
                     prod.stock_actual,
+                    prod.precio_compra,
                     prod.precio_venta
                     FROM productos prod
                     INNER JOIN categorias c ON prod.id_categoria = c.id_categoria
@@ -52,11 +53,11 @@ Class productoModel{
     //==================================================================================
         //CREAR PRODUCTOS   
         
-    public function crearProducto($codigo, $nombre, $id_categoria, $id_proveedor, $unidad_medida, $unidades_por_empaque, $precio_compra, $precio_venta, $aplica_iva, $stock_minimo){
+    public function crearProducto($codigo, $nombre, $id_categoria, $id_proveedor, $unidad_medida, $unidades_por_empaque, $precio_compra, $precio_venta, $aplica_iva, $stock_actual, $stock_minimo){
         try{
-                $sql = "INSERT INTO productos (codigo, nombre, id_categoria, id_proveedor, unidad_medida, unidades_por_empaque, precio_compra, precio_venta, aplica_iva, stock_minimo) 
+                $sql = "INSERT INTO productos (codigo, nombre, id_categoria, id_proveedor, unidad_medida, unidades_por_empaque, precio_compra, precio_venta, aplica_iva, stock_actual, stock_minimo) 
                         VALUES 
-                        (:codigo, :nombre, :id_categoria, :id_proveedor, :unidad_medida, :unidades_por_empaque, :precio_compra, :precio_venta, :aplica_iva, :stock_minimo)";
+                        (:codigo, :nombre, :id_categoria, :id_proveedor, :unidad_medida, :unidades_por_empaque, :precio_compra, :precio_venta, :aplica_iva, :stock_actual, :stock_minimo)";
 
                         $stmt = $this->pdo->prepare($sql);
                         $stmt->execute([
@@ -68,8 +69,9 @@ Class productoModel{
                             ':unidades_por_empaque' => $unidades_por_empaque,
                             ':precio_compra' => $precio_compra,
                             ':precio_venta' => $precio_venta,
+                            ':stock_actual' => $stock_actual,
                             ':aplica_iva' => $aplica_iva,
-                            ':stock_minimo' => $stock_minimo
+                            ':stock_minimo' => $stock_minimo    
                         ]);
 
                         return true; //SE GUARDÓ CORRECTAMENTE.
