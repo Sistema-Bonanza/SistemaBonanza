@@ -37,13 +37,16 @@ public function formeditarcliente(){
 public function guardar(){
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             // Recibimos los datos del formulario
-            $nombre = $_POST['nombre'] ?? '';
-            $cedula = $_POST['cedula'] ?? '';
+            
+            $tipo_documento = $_POST['tipo_documento'] ?? '';
+            $num_documento = $_POST['num_documento'] ?? '';
+            $nombre_razon_social = $_POST['nombre_razon_social'] ?? '';
             $telefono = $_POST['telefono'] ?? '';
+            $email = $_POST['email'] ?? '';
             $direccion = $_POST['direccion'] ?? '';
 
             // Enviamos los datos al modelo para hacer el INSERT
-            $exito = $this->clienteModel->createcliente($nombre, $cedula, $telefono, $direccion);
+            $exito = $this->clienteModel->createcliente($tipo_documento, $num_documento, $nombre_razon_social, $telefono, $email, $direccion);
 
             if ($exito) {
                 // Si se guardó, redirigimos al dashboard de clientes
@@ -56,16 +59,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 public function actualizar(){
+
 //Recibimos los datos del formulario
         $id = (int) ($_POST['id'] ?? 0);
-        $nombre= trim($_POST['nombre'] ?? '');
-        $cedula= trim ($_POST['cedula'] ?? '');
+        $tipo_documento= trim($_POST['tipo_documento'] ?? '');
+        $num_documento= trim ($_POST['num_documento'] ?? '');
+        $nombre_razon_social= trim($_POST['nombre_razon_social'] ?? '');
         $telefono= trim ($_POST['telefono'] ?? '');
+        $email= trim ($_POST['email'] ?? '');
         $direccion= trim ($_POST['direccion'] ?? '');
+        $estado= trim ($_POST['estado'] ?? '');
+        $creado_en= trim ($_POST['creado_en'] ?? '');
          
         //verificación de campos
-        if(!empty($id) && !empty($nombre) && !empty($cedula) && !empty($telefono) && !empty($direccion)){
-            $this->clienteModel->updatecliente($id, $nombre, $cedula, $telefono, $direccion);
+        if(!empty($id) && !empty($tipo_documento) && !empty($nombre_razon_social) && !empty($num_documento) && !empty($telefono)
+             && !empty($email) && !empty($direccion) && !empty($estado) && !empty($creado_en)){
+            $this->clienteModel->updatecliente($id, $tipo_documento, $nombre_razon_social, 
+            $num_documento, $telefono, $email, $direccion, $estado, $creado_en);
         }
 
         //Redireccionamiento
@@ -74,5 +84,6 @@ public function actualizar(){
 }
 
 }
+
 
 ?>

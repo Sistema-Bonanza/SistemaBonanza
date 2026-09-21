@@ -6,27 +6,36 @@ public function __construct($pdo){
 }
 
 public function getAll(){   //Funcion para obtener todos los clientes.
-    $stmt = $this->pdo->query("SELECT * FROM clientes  ORDER BY nombre ASC");
-    return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $sql = "SELECT id_cliente, tipo_documento, num_documento, 
+                       nombre_razon_social, telefono, email, direccion, estado, creado_en
+                FROM clientes 
+                WHERE estado = 1 
+                ORDER BY nombre_razon_social ASC";
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
 public function getById($id){ //funcion para obtener un cliente por su id.
-    $sql = "SELECT id_clientes as id, nombre, cedula, telefono, direccion FROM clientes WHERE id_clientes = :id";
+    $sql = "SELECT id_cliente as id, tipo_documento, num_documento,
+     nombre_razon_social, telefono, email, direccion, estado, creado_en
+     FROM clientes WHERE id_cliente = :id";
     $stmt = $this->pdo->prepare($sql);
     $stmt->execute([':id' => $id]);
     return $stmt->fetch(PDO::FETCH_ASSOC);
 }
 
-public function createcliente($nombre, $cedula, $telefono, $direccion){
+public function createcliente($tipo_documento, $num_documento, $nombre_razon_social, $telefono, $email, $direccion){
 
             try{
                 //sentencia para crear el nuevo proveedor.
-                $sql = "INSERT INTO clientes (nombre, cedula, telefono, direccion) VALUES (:nombre, :cedula, :telefono, :direccion)";
+                $sql = "INSERT INTO clientes (tipo_documento, num_documento, nombre_razon_social, telefono, email, direccion) VALUES (:tipo_documento, :num_documento, :nombre_razon_social, :telefono, :email, :direccion)";
                 $stmt = $this->pdo->prepare($sql);
                 $stmt->execute([
-                    ':nombre' => $nombre,
-                    ':cedula' => $cedula,
+                    ':tipo_documento' => $tipo_documento,
+                    ':num_documento' => $num_documento,
+                    ':nombre_razon_social' => $nombre_razon_social,
                     ':telefono' => $telefono,
+                    ':email' => $email,
                     ':direccion' => $direccion,
                 ]);
 
@@ -40,17 +49,24 @@ public function createcliente($nombre, $cedula, $telefono, $direccion){
         }
 
 
-public function updatecliente($id, $nombre, $cedula, $telefono, $direccion){
+public function updatecliente($id, $tipo_documento, $nombre_razon_social, $num_documento, $telefono,
+ $email, $direccion, $estado, $creado_en){
     try{
         //sentencia para actualizar el cliente.
-        $sql = "UPDATE clientes SET nombre = :nombre, cedula = :cedula, telefono = :telefono, direccion = :direccion WHERE id_clientes = :id_clientes";
+        $sql = "UPDATE clientes SET tipo_documento = :tipo_documento, nombre_razon_social = :nombre_razon_social, num_documento = :num_documento,
+         telefono = :telefono, email = :email, direccion = :direccion, estado = :estado, creado_en = :creado_en
+          WHERE id_cliente = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([
-            ':id_clientes' => $id,
-            ':nombre' => $nombre,
-            ':cedula' => $cedula,
+            ':id' => $id,
+            ':tipo_documento' => $tipo_documento,
+            ':nombre_razon_social' => $nombre_razon_social,
+            ':num_documento' => $num_documento,
             ':telefono' => $telefono,
+            ':email' => $email,
             ':direccion' => $direccion,
+            ':estado' => $estado,
+            ':creado_en' => $creado_en
         ]);
 
         return true; //cliente actualizado exitosamente.

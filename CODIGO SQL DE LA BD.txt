@@ -90,10 +90,15 @@ FOREIGN KEY (id_proveedor) REFERENCES proveedores(id_proveedor) ON UPDATE CASCAD
 
 CLIENTES:
 USE sistema_bonanza;
-CREATE TABLE clientes(
-id_clientes int  AUTO_INCREMENT PRIMARY KEY,
-nombre text (150),
-cedula int(10),
-telefono int (10),
-direccion text (150)
+
+CREATE TABLE clientes (
+    id_cliente INT AUTO_INCREMENT PRIMARY KEY,
+    tipo_documento ENUM('V', 'E', 'J', 'G') NOT NULL DEFAULT 'V',
+    num_documento VARCHAR(20) NOT NULL UNIQUE,
+    nombre_razon_social VARCHAR(150) NOT NULL,
+    telefono VARCHAR(20) DEFAULT NULL,
+    email VARCHAR(100) DEFAULT NULL,
+    direccion VARCHAR(255) DEFAULT NULL,
+    estado TINYINT(1) NOT NULL DEFAULT 1,
+    creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
