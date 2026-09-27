@@ -66,32 +66,14 @@ if (!isset($_SESSION['user_id'])) {
                             <?php endif; ?>
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Proveedor <span class="required">*</span></label>
-                        <select name="id_proveedor" class="form-control" required>
-                            <option value="" disabled selected>-- Seleccione un Proveedor --</option>
-                            <?php 
-                            // Verificamos si la variable $proveedores existe y tiene datos
-                            if(isset($proveedores) && !empty($proveedores)): 
-                                foreach($proveedores as $prov): 
-                            ?>
-                                    <!-- Los nombres de las columnas (id_proveedor, razon_social) deben coincidir con tu BD -->
-                                    <option value="<?= $prov['id_proveedor'] ?>"><?= $prov['razon_social'] ?></option>
-                            <?php 
-                                endforeach; 
-                            else: 
-                            ?>
-                                <option value="" disabled>No hay proveedores registrados</option>
-                            <?php endif; ?>
-                        </select>
-                    </div>
+                  
                 </div>
 
                 <hr class="form-divider">
 
                 <h4 class="form-section-title">Datos Adicionales</h4>
 
-                <div class="grid-3-cols">
+                <!---<div class="grid-3-cols">
                     <div class="form-group">
                         <label>Unidad de Medida</label>
                         <select name="unidad_medida" class="form-control">
@@ -109,14 +91,14 @@ if (!isset($_SESSION['user_id'])) {
                         <label>Stock Mínimo</label>
                         <input type="number" name="stock_minimo" class="form-control" placeholder="Ej. 10" min="0">
                     </div>
-                </div>
+                </div> -->
 
                 <!-- Pasamos de grid-3-cols a grid-2-cols al eliminar el precio de venta -->
                 <div class="grid-2-cols">
-                    <div class="form-group">
+                    <!---<div class="form-group">
                         <label>Precio de Compra ($)</label>
                         <input type="number" name="precio_compra" class="form-control" placeholder="0.00" step="0.01" min="0">
-                    </div>
+                    </div> -->
                     <div class="form-group">
                         <label class="checkbox-group">
                             <input type="checkbox" name="aplica_iva" value="1" checked>

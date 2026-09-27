@@ -71,7 +71,7 @@ class SistemaController{
 
 public function logout(){
     //Limpiamos todas las variables de la sesion
-    $_SESSIN = array();
+    $_SESSION = array();
 
  //destruimos completamente la sesion
     session_destroy();

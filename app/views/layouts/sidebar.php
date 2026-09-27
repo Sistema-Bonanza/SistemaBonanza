@@ -4,7 +4,7 @@
     <nav>
         <!-- Rutas apuntando a tu index.php -->
         <a href="index.php?controller=sistema&action=dashboard"><i>📊</i> Dashboard</a>
-        <a href="index.php?controller=producto&action=Tablaproductos"><i>🛒</i> Productos</a>
+        <a href="index.php?controller=producto&action=tablaProductos"><i>🛒</i> Productos</a>
         <a href="#"><i>📦</i> Mi inventario</a>
         <a href="index.php?controller=categoria&action=formcategoria"><i>🏷️</i> Categorías</a>
         <a href="#"><i>📋</i> Reportes</a>
@@ -13,7 +13,7 @@
         <a href="index.php?controller=usuario&action=formusuario"><i>⚙️</i> Usuarios</a>
     </nav>
     <div class="sidebar-footer">
-        <p>👤 Administrador</p>
+        <p><?php echo htmlspecialchars($_SESSION['username'] ?? 'Usuario'); ?> </p>
         
 </nav>
         <small>Sistema de Inventario</small>

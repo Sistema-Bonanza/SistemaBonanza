@@ -19,13 +19,11 @@ Class productoModel{
                     prod.codigo,
                     prod.nombre,
                     c.nombre AS nombre_categoria,
-                    prov.razon_social AS razon_social_proveedor,
                     prod.stock_actual,
                     prod.precio_compra,
                     prod.precio_venta
                     FROM productos prod
                     INNER JOIN categorias c ON prod.id_categoria = c.id_categoria
-                    INNER JOIN proveedores prov ON prod.id_proveedor = prov.id_proveedor
                     WHERE prod.estado = 1 
                     ORDER BY prod.id_producto DESC";
                     // SE UTILIZA 1 PARA ESPECIFICAR QUE SOLO SE OBTIENEN LOS PRODUCTOS ACTIVOS (ESTADO = 1) Y SE ORDENA POR ID DE PRODUCTO EN ORDEN DESCENDENTE.
@@ -53,25 +51,24 @@ Class productoModel{
     //==================================================================================
         //CREAR PRODUCTOS   
         
-    public function crearProducto($codigo, $nombre, $id_categoria, $id_proveedor, $unidad_medida, $unidades_por_empaque, $precio_compra, $precio_venta, $aplica_iva, $stock_actual, $stock_minimo){
+    public function crearProducto($codigo, $nombre, $id_categoria, $aplica_iva, $stock_minimo = 0, $stock_actual = 0, $precio_compra = 0.00, $precio_venta = 0.00){
         try{
-                $sql = "INSERT INTO productos (codigo, nombre, id_categoria, id_proveedor, unidad_medida, unidades_por_empaque, precio_compra, precio_venta, aplica_iva, stock_actual, stock_minimo) 
+                $sql = "INSERT INTO productos (codigo, nombre, id_categoria, aplica_iva, stock_minimo, stock_actual, precio_compra, precio_venta) 
                         VALUES 
-                        (:codigo, :nombre, :id_categoria, :id_proveedor, :unidad_medida, :unidades_por_empaque, :precio_compra, :precio_venta, :aplica_iva, :stock_actual, :stock_minimo)";
+                        (:codigo, :nombre, :id_categoria, :aplica_iva, :stock_minimo, :stock_actual, :precio_compra, :precio_venta)";
 
                         $stmt = $this->pdo->prepare($sql);
                         $stmt->execute([
                             ':codigo' => $codigo,
                             ':nombre' => $nombre,
                             ':id_categoria' => $id_categoria,
-                            ':id_proveedor' => $id_proveedor,
-                            ':unidad_medida' => $unidad_medida,
-                            ':unidades_por_empaque' => $unidades_por_empaque,
+                            ':aplica_iva' => $aplica_iva,
+                            ':stock_minimo' => $stock_minimo,
+                            ':stock_actual' => $stock_actual,
                             ':precio_compra' => $precio_compra,
                             ':precio_venta' => $precio_venta,
-                            ':stock_actual' => $stock_actual,
-                            ':aplica_iva' => $aplica_iva,
-                            ':stock_minimo' => $stock_minimo    
+                            
+                                
                         ]);
 
                         return true; //SE GUARDÓ CORRECTAMENTE.
@@ -85,15 +82,12 @@ Class productoModel{
 
 
     //==================================================================================
-    public function actualizarProducto($id_producto, $codigo, $nombre, $id_categoria, $id_proveedor, $unidad_medida, $unidades_por_empaque, $precio_compra, $precio_venta, $aplica_iva, $stock_minimo){
+    public function actualizarProducto($id_producto, $codigo, $nombre, $id_categoria, $precio_compra, $precio_venta, $aplica_iva, $stock_minimo){
         try{
             $sql = "UPDATE productos SET
                         codigo = :codigo, 
                         nombre = :nombre, 
                         id_categoria = :id_categoria, 
-                        id_proveedor = :id_proveedor, 
-                        unidad_medida = :unidad_medida, 
-                        unidades_por_empaque = :unidades_por_empaque, 
                         precio_compra = :precio_compra, 
                         precio_venta = :precio_venta, 
                         aplica_iva = :aplica_iva, 
@@ -106,9 +100,6 @@ Class productoModel{
                 ':codigo'               => $codigo,
                 ':nombre'               => $nombre,
                 ':id_categoria'         => $id_categoria,
-                ':id_proveedor'         => $id_proveedor,
-                ':unidad_medida'        => $unidad_medida,
-                ':unidades_por_empaque' => $unidades_por_empaque,
                 ':precio_compra'        => $precio_compra,
                 ':precio_venta'         => $precio_venta,
                 ':aplica_iva'           => $aplica_iva,

@@ -56,45 +56,53 @@ Class productoController{
     }
 
 
-    //metodos relacionados a productos  
+    // Metodos relacionados a productos   
     public function guardarProducto(){
 
-        // DATOS INDISPENSABLES DEL FORMULARIO DE PRODUCTOS 
-                $codigo = trim($_POST['codigo'] ?? '');
-                $nombre = trim($_POST['nombre'] ?? '');
-                $id_categoria = trim($_POST['id_categoria'] ?? '');
-                $id_proveedor = trim($_POST['id_proveedor'] ?? '');
+        // 1. DATOS INDISPENSABLES DEL FORMULARIO
+        $codigo       = trim($_POST['codigo'] ?? '');
+        $nombre       = trim($_POST['nombre'] ?? '');
+        // Asegúrate de que en el HTML el <select> tenga name="id_categoria"
+        $id_categoria = trim($_POST['id_categoria'] ?? '');
 
 
-                //DATOS RESCATABLES (Si vienen vacíos, les asignamos un valor por defecto seguro)
-            // Usamos un condicional corto: (Condición) ? (Si es verdad) : (Si es falso)
+        // 2. DATOS OPCIONALES O CON VALORES POR DEFECTO
+        $precio_compra = 0;
+        $precio_venta  = 0; // Se gestionará posteriormente en el módulo de precios
+        $stock_minimo  = 0;
 
-               $precio_compra = (isset($_POST['precio_compra']) && $_POST['precio_compra'] !== '') ? trim($_POST['precio_compra']) : 0;
-               $precio_venta = 0;
-                $stock_minimo = (isset($_POST['stock_minimo']) && $_POST['stock_minimo'] !== '') ? trim($_POST['stock_minimo']) : 0;
-                $unidades_por_empaque = 1;
+        $aplica_iva   = isset($_POST['aplica_iva']) ? 1 : 0; // Checkbox booleano
+        $stock_actual = 0;
 
-                $unidad_media = trim($_POST['unidad_medida'] ?? 'UNIDAD'); //SI VIENE VACIO, ASUMIMOS UNIDAD.
-               $aplica_iva = isset($_POST['aplica_iva']) ? 1 : 0; // SI EL CHECKBOX SE MARCÓ ES 1. SI NO ES 0.
-               $stock_actual = (isset($_POST['stock_actual']) && $_POST['stock_actual'] !== '') ? trim($_POST['stock_actual']) : 0;
-            
-                //$estado = trim($_POST['estado'] ?? '');
-                //$create_at = trim($_POST['create_at'] ?? '');
 
-                // los checkboxes no envian nada si no estan marcado, asi que validamos asi:
+        // 3. VALIDACIÓN DE CAMPOS INDISPENSABLES
+        if($codigo !== '' && $nombre !== '' && $id_categoria !== ''){
 
-        if($codigo !== '' && $nombre !== '' && $id_categoria !== '' && $id_proveedor !== ''){
+            // Ejecutar el modelo y guardar el resultado en una variable ($exito)
+            $exito = $this->productoModel->crearProducto(
+                $codigo, 
+                $nombre, 
+                $id_categoria,
+                $aplica_iva,
+                $stock_minimo,
+                $stock_actual,
+                $precio_compra, 
+                $precio_venta
+            );
 
-            //SI LAS CONDICIONES SE CUMPLEN, LOS ENVIAREMOS AL MODELO.
-            $this->productoModel->crearProducto($codigo, $nombre, $id_categoria, $id_proveedor, $unidad_media, $unidades_por_empaque, $precio_compra, $precio_venta, $aplica_iva, $stock_actual, $stock_minimo);
-            // REDIRECCION CON EXITO
-            header("Location: index.php?controller=producto&action=tablaProductos");
-            exit;
+            if($exito){
+                // REDIRECCIÓN SOLO SI SE GUARDÓ CORRECTAMENTE EN BD
+                header("Location: index.php?controller=producto&action=TablaProductos");
+                exit;
+            } else {
+                // SI FALLÓ LA BASE DE DATOS, DETENEMOS LA REDIRECCIÓN PARA VER EL ERROR EN PANTALLA
+                echo "<br><b>No se pudo guardar el registro en la base de datos. Revisa el mensaje de PDO arriba.</b>";
+            }
+
         } else {
-            //OPCIONAL: SI FALTA UN DATO INDISPENSABLE, SE DEVUELVE AL FORMULARIO
-            //AQUI SE AGREGA UN MENSAJE DE ERROR POR LA URL EJ (&ERROR=FALTAN_DATOS).
-
-            header("location: index.php?controller=producto&action=formproduc&error=faltan_datos");
+            // SI FALTA UN DATO OBLIGATORIO EN EL FORMULARIO
+            header("Location: index.php?controller=producto&action=formCrear&error=faltan_datos");
+            exit;
         }
     }
 }
