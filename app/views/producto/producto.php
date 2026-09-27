@@ -122,13 +122,13 @@ if (!isset($_SESSION['user_id'])) {
                                         <td>
                                             <div class="actions-cell">
                                                 <!-- Enlaces a los controladores de edición y eliminación -->
-                                                <a href="index.php?controller=producto&action=formEdit&id=<?= $p['id_producto'] ?? $p['id'] ?? '' ?>" 
+                                                <a href="index.php?controller=producto&action=formEditar&id=<?= $p['id_producto'] ?? $p['id'] ?? '' ?>" 
                                                    class="btn-table btn-edit" 
                                                    title="Editar producto">
                                                     <span class="icon-edit"></span>
                                                 </a>
                                                 
-                                                <a href="index.php?controller=producto&action=eliminar&id=<?= $p['id_producto'] ?? $p['id'] ?? '' ?>" 
+                                                <a href="index.php?controller=producto&action=eliminarProducto&id=<?= $p['id_producto'] ?? $p['id'] ?? '' ?>" 
                                                    class="btn-table btn-delete-table" 
                                                    title="Eliminar producto"
                                                    onclick="return confirm('¿Estás seguro de eliminar este producto del inventario?');">

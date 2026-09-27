@@ -105,73 +105,91 @@ Class productoController{
             exit;
         }
     }
-}
+    public function formEditar(){
+        $id = $_GET['id'] ?? '';
+        if(!empty($id)){
+            // OBTENER LOS DATOS  ACTUALES DEL PRODUCTO
+            $producto = $this->productoModel->obtenerProductoPorId($id);
 
-/* 
-}
-public function actualizarProducto(){
-    $id = $_POST['id'] ?? '';
-    $codigo = trim($_POST['codigo'] ?? '');
-    $nombre = trim($_POST['nombre'] ?? '');
-    $id_categoria = trim($_POST['id_categoria'] ?? '');
-    $id_proveedor = trim($_POST['id_proveedor'] ?? '');
-    $unidad_media = trim($_POST['unidad_media'] ?? '');
-    $unidades_por_empaque = trim($_POST['unidades_por_empaque'] ?? '');
-    $precio_compra = trim($_POST['precio_compra'] ?? '');
-    $precio_venta = trim($_POST['precio_venta'] ?? '');
-    $aplica_iva = trim($_POST['aplica_iva'] ?? '');
-    $stock_actual = trim($_POST['stock_actual'] ?? '');
-    $stock_minimo = trim($_POST['stock_minimo'] ?? '');
-    $estado = trim($_POST['estado'] ?? '');
-    $create_at = trim($_POST['create_at'] ?? '');
+            // VALIDAMOS QUE EL PRODUCTO REALMENTE EXISTA EN LA BASE DE DATOS
+            if($producto){
+            
+            // Obtener todas las categorías para llenar el menú desplegable
+            $categorias = $this->categoriaModel->getAll();
 
-    if(!empty($id) && !empty($codigo) && !empty($nombre) && !empty($id_categoria) && !empty($id_proveedor) && !empty($unidad_media) && !empty($unidades_por_empaque) && !empty($precio_compra) && !empty($precio_venta) && !empty($aplica_iva) && !empty($stock_actual) && !empty($stock_minimo) && !empty($estado) && !empty($create_at)){
-        $this->model->actualizarProducto($id, $codigo, $nombre, $id_categoria, $id_proveedor, $unidad_media, $unidades_por_empaque, $precio_compra, $precio_venta, $aplica_iva, $stock_actual, $stock_minimo, $estado, $create_at);
+            //CARGAR LA VISTA CON LOS DATOS LISTOS
+            require_once __DIR__.'/../../app/views/producto/editarProducto.php';
+    
+            } else {
+                // ERROR: El ID existe en la URL pero no en la BD (ej. un producto eliminado)
+                header("Location: index.php?controller=producto&action=TablaProductos&error=producto_no_encontrado");
+                exit;
+            }
+        } else {
+            // ERROR: Entraron a la URL sin pasar ningún ID
+            header("Location: index.php?controller=producto&action=TablaProductos");
+            exit;
+            require_once __DIR__.'/../../app/views/producto/editarProducto.php';
+        }
     }
-    header("Location: index.php?controller=producto&action=TablaProductos");
-    exit;
 
-}
+    public function actualizarProducto(){
+        // 1. Capturar los datos enviados por el formulario HTML
+        $id_producto  = trim($_POST['id_producto'] ?? '');
+        $codigo       = trim($_POST['codigo'] ?? '');
+        $nombre       = trim($_POST['nombre'] ?? '');
+        $id_categoria = trim($_POST['id_categoria'] ?? '');
+        
+        // Si el checkbox está marcado llega el valor, sino se asigna 0
+        $aplica_iva   = isset($_POST['aplica_iva']) ? 1 : 0; 
 
-public function eliminarProducto(){
-    $id = $_POST['id'] ?? '';
-    if(!empty($id)){
-        $this->model->eliminarProducto($id);
+        // 2. Validar que los campos indispensables no estén vacíos
+        if($id_producto !== '' && $codigo !== '' && $nombre !== '' && $id_categoria !== ''){
+
+            // 3. Ejecutar la actualización en el modelo
+            $exito = $this->productoModel->actualizarProducto(
+                $id_producto, 
+                $codigo, 
+                $nombre, 
+                $id_categoria, 
+                $aplica_iva
+            );
+
+            if($exito){
+                // Redirigir a la tabla si todo salió bien
+                header("Location: index.php?controller=producto&action=TablaProductos");
+                exit;
+            } else {
+                echo "<br><b>Error: Ocurrió un problema al actualizar el registro en la base de datos.</b>";
+            }
+
+        } else {
+            // Si falta algún dato, lo devolvemos al formulario de edición del mismo producto
+            header("Location: index.php?controller=producto&action=formEditar&id=".$id_producto."&error=faltan_datos");
+            exit;
+        }
     }
-    header("Location: index.php?controller=producto&action=TablaProductos");
-    exit;
 
-}
-//metotos relacionados a categorias y proveedores
-
-public function guardarCategoria(){
-    $nombre = trim($_POST['nombre'] ?? '');
-    $descripcion = trim($_POST['descripcion'] ?? '');
-    if(!empty($nombre)){
-        $this->model->crearCategoria($nombre, $descripcion);
+    public function eliminarProducto(){
+        // Capturamos el ID ya sea que venga por URL (GET) o por Formulario oculto (POST)
+        $id = $_GET['id'] ?? $_POST['id'] ?? '';
+        if(!empty($id)){
+            // Ejecutamos el borrado lógico en el modelo
+            $exito =$this->productoModel->eliminarProducto($id);
+            if($exito){
+                // Redirigimos a la tabla principal
+                header("Location: index.php?controller=producto&action=TablaProductos");
+                exit;
+            } else {
+                echo "<br><b>Error: Ocurrió un problema al intentar desactivar el producto.</b>";
+            }
+        } else {
+            // Si intentan entrar sin enviar un ID
+            header("Location: index.php?controller=producto&action=TablaProductos");
+            exit;
+        }
     }
-    header("Location: index.php?controller=producto&action=formcategoria");
-    exit;
 }
-
-public function guardarProveedor(){
-    $rif = trim($_POST['rif'] ?? '');
-    $razon_social = trim($_POST['razon_social'] ?? '');
-    $nombre_contacto = trim($_POST['nombre_contacto'] ?? '');
-    $telefono = trim($_POST['telefono'] ?? '');
-    $email = trim($_POST['email'] ?? '');
-    $direccion = trim($_POST['direccion'] ?? '');
-    if(!empty($rif)){
-        $this->model->crearProveedor($rif, $razon_social, $nombre_contacto, $telefono, $email, $direccion);
-    }
-    header("Location: index.php?controller=producto&action=formproveedor");
-    exit;
-
-
-
-}
-
-}
-*/
+        
 
 ?>

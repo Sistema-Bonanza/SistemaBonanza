@@ -82,16 +82,13 @@ Class productoModel{
 
 
     //==================================================================================
-    public function actualizarProducto($id_producto, $codigo, $nombre, $id_categoria, $precio_compra, $precio_venta, $aplica_iva, $stock_minimo){
+    public function actualizarProducto($id_producto, $codigo, $nombre, $id_categoria,$aplica_iva){
         try{
             $sql = "UPDATE productos SET
                         codigo = :codigo, 
                         nombre = :nombre, 
                         id_categoria = :id_categoria, 
-                        precio_compra = :precio_compra, 
-                        precio_venta = :precio_venta, 
-                        aplica_iva = :aplica_iva, 
-                        stock_minimo = :stock_minimo 
+                        aplica_iva = :aplica_iva 
                     WHERE id_producto = :id_producto";
                 
             $stmt = $this->pdo->prepare($sql);
@@ -100,10 +97,7 @@ Class productoModel{
                 ':codigo'               => $codigo,
                 ':nombre'               => $nombre,
                 ':id_categoria'         => $id_categoria,
-                ':precio_compra'        => $precio_compra,
-                ':precio_venta'         => $precio_venta,
-                ':aplica_iva'           => $aplica_iva,
-                ':stock_minimo'         => $stock_minimo
+                ':aplica_iva'           => $aplica_iva
             ]);
             
             return true;

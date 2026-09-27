@@ -73,32 +73,10 @@ if (!isset($_SESSION['user_id'])) {
 
                 <h4 class="form-section-title">Datos Adicionales</h4>
 
-                <!---<div class="grid-3-cols">
-                    <div class="form-group">
-                        <label>Unidad de Medida</label>
-                        <select name="unidad_medida" class="form-control">
-                            <option value="Unidad" selected>Unidad</option>
-                            <option value="Kg">Kilogramo (Kg)</option>
-                            <option value="Bulto">Bulto</option>
-                            <option value="Caja">Caja</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Unidades por Empaque</label>
-                        <input type="number" name="stock_actual" class="form-control" placeholder="Ej. 24" min="1">
-                    </div>
-                    <div class="form-group">
-                        <label>Stock Mínimo</label>
-                        <input type="number" name="stock_minimo" class="form-control" placeholder="Ej. 10" min="0">
-                    </div>
-                </div> -->
 
                 <!-- Pasamos de grid-3-cols a grid-2-cols al eliminar el precio de venta -->
                 <div class="grid-2-cols">
-                    <!---<div class="form-group">
-                        <label>Precio de Compra ($)</label>
-                        <input type="number" name="precio_compra" class="form-control" placeholder="0.00" step="0.01" min="0">
-                    </div> -->
+                                
                     <div class="form-group">
                         <label class="checkbox-group">
                             <input type="checkbox" name="aplica_iva" value="1" checked>
