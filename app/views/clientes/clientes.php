@@ -86,12 +86,6 @@ if (!isset($_SESSION['user_id'])) {
                                                    title="Editar cliente">
                                                     <span class="icon-edit"></span>
                                                 </a>
-                                                <a href="index.php?controller=cliente&action=eliminar&id=<?= $c['id_cliente'] ?? '' ?>" 
-                                                   class="btn-table btn-delete-table" 
-                                                   title="Eliminar cliente"
-                                                   onclick="return confirm('¿Estás seguro de eliminar este cliente? Se marcará como inactivo.');">
-                                                    <span class="icon-delete-table"></span>
-                                                </a>
                                             </div>
                                         </td>
                                     </tr>
