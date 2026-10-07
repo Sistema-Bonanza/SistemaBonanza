@@ -1,0 +1,420 @@
+<?php
+/**
+ * app/helpers/seguridad.php
+ *
+ * Caja de herramientas de seguridad compartida por TODOS los módulos.
+ * Se carga con require_once (NO con require):
+ *   require_once __DIR__ . '/../helpers/seguridad.php';
+ * Si se cargara dos veces, PHP daría error por redeclarar funciones y
+ * constantes. (En empaques.php es al revés: allí SÍ se usa require,
+ * porque necesitas el valor que devuelve.)
+ *
+ * Secciones:
+ *   1. Configuración (claves de sesión y URLs)
+ *   2. Salida y navegación: esc(), urlAccion(), redirigir()
+ *   3. Sesión y permisos
+ *   4. CSRF
+ *   5. Mensajes (flash) y formulario previo
+ *   6. Validación de entradas
+ */
+ 
+ 
+// ============================================================
+// 1. CONFIGURACIÓN
+// ============================================================
+ 
+// Claves de $_SESSION que escribe tu SistemaController::procesarLogin().
+// Si algún día las renombras, solo cambias estas líneas.
+const SESION_ID  = 'user_id';
+const SESION_ROL = 'is_admin';   // OJO: el nombre engaña. Guarda el TEXTO del rol
+                                 // (por ejemplo 'admin'), no un true/false.
+ 
+const URL_LOGIN     = 'index.php';
+const URL_DASHBOARD = 'index.php?controller=sistema&action=dashboard';
+ 
+ 
+// ============================================================
+// 2. SALIDA Y NAVEGACIÓN
+// ============================================================
+ 
+/**
+ * Escapa un valor para imprimirlo de forma segura en HTML (evita XSS).
+ * Uso en vistas:  <?= esc($producto['nombre']) ?>
+ * Úsala en TODO lo que imprimas, incluso si viene de tu propia BD.
+ */
+function esc($valor): string
+{
+    // Arreglos u objetos no se pueden imprimir como texto: se devuelve vacío.
+    if ($valor !== null && !is_scalar($valor)) {
+        return '';
+    }
+    // ENT_QUOTES: convierte comillas simples y dobles (importante dentro de atributos).
+    // ENT_SUBSTITUTE: si hay bytes inválidos, pone un símbolo en vez de devolver vacío.
+    return htmlspecialchars((string) ($valor ?? ''), ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+}
+ 
+/**
+ * Construye una URL de tu router sin escribirla a mano.
+ * urlAccion('compra', 'ver', ['id' => 5])  =>  index.php?controller=compra&action=ver&id=5
+ * Evita errores de tipeo y de mayúsculas. En HTML imprímela con esc():
+ *   <a href="<?= esc(urlAccion('compra', 'crear')) ?>">
+ */
+function urlAccion(string $controlador, string $accion, array $parametros = []): string
+{
+    // El operador + conserva las claves de la izquierda: un parámetro extra
+    // nunca puede pisar 'controller' ni 'action'.
+    return 'index.php?' . http_build_query(
+        ['controller' => $controlador, 'action' => $accion] + $parametros
+    );
+}
+ 
+/**
+ * Redirige y DETIENE el script.
+ * header() solo "pide" al navegador que cambie de página; si no hay exit,
+ * PHP sigue ejecutando el resto del código. Por eso el exit va aquí dentro.
+ */
+function redirigir(string $destino): void
+{
+    // Solo se permiten destinos internos. Se bloquea "http://..." y "//dominio".
+    if (preg_match('#^(//|[a-z][a-z0-9+.-]*://)#i', $destino) || strpbrk($destino, "\r\n") !== false) {
+        error_log('Redirección bloqueada: ' . $destino);
+        $destino = URL_LOGIN;
+    }
+    header('Location: ' . $destino);
+    exit;
+}
+ 
+/**
+ * Cabeceras para que el navegador no guarde la página en caché.
+ * Sin esto, tras cerrar sesión el botón "atrás" puede mostrar un formulario viejo.
+ * Llámala al inicio de las acciones que muestran vistas (crear, ver, index).
+ */
+function evitarCache(): void
+{
+    header('Cache-Control: no-cache, no-store, must-revalidate');
+    header('Pragma: no-cache');
+    header('Expires: 0');
+}
+ 
+ 
+// ============================================================
+// 3. SESIÓN Y PERMISOS
+// ============================================================
+ 
+/** Inicia la sesión solo si todavía no está iniciada. */
+function asegurarSesion(): void
+{
+    if (session_status() === PHP_SESSION_NONE) {
+        session_start();
+    }
+}
+ 
+/** Si no hay usuario logueado, manda al login. Va PRIMERO en cada acción. */
+function exigirSesion(): void
+{
+    asegurarSesion();
+    if (empty($_SESSION[SESION_ID])) {
+        redirigir(URL_LOGIN);
+    }
+}
+ 
+/**
+ * Id del usuario logueado. Se usa para id_usuario en compras y movimientos.
+ * NUNCA lo recibas del formulario: siempre sale de la sesión.
+ */
+function usuarioActualId(): int
+{
+    asegurarSesion();
+    return (int) ($_SESSION[SESION_ID] ?? 0);
+}
+ 
+/**
+ * ¿El rol del usuario está en la lista? Devuelve true/false.
+ * Sirve en las vistas para mostrar u ocultar botones, pero eso es solo
+ * comodidad: la protección real es exigirRol() en el controlador.
+ */
+function tieneRol(array $rolesPermitidos): bool
+{
+    asegurarSesion();
+    $rol = $_SESSION[SESION_ROL] ?? null;
+    // in_array con true = comparación estricta (tipo y valor).
+    return is_string($rol) && in_array($rol, $rolesPermitidos, true);
+}
+ 
+/**
+ * Exige sesión Y uno de los roles indicados. Si no cumple, deja registro
+ * en el log, avisa al usuario y lo manda al dashboard.
+ * Ejemplo: exigirRol(['admin']);
+ */
+function exigirRol(array $rolesPermitidos): void
+{
+    exigirSesion();
+    if (!tieneRol($rolesPermitidos)) {
+        error_log('Acceso denegado: el usuario ' . usuarioActualId() . ' intentó una acción restringida.');
+        setFlash('error', 'No tienes permiso para realizar esta acción.');
+        redirigir(URL_DASHBOARD);
+    }
+}
+ 
+ 
+// ============================================================
+// 4. CSRF
+// ============================================================
+ 
+/**
+ * Devuelve el token CSRF de la sesión; lo crea si no existe.
+ * random_bytes(32) = 32 bytes impredecibles; bin2hex los pasa a 64 caracteres.
+ */
+function tokenCsrf(): string
+{
+    asegurarSesion();
+    if (empty($_SESSION['csrf_token']) || !is_string($_SESSION['csrf_token'])) {
+        $_SESSION['csrf_token'] = bin2hex(random_bytes(32));
+    }
+    return $_SESSION['csrf_token'];
+}
+ 
+/** Devuelve el <input> oculto. En el formulario:  <?= campoCsrf() ?> */
+function campoCsrf(): string
+{
+    return '<input type="hidden" name="csrf_token" value="' . esc(tokenCsrf()) . '">';
+}
+ 
+/**
+ * Compara el token recibido con el de la sesión.
+ * - is_string(): si llega un arreglo (csrf_token[]=x), hash_equals daría error.
+ * - hash_equals(): compara en tiempo constante, sin revelar por el tiempo de
+ *   respuesta cuántos caracteres acertó un atacante (un == normal sí lo haría).
+ */
+function validarCsrf($token): bool
+{
+    asegurarSesion();
+    $esperado = $_SESSION['csrf_token'] ?? '';
+    return is_string($token)
+        && is_string($esperado)
+        && $esperado !== ''
+        && hash_equals($esperado, $token);
+}
+ 
+/**
+ * Descarta el token actual; el próximo tokenCsrf() creará uno nuevo.
+ * Llámala tras guardar con éxito: un reenvío del mismo formulario (F5,
+ * doble clic) ya no tendrá un token válido.
+ */
+function renovarCsrf(): void
+{
+    asegurarSesion();
+    unset($_SESSION['csrf_token']);
+}
+ 
+/**
+ * Guardia de todas las acciones que modifican datos (guardar, anular):
+ * exige método POST y token válido. Si falla, avisa y redirige.
+ */
+function exigirPostConCsrf(string $urlSiFalla): void
+{
+    if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+        setFlash('error', 'Solicitud no válida.');
+        redirigir($urlSiFalla);
+    }
+    if (!validarCsrf($_POST['csrf_token'] ?? null)) {
+        error_log('CSRF inválido: usuario ' . usuarioActualId() . ' desde ' . ($_SERVER['REMOTE_ADDR'] ?? 'desconocida'));
+        setFlash('error', 'El formulario expiró o no es válido. Recarga la página e inténtalo de nuevo.');
+        redirigir($urlSiFalla);
+    }
+}
+ 
+ 
+// ============================================================
+// 5. MENSAJES (FLASH) Y FORMULARIO PREVIO
+// ============================================================
+ 
+/**
+ * Guarda un mensaje en la sesión para mostrarlo UNA vez en la próxima página.
+ * $tipo: 'exito', 'error' o 'aviso'.
+ * $mensajes: un texto o un arreglo de textos (varios errores de validación).
+ * Usa la clave 'flash', así no choca con tu $_SESSION['error'] actual.
+ */
+function setFlash(string $tipo, $mensajes): void
+{
+    asegurarSesion();
+    if (!in_array($tipo, ['exito', 'error', 'aviso'], true)) {
+        $tipo = 'aviso';
+    }
+    $_SESSION['flash'] = [
+        'tipo'     => $tipo,
+        'mensajes' => array_map('strval', (array) $mensajes),
+    ];
+}
+ 
+/**
+ * Devuelve el HTML del mensaje pendiente (ya escapado) y lo borra de la sesión.
+ * En la vista:  <?= mostrarFlash() ?>
+ * Genera <div class="mensaje mensaje-exito|error|aviso">: crea esos estilos en tu CSS.
+ */
+function mostrarFlash(): string
+{
+    asegurarSesion();
+    if (empty($_SESSION['flash'])) {
+        return '';
+    }
+    $flash = $_SESSION['flash'];
+    unset($_SESSION['flash']);   // se lee una sola vez
+ 
+    $html = '<div class="mensaje mensaje-' . esc($flash['tipo']) . '" role="alert">';
+    foreach ($flash['mensajes'] as $mensaje) {
+        $html .= '<p>' . esc($mensaje) . '</p>';
+    }
+    return $html . '</div>';
+}
+ 
+/**
+ * Guarda lo que el usuario escribió, para no perderlo si el servidor
+ * rechaza el envío. Se excluye el token.
+ */
+function guardarFormulario(array $datos): void
+{
+    asegurarSesion();
+    unset($datos['csrf_token']);
+    $_SESSION['formulario_previo'] = $datos;
+}
+ 
+/**
+ * Devuelve lo guardado con guardarFormulario() y lo borra (lectura única).
+ * En la vista:  value="<?= esc($previo['numero_factura'] ?? '') ?>"
+ */
+function recuperarFormulario(): array
+{
+    asegurarSesion();
+    $datos = $_SESSION['formulario_previo'] ?? [];
+    unset($_SESSION['formulario_previo']);
+    return is_array($datos) ? $datos : [];
+}
+ 
+ 
+// ============================================================
+// 6. VALIDACIÓN DE ENTRADAS
+// ------------------------------------------------------------
+// Regla común: devuelven el valor limpio y válido, o null si no
+// pasa. Nunca "arreglan" un dato inválido en silencio.
+// Todas aceptan cualquier tipo de entrada, porque un atacante
+// puede enviar arreglos (campo[]=x) en lugar de texto.
+// ============================================================
+ 
+/** Lee un campo de $_POST que debe ser un arreglo (ej. producto[]). Si no lo es, devuelve []. */
+function postArray(string $campo): array
+{
+    return (isset($_POST[$campo]) && is_array($_POST[$campo])) ? $_POST[$campo] : [];
+}
+ 
+/**
+ * Entero entre $min y $max, o null.
+ * validarEntero($_GET['id'], 1)   // un id
+ * validarEntero($cantidad, 1, 10000)
+ */
+function validarEntero($valor, int $min = 1, int $max = PHP_INT_MAX): ?int
+{
+    if (!is_string($valor) && !is_int($valor)) {
+        return null;
+    }
+    $resultado = filter_var($valor, FILTER_VALIDATE_INT, [
+        'options' => ['min_range' => $min, 'max_range' => $max],
+    ]);
+    // filter_var devuelve false si falla; 0 es un valor válido, por eso se compara con ===.
+    return $resultado === false ? null : $resultado;
+}
+ 
+/**
+ * Decimal con punto, hasta $maxEnteros dígitos enteros y $decimales decimales.
+ * Devuelve un TEXTO normalizado ("25.50") listo para enlazar a un DECIMAL, o null.
+ * Rechaza la coma ("25,50"): un <input type="number"> siempre envía punto.
+ * Por defecto rechaza el cero.
+ */
+function validarDecimal($valor, int $maxEnteros = 8, int $decimales = 2, bool $permitirCero = false): ?string
+{
+    if (!is_string($valor)) {
+        return null;
+    }
+    $valor = trim($valor);
+    // \d = solo dígitos 0-9.  \z = fin exacto del texto.
+    // (Con $ se colaría un salto de línea final, "25.00\n".)
+    $patron = '/^\d{1,' . $maxEnteros . '}(\.\d{1,' . $decimales . '})?\z/';
+    if (!preg_match($patron, $valor)) {
+        return null;
+    }
+    if (!$permitirCero && (float) $valor <= 0) {
+        return null;
+    }
+    return number_format((float) $valor, $decimales, '.', '');
+}
+ 
+/**
+ * Texto con trim, longitud entre $min y $max y, opcionalmente, un patrón.
+ * Rechaza caracteres de control invisibles.
+ * Si pasas $patron, termínalo en \z (no en $):
+ *   validarTexto($factura, 1, 30, '/^[A-Za-z0-9-]+\z/')
+ */
+function validarTexto($valor, int $min, int $max, ?string $patron = null): ?string
+{
+    if (!is_string($valor)) {
+        return null;
+    }
+    $texto = trim($valor);
+    $largo = mb_strlen($texto, 'UTF-8');   // cuenta caracteres, no bytes (á cuenta 1)
+    if ($largo < $min || $largo > $max) {
+        return null;
+    }
+    // Se permiten tabulación y saltos de línea; se rechaza el resto de los de control.
+    if (preg_match('/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/', $texto)) {
+        return null;
+    }
+    if ($patron !== null && !preg_match($patron, $texto)) {
+        return null;
+    }
+    return $texto;
+}
+ 
+/**
+ * Fecha en formato Y-m-d, real (rechaza 2026-02-31), no futura
+ * (salvo que lo permitas) y no más antigua de $maxAniosAtras años.
+ * Devuelve el mismo texto o null.
+ * Consejo: define date_default_timezone_set(...) en tu arranque para que
+ * "hoy" sea el de tu país.
+ */
+function validarFecha($valor, bool $permitirFutura = false, int $maxAniosAtras = 5): ?string
+{
+    if (!is_string($valor)) {
+        return null;
+    }
+    // El "!" pone la hora en 00:00:00, así se compara solo la fecha.
+    $fecha = DateTime::createFromFormat('!Y-m-d', $valor);
+    // createFromFormat "corrige" fechas imposibles (31 de febrero pasa a marzo).
+    // Si al reescribirla no coincide con el original, la fecha era falsa.
+    if ($fecha === false || $fecha->format('Y-m-d') !== $valor) {
+        return null;
+    }
+    $hoy = new DateTime('today');
+    if (!$permitirFutura && $fecha > $hoy) {
+        return null;
+    }
+    $limite = (new DateTime('today'))->modify('-' . $maxAniosAtras . ' years');
+    if ($fecha < $limite) {
+        return null;
+    }
+    return $valor;
+}
+ 
+/**
+ * Valida que el valor sea una CLAVE existente de un arreglo asociativo
+ * (lista blanca). Ejemplo con los empaques:
+ *   validarClave($_POST['tipo'], $empaques)
+ * is_string() va primero: array_key_exists() con un arreglo daría error.
+ */
+function validarClave($valor, array $listaPermitida): ?string
+{
+    if (!is_string($valor) || !array_key_exists($valor, $listaPermitida)) {
+        return null;
+    }
+    return $valor;
+}
+ 

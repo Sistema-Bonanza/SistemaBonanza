@@ -14,7 +14,7 @@
         }
 
         public function getActivos(){ //funcion para obtener todos los proveedores activos.
-            $stmt = $this->pdo->query("SELECT id_proveedor, razon_social FROM proveedores WHERE estado = 1 ORDER BY razon_social ASC");
+            $stmt = $this->pdo->query("SELECT id_proveedor, rif, razon_social FROM proveedores WHERE estado = 1 ORDER BY razon_social ASC");
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
 

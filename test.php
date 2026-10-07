@@ -1,48 +1,26 @@
 <?php
-// Mostrar todos los errores por pantalla (muy útil para pruebas)
-ini_set('display_errors', 1);
-error_reporting(E_ALL);
+// 1. Importar la conexión y los modelos
+require_once __DIR__ . '/config/database.php';
+require_once __DIR__ . '/app/model/proveedorModel.php';
+require_once __DIR__ . '/app/model/productoModel.php';
 
-echo "<h2>Iniciando prueba del Modelo...</h2>";
+// 2. Iniciar conexión
+$database = new Database();
+$pdo = $database->getConnection();
 
-// 1. Llama a tu archivo de conexión a la Base de Datos.
-// ¡OJO! Asegúrate de que esta ruta sea la correcta en tu proyecto.
-require_once 'config/database.php'; 
+// 3. Instanciar los modelos
+$proveedorModel = new ProveedorModel($pdo);
+$productoModel = new ProductoModel($pdo);
 
-// 2. Llama a tu nuevo modelo.
-require_once 'app/model/UsuarioModel.php';
+// 4. Imprimir resultados en pantalla usando <pre> para darles formato legible
+echo "<h3>Lista de Proveedores Activos:</h3>";
+echo "<pre>";
+print_r($proveedorModel->getActivos());
+echo "</pre>";
 
-try {
-    echo "<p>1. Archivos cargados correctamente.</p>";
+echo "<hr>";
 
-    // 3. Crear una instancia de la conexión a la base de datos.
-    // NOTA: Ajusta esto dependiendo de cómo se llame tu clase de conexión.
-    // Si tu conexión es una función, llámala. Aquí asumo que devuelve un objeto $pdo.
-    $conexion = new Database(); // Cambia 'Conexion' por el nombre real de tu clase
-    $pdo = $conexion->getConnection(); // Cambia 'conectar' por el método real de tu clase
-
-    echo "<p>2. Conexión a la BD establecida.</p>";
-
-    // 4. Instanciar el modelo pasándole la conexión.
-    $modelo = new usuarioModel($pdo);
-
-    // 5. Los datos de prueba ("Dummies")
-    $user_prueba = "miguel_test";
-    $pass_hash_prueba = password_hash("123456", PASSWORD_DEFAULT); // Simulamos una clave encriptada
-    $rol_prueba = "Administrador"; 
-
-    // 6. Ejecutar el método que acabas de crear.
-    $resultado = $modelo->crearUsuario($user_prueba, $pass_hash_prueba, $rol_prueba);
-
-    if ($resultado) {
-        echo "<h3 style='color:green;'>¡PRUEBA EXITOSA! 🎉</h3>";
-        echo "Ve a phpMyAdmin y revisa la tabla 'usuarios'. Debería aparecer 'miguel_test'.";
-    } else {
-        echo "<h3 style='color:red;'>La consulta falló, pero no devolvió error de código.</h3>";
-    }
-
-} catch (Exception $e) {
-    echo "<h3 style='color:red;'>Error crítico en la prueba:</h3>";
-    echo "<p>" . $e->getMessage() . "</p>";
-}
-?>
+echo "<h3>Lista de Productos:</h3>";
+echo "<pre>";
+print_r($productoModel->obtenerProductos());
+echo "</pre>";

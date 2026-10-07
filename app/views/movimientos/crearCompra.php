@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registrar Entrada · Distribuidora Bonanza</title>
+    
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
+    
+   <!-- Ruta absoluta a tu CSS centralizado -->
+     <link rel="stylesheet" href="assets/css/sidebar.css" />
+</head>
+<body>
+
+    <!-- SIDEBAR -->
+    <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <main class="main-content"  style="width: 100%; flex-grow: 1; max-width: 100%; overflow-x: hidden; padding: 30px;">
+        <div class="container is-max-widescreen">
+            
+            <!-- CABECERA DE LA PÁGINA -->
+            <div class="level mb-6">
+                <div class="level-left">
+                    <div>
+                        <h1 class="title is-4 mb-1">Registrar Entrada de Mercancía</h1>
+                        <p class="has-text-grey mt-1">Generar nueva recepción (Kardex y Costos)</p>
+                    </div>
+                </div>
+                <div class="level-right">
+                    <a href="<?= urlAccion('movimiento', 'tablaMovimientos') ?>" class="button is-light">
+                        <span class="icon is-small"><i class="fas fa-arrow-left"></i></span>
+                        <span>Volver al listado</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- FORMULARIO PRINCIPAL -->
+            <form action="<?= urlAccion('compra', 'guardarCompra') ?>" method="POST">
+                <?= campoCsrf() ?>
+
+                <!-- 1. DATOS DE LA FACTURA -->
+                <div class="box mb-6">
+                    <h2 class="title is-5 mb-4 pb-2" style="border-bottom: 1px solid #ededed;">Datos de la Factura (Cabecera)</h2>
+                    
+                    <div class="columns is-multiline">
+                        <!-- Proveedor -->
+                        <div class="column is-6">
+                            <div class="field">
+                                <label class="label has-text-grey">Proveedor</label>
+                                <div class="control has-icons-left is-expanded">
+                                    <div class="select is-fullwidth">
+                                        <select name="id_proveedor" required class="has-text-weight-semibold">
+                                            <option value="">Seleccione un proveedor...</option>
+                                            <?php foreach($proveedores as $prov): ?>
+                                                <option value="<?= $prov['id_proveedor'] ?>">
+                                                    <?= esc($prov['rif'] . ' - ' . $prov['razon_social']) ?>
+                                                </option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                    <span class="icon is-small is-left has-text-grey-light"><i class="fas fa-truck"></i></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- N° Factura -->
+                        <div class="column is-3">
+                            <div class="field">
+                                <label class="label has-text-grey">N° de Factura</label>
+                                <div class="control has-icons-left">
+                                    <input type="text" name="numero_factura" class="input has-text-weight-bold" style="font-family: monospace;" required placeholder="Ej: 001-54321">
+                                    <span class="icon is-small is-left has-text-grey-light"><i class="fas fa-hashtag"></i></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Fecha -->
+                        <div class="column is-3">
+                            <div class="field">
+                                <label class="label has-text-grey">Fecha de Emisión</label>
+                                <div class="control has-icons-left">
+                                    <input type="date" name="fecha_factura" class="input" style="font-family: monospace;" required value="<?= date('Y-m-d') ?>">
+                                    <span class="icon is-small is-left has-text-grey-light"><i class="fas fa-calendar"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. DETALLE DE PRODUCTOS -->
+                <div class="box p-0 mb-6" style="overflow: hidden;">
+                    <div class="level px-4 py-3 has-background-white-ter mb-0" style="border-bottom: 1px solid #ededed;">
+                        <div class="level-left">
+                            <h2 class="has-text-weight-bold is-size-5">Productos Ingresados (Detalle)</h2>
+                        </div>
+                        <div class="level-right">
+                            <span class="tag is-info is-light has-text-weight-bold">Máx 8 líneas (Fase 1)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="table-container mb-0">
+                        <table class="table is-fullwidth is-hoverable is-vcentered mb-0">
+                            <thead class="has-background-white-ter">
+                                <tr>
+                                    <th class="has-text-centered" style="width: 50px;">#</th>
+                                    <th style="width: 35%;">Producto</th>
+                                    <th>Empaque</th>
+                                    <th class="has-text-centered" style="width: 120px;">Cant.</th>
+                                    <th class="has-text-right" style="width: 180px;">Costo Factura ($)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php for ($i = 0; $i < 8; $i++): ?>
+                                    <tr>
+                                        <td class="has-text-centered has-text-grey-light has-text-weight-bold"><?= $i + 1 ?></td>
+                                        
+                                        <td>
+                                            <div class="select is-small is-fullwidth">
+                                                <select name="id_producto[]">
+                                                    <option value="">-- Dejar vacío si no se usa --</option>
+                                                    <?php foreach($productos as $prod): ?>
+                                                        <option value="<?= $prod['id_producto'] ?>">
+                                                            <?= esc($prod['codigo'] . ' - ' . $prod['nombre']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </td>
+                                        
+                                        <td>
+                                            <div class="select is-small is-fullwidth">
+                                                <select name="tipo_empaque[]">
+                                                    <option value ="">--- Selecciones ---</option>
+                                                    <?php foreach($empaques as $clave => $datosEmpaque): ?>
+
+                                                        <!-- Guardamos la 'clave' (ej. paquete_chimo) en la base de datos -->
+                                                        <option value="<?=  esc($clave) ?>">
+
+                                                            <!-- Imprimimos solo la 'etiqueta' (ej. Paquete Chimo) en pantalla -->
+                                                             <?= esc($datosEmpaque['etiqueta']) ?>
+                                                        </option>
+                                                    <?php endforeach; ?>
+
+                                                </select>
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <input type="number" name="cantidad_empaques[]" class="input is-small has-text-centered" style="font-family: monospace;" min="1" placeholder="0">
+                                        </td>
+                                        
+                                        <td>
+                                            <div class="control has-icons-left">
+                                                <input type="number" step="0.01" name="costo_por_empaque[]" class="input is-small has-text-right" style="font-family: monospace;" min="0" placeholder="0.00">
+                                                <span class="icon is-small is-left has-text-grey-light"><i class="fas fa-dollar-sign"></i></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                <?php endfor; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- 3. BOTÓN DE PROCESAR -->
+                <div class="is-flex is-justify-content-flex-end" style="gap: 1rem;">
+                    <a href="<?= urlAccion('compra', 'tablaCompras') ?>" class="button is-ghost has-text-grey">Cancelar</a>
+                    
+                    <button type="submit" class="button is-link has-text-weight-bold px-6" onclick="return confirm('¿Confirma que los costos y cantidades son correctos? La factura no podrá editarse después.');">
+                        <span class="icon is-small"><i class="fas fa-check-double"></i></span>
+                        <span>Procesar y Actualizar Kardex</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+    </main>
+
+</body>
+</html>

@@ -102,3 +102,169 @@ CREATE TABLE clientes (
     estado TINYINT(1) NOT NULL DEFAULT 1,
     creado_en TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+
+Modulo de INGRESOS DE MERCANCIA:
+
+-- =====================================================================
+-- MODULO DE INGRESOS DE MERCANCIA - Sistema Bonanza (Fase 1)
+-- Tablas: compras, detalle_compras, movimientos, historial_precios
+--
+-- REQUISITOS
+--  * MySQL 8.0.16+ o MariaDB 10.2+ para que los CHECK se apliquen.
+--    (Revisa con: SELECT VERSION();)
+--  * usuarios, proveedores y productos ya deben existir y ser InnoDB.
+--    Si no lo son, las FK fallan con error 1215 / 3780.
+--
+-- IMPORTANTE: ejecuta el script completo y en este orden. Cada clave
+-- foranea (FK) exige que la tabla a la que apunta ya exista.
+-- =====================================================================
+
+USE sistema_bonanza;
+
+-- ---------------------------------------------------------------------
+-- 1) compras  ->  CABECERA: una fila por factura del proveedor
+-- ---------------------------------------------------------------------
+CREATE TABLE compras (
+    id_compra         INT           NOT NULL AUTO_INCREMENT,
+    id_proveedor      INT           NOT NULL,
+    numero_factura    VARCHAR(30)   NOT NULL,
+    fecha_factura     DATE          NOT NULL,   -- fecha del documento
+    fecha_registro    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,  -- cuando se cargo al sistema
+    subtotal          DECIMAL(12,2) NOT NULL,   -- suma de lineas, sin IVA
+    tasa_iva          DECIMAL(5,2)  NOT NULL,   -- tasa vigente ese dia (historico)
+    monto_iva         DECIMAL(12,2) NOT NULL,
+    total             DECIMAL(12,2) NOT NULL,
+    observaciones     VARCHAR(255)  NULL,
+    estado            TINYINT(1)    NOT NULL DEFAULT 1,  -- 1 = registrada, 0 = anulada
+    id_usuario        INT           NOT NULL,   -- quien la registro
+    fecha_anulacion   DATETIME      NULL,       -- las 3 siguientes solo se llenan al anular
+    id_usuario_anula  INT           NULL,
+    motivo_anulacion  VARCHAR(255)  NULL,
+
+    PRIMARY KEY (id_compra),
+
+    -- Un mismo proveedor no puede repetir su numero de factura.
+    CONSTRAINT uq_compras_factura UNIQUE (id_proveedor, numero_factura),
+
+    CONSTRAINT fk_compras_proveedor FOREIGN KEY (id_proveedor)
+        REFERENCES proveedores (id_proveedor) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_compras_usuario FOREIGN KEY (id_usuario)
+        REFERENCES usuarios (id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_compras_usuario_anula FOREIGN KEY (id_usuario_anula)
+        REFERENCES usuarios (id) ON UPDATE CASCADE ON DELETE RESTRICT,
+
+    CONSTRAINT chk_compras_estado CHECK (estado IN (0, 1)),
+    CONSTRAINT chk_compras_montos CHECK (subtotal >= 0 AND monto_iva >= 0 AND total >= 0),
+    CONSTRAINT chk_compras_tasa   CHECK (tasa_iva >= 0 AND tasa_iva <= 100),
+    CONSTRAINT chk_compras_total  CHECK (total = subtotal + monto_iva)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ---------------------------------------------------------------------
+-- 2) detalle_compras  ->  LINEAS: una fila por producto dentro de la factura
+-- ---------------------------------------------------------------------
+CREATE TABLE detalle_compras (
+    id_detalle           INT           NOT NULL AUTO_INCREMENT,
+    id_compra            INT           NOT NULL,
+    id_producto          INT           NOT NULL,
+    tipo_empaque         VARCHAR(30)   NOT NULL,  -- CLAVE del arreglo config/empaques.php (ej: brazo_cigarros)
+    cantidad_empaques    INT           NOT NULL,  -- cuantos brazos, paquetes, etc.
+    unidades_por_empaque INT           NOT NULL,  -- copia historica, sale de config/empaques.php
+    cantidad_unidades    INT           NOT NULL,  -- cantidad_empaques x unidades_por_empaque
+    costo_por_empaque    DECIMAL(10,2) NOT NULL,  -- lo que dice la factura
+    costo_unitario       DECIMAL(12,4) NOT NULL,  -- costo_por_empaque / unidades_por_empaque
+    aplica_iva           TINYINT(1)    NOT NULL,  -- copia historica de productos.aplica_iva
+    subtotal_linea       DECIMAL(12,2) NOT NULL,  -- cantidad_empaques x costo_por_empaque
+
+    PRIMARY KEY (id_detalle),
+
+    -- Un producto aparece una sola vez por factura.
+    -- Si algun proveedor factura el mismo producto en dos lineas, elimina esta restriccion.
+    -- CONSTRAINT uq_detalle_compra_producto UNIQUE (id_compra, id_producto)--
+
+    CONSTRAINT fk_detalle_compra FOREIGN KEY (id_compra)
+        REFERENCES compras (id_compra) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_detalle_producto FOREIGN KEY (id_producto)
+        REFERENCES productos (id_producto) ON UPDATE CASCADE ON DELETE RESTRICT,
+
+    CONSTRAINT chk_det_cant_empaques  CHECK (cantidad_empaques > 0),
+    CONSTRAINT chk_det_unid_empaque   CHECK (unidades_por_empaque > 0),
+    CONSTRAINT chk_det_cant_unidades  CHECK (cantidad_unidades > 0),
+    CONSTRAINT chk_det_costo_empaque  CHECK (costo_por_empaque > 0),
+    CONSTRAINT chk_det_costo_unitario CHECK (costo_unitario > 0),
+    CONSTRAINT chk_det_aplica_iva     CHECK (aplica_iva IN (0, 1)),
+    -- Coherencia entre columnas calculadas:
+    CONSTRAINT chk_det_unidades_calc  CHECK (cantidad_unidades = cantidad_empaques * unidades_por_empaque),
+    CONSTRAINT chk_det_subtotal_calc  CHECK (subtotal_linea = cantidad_empaques * costo_por_empaque)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ---------------------------------------------------------------------
+-- 3) movimientos  ->  KARDEX: cada vez que cambia el stock de un producto
+-- ---------------------------------------------------------------------
+CREATE TABLE movimientos (
+    id_movimiento  INT          NOT NULL AUTO_INCREMENT,
+    id_producto    INT          NOT NULL,
+    tipo           ENUM('entrada','salida') NOT NULL,
+    cantidad       INT          NOT NULL,       -- siempre positiva; 'tipo' indica el signo
+    stock_antes    INT          NOT NULL,
+    stock_despues  INT          NOT NULL,
+    motivo         VARCHAR(255) NULL,           -- ej: "Compra factura 0045"
+    id_compra      INT          NULL,           -- NULL cuando el movimiento no viene de una compra
+    id_usuario     INT          NOT NULL,
+    fecha          TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id_movimiento),
+    INDEX idx_mov_producto_fecha (id_producto, fecha),
+
+    CONSTRAINT fk_mov_producto FOREIGN KEY (id_producto)
+        REFERENCES productos (id_producto) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_mov_compra FOREIGN KEY (id_compra)
+        REFERENCES compras (id_compra) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_mov_usuario FOREIGN KEY (id_usuario)
+        REFERENCES usuarios (id) ON UPDATE CASCADE ON DELETE RESTRICT,
+
+    CONSTRAINT chk_mov_cantidad CHECK (cantidad > 0),
+    CONSTRAINT chk_mov_stock    CHECK (stock_antes >= 0 AND stock_despues >= 0),
+    -- El stock "despues" siempre debe cuadrar con el "antes" y la cantidad:
+    CONSTRAINT chk_mov_coherencia CHECK (
+        (tipo = 'entrada' AND stock_despues = stock_antes + cantidad) OR
+        (tipo = 'salida'  AND stock_despues = stock_antes - cantidad)
+    )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ---------------------------------------------------------------------
+-- 4) historial_precios  ->  foto de los precios cada vez que cambian
+-- ---------------------------------------------------------------------
+CREATE TABLE historial_precios (
+    id_historial            INT           NOT NULL AUTO_INCREMENT,
+    id_producto             INT           NOT NULL,
+    precio_compra_anterior  DECIMAL(10,2) NOT NULL,  -- puede ser 0.00 (tus productos nuevos)
+    precio_compra_nuevo     DECIMAL(10,2) NOT NULL,
+    precio_venta_anterior   DECIMAL(10,2) NOT NULL,
+    precio_venta_nuevo      DECIMAL(10,2) NOT NULL,
+    id_compra               INT           NULL,      -- NULL si el cambio no vino de una compra
+    id_usuario              INT           NOT NULL,
+    fecha                   TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (id_historial),
+    INDEX idx_hist_producto_fecha (id_producto, fecha),
+
+    CONSTRAINT fk_hist_producto FOREIGN KEY (id_producto)
+        REFERENCES productos (id_producto) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_hist_compra FOREIGN KEY (id_compra)
+        REFERENCES compras (id_compra) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_hist_usuario FOREIGN KEY (id_usuario)
+        REFERENCES usuarios (id) ON UPDATE CASCADE ON DELETE RESTRICT,
+
+    CONSTRAINT chk_hist_precios CHECK (
+        precio_compra_anterior >= 0 AND precio_compra_nuevo >= 0 AND
+        precio_venta_anterior  >= 0 AND precio_venta_nuevo  >= 0
+    ),
+    -- Solo se guarda una fila si algo realmente cambio:
+    CONSTRAINT chk_hist_hubo_cambio CHECK (
+        precio_compra_anterior <> precio_compra_nuevo OR
+        precio_venta_anterior  <> precio_venta_nuevo
+    )
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

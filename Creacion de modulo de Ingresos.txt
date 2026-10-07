@@ -1,0 +1,71 @@
+Primera funcionalidad de cada archivo
+Archivo	Primera funcionalidad	Por qué empezar ahí
+config/empaques.php	Ya está hecho	Es la base de las validaciones
+
+app/helpers/seguridad.php	Verificar sesión y rol, y generar y validar el token CSRF	Los usará este módulo y los que vengan, así que conviene que existan antes del controlador
+
+compraModel.php	getProveedoresActivos() y getProductosActivos()	Son lecturas simples y las pruebas en test.php sin depender de nada
+
+compraController.php	crear(): carga los datos, genera el token y muestra la vista	Es el controlador más sencillo y ya conecta modelo con vista
+
+views/compra/crear.php	El formulario, solo HTML y sin guardar todavía	Fija los nombres de los campos que luego validará el controlador
+
+Con esas cinco piezas ves el formulario funcionando con datos reales de la BD. Esa es tu primera meta.
+
+
+Funciones completas del módulo
+
+Modelo (compraModel.php)
+
+Lectura: getProveedoresActivos(), getProductosActivos(), existeFactura(), listar() y contar() (con filtros y paginación), getCabecera() y getLineas().
+Escritura: registrarCompra() (el único con la transacción) y anularCompra() (también transaccional).
+Privados: bloquear productos, insertar cabecera, insertar línea, sumar o restar stock, registrar movimiento y registrar historial de precios.
+
+Controlador (compraController.php)
+
+Públicos: index(), crear(), guardar(), ver() y anular().
+Privados: validarCabecera(), validarLineas() y armarLineas(). Esta última toma las unidades de empaques.php y calcula el subtotal y el costo unitario de cada línea. El IVA y los totales los calcula el modelo, porque aplica_iva debe leerse de la BD.
+
+Vistas
+
+crear.php (formulario), compra.php (listado), ver.php (detalle con el botón de anular) y un parcial para los mensajes de éxito o error.
+Alcance recomendado para TSU
+
+Imprescindible (el núcleo):
+
+Registrar, listar, ver detalle y anular.
+Validación en tres capas, transacción, kardex e historial de precios.
+
+Recomendable, con poco costo extra:
+
+Filtros en el listado (fecha, proveedor, estado) y paginación.
+Mensajes de éxito y error tras cada acción (Post-Redirect-Get).
+Confirmación y motivo obligatorio al anular.
+
+Fase 2 (con JavaScript):
+
+Líneas dinámicas y totales en pantalla.
+Modal para crear presentaciones y sugerencia de la última cantidad usada.
+
+Fuera de este módulo:
+
+Reportes y comparación de costos por proveedor.
+Exportar a PDF o Excel.
+Ajustes de inventario.
+Editar compras: nunca se editan, se anulan.
+
+Con esto tienes un módulo completo y defendible, sin exceso de funciones que no podrías explicar línea por línea.
+
+Una decisión que debes tomar ahora
+
+Como el JavaScript viene después, tu formulario de la fase 1 no puede agregar líneas dinámicamente. La solución más simple es mostrar un número fijo de filas (por ejemplo 8 o 10) y que el controlador ignore las filas completamente vacías. Una fila a medias, con producto pero sin cantidad, se rechaza. Esto cambia la validación del controlador, y conviene tenerlo claro antes de escribirla. Cuando llegue la fase 2, el JS solo reemplazará esas filas fijas por un botón de "agregar línea", sin tocar el servidor.
+
+Orden de trabajo
+Helpers de seguridad.
+Modelo: los dos métodos de lectura.
+Controlador crear(), router y vista crear.php.
+Registrar (guardar() con la transacción).
+Listado, detalle y anular.
+Pruebas negativas y limpieza.
+
+Empieza por el punto 1 y 2, y pásame lo que tengas escrito. Si me envías antes tu productoModel.php, te ayudo a mantener el mismo estilo.
