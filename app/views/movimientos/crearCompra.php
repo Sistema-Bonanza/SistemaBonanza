@@ -37,7 +37,7 @@
             </div>
 
             <!-- FORMULARIO PRINCIPAL -->
-            <form action="<?= urlAccion('compra', 'guardarCompra') ?>" method="POST">
+            <form action="<?= urlAccion('movimiento', 'guardarCompra') ?>" method="POST">
                 <?= campoCsrf() ?>
 
                 <!-- 1. DATOS DE LA FACTURA -->
@@ -108,7 +108,7 @@
                                     <th style="width: 35%;">Producto</th>
                                     <th>Empaque</th>
                                     <th class="has-text-centered" style="width: 120px;">Cant.</th>
-                                    <th class="has-text-right" style="width: 180px;">Costo Factura ($)</th>
+                                    <th class="has-text-right" style="width: 180px;">Precio Unitario ($)</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -166,7 +166,7 @@
 
                 <!-- 3. BOTÓN DE PROCESAR -->
                 <div class="is-flex is-justify-content-flex-end" style="gap: 1rem;">
-                    <a href="<?= urlAccion('compra', 'tablaCompras') ?>" class="button is-ghost has-text-grey">Cancelar</a>
+                    <a href="<?= urlAccion('movimiento', 'tablaMovimientos') ?>" class="button is-ghost has-text-grey">Cancelar</a>
                     
                     <button type="submit" class="button is-link has-text-weight-bold px-6" onclick="return confirm('¿Confirma que los costos y cantidades son correctos? La factura no podrá editarse después.');">
                         <span class="icon is-small"><i class="fas fa-check-double"></i></span>

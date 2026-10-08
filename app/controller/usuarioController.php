@@ -36,7 +36,7 @@ require_once __DIR__.'/../model/usuarioModel.php';
     if(!$usuario){
         $_SESSION['error'] = "Usuario no encontrado";
         header("Location: index.php?controller=usuario&action=formusuario");
-        exit;
+        exit;id;
     }
     
     require_once '../app/views/usuario/editar.php';

@@ -10,29 +10,32 @@ Class movimientoModel {
 //==================================================================================
         //OBTENER TODOS LOS PRODUCTOS
     public function obtenerCompras(){
-        try{
+    try{
+        $sql = "SELECT
+                    c.id_compra, 
+                    c.numero_factura, 
+                    c.fecha_factura, 
+                    c.fecha_registro, 
+                    c.total, 
+                    c.estado,
+                    p.razon_social AS nombre_proveedor, 
+                    p.rif AS rif_proveedor, 
+                    u.username AS nombre_usuario
+                FROM compras c
+                INNER JOIN proveedores p ON c.id_proveedor = p.id_proveedor
+                INNER JOIN usuarios u ON c.id_usuario = u.id
+                ORDER BY c.fecha_registro DESC";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-            $sql = "SELECT
-                        c.id_compra, 
-                        c.numero_factura, 
-                        c.fecha_factura, 
-                        c.total, 
-                        c.estado,
-                        p.nombre AS nombre_proveedor, 
-                        u.usuario AS nombre_usuario
-                    FROM compras c
-                    INNER JOIN proveedores p ON c.id_proveedor = p.id_proveedor
-                    INNER JOIN usuarios u ON c.id_usuario = u.id
-                    ORDER BY c.fecha_registro DESC";
-            
-            $stmt =$this->pdo->prepare($sql);$stmt->execute();
-            return $stmt->fetchAll(PDO::FETCH_ASSOC); // RETORNA UN ARREGLO ASOCIATIVO CON TODOS LOS PRODUCTOS OBTENIDOS DE LA CONSULTA.
-
-        } catch(PDOException $e){
-            error_log("Error en obtenerCompras: " . $e->getMessage());
-            return [];
-        }
-    } 
+    } catch(PDOException $e) {
+        // En producción (cuando el sistema esté listo), esto debe ser solo un return [];
+        // Por ahora lo dejamos con die() para cazar errores de MySQL.
+        die("Error en obtenerCompras: " . $e->getMessage());
+    }
+}
     //==================================================================================
 
     public function registrarCompraCompleta($cabecera, $detalles) {
@@ -63,7 +66,7 @@ Class movimientoModel {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmtDetalle = $this->pdo->prepare($sqlDetalle);
 
-        $sqlStockActual = "SELECT stock FROM productos WHERE id_producto = ? FOR UPDATE";
+        $sqlStockActual = "SELECT stock_actual FROM productos WHERE id_producto = ? FOR UPDATE";
         $stmtStockActual = $this->pdo->prepare($sqlStockActual);
 
         $sqlKardex = "INSERT INTO movimientos 
@@ -71,7 +74,7 @@ Class movimientoModel {
             VALUES (?, 'entrada', ?, ?, ?, ?, ?, ?)";
         $stmtKardex = $this->pdo->prepare($sqlKardex);
 
-        $sqlActualizarStock = "UPDATE productos SET stock = ? WHERE id_producto = ?";
+        $sqlActualizarStock = "UPDATE productos SET stock_actual = ? WHERE id_producto = ?";
         $stmtActualizarStock = $this->pdo->prepare($sqlActualizarStock);
 
         // 3. Ejecutar ciclo por cada producto válido
@@ -92,7 +95,7 @@ Class movimientoModel {
 
             $stmtStockActual->execute([$det['id_producto']]);
             $filaProd = $stmtStockActual->fetch(PDO::FETCH_ASSOC);
-            $stock_antes = $filaProd['stock'] ?? 0;
+            $stock_antes = $filaProd['stock_actual'] ?? 0;
             $stock_despues = $stock_antes + $det['cantidad_unidades'];
 
             $motivo = "Compra Factura #" . $cabecera['numero_factura'];
@@ -112,11 +115,15 @@ Class movimientoModel {
         $this->pdo->commit();
         return true;
 
-    } catch (PDOException $e) {
-        $this->pdo->rollBack();
-        error_log("Fallo en registrarCompraCompleta: " . $e->getMessage());
-        return false;
+            } catch (PDOException $e) {
+            // 3. REVERTIR TRANSACCIÓN
+            $this->pdo->rollBack();
+            
+            // ¡ESTA ES LA LÍNEA NUEVA! Matamos la ejecución y mostramos el error exacto de MySQL:
+            die("<h1>ERROR SQL DETECTADO:</h1> <p>" . $e->getMessage() . "</p>");
+            
+            // error_log("Fallo en registrarCompraCompleta: " . $e->getMessage());
+            // return false;
+        }
     }
-}
-
-}
+}   

@@ -31,6 +31,9 @@ class MovimientoController {
         // 1. Validamos la session 
         exigirSesion();
 
+        //Obtenemos todas las compras desde el modelo
+        $compras =$this->movimientoModel->obtenerCompras();
+
         require_once __DIR__ . '/../views/movimientos/movimientos.php';
     }
 
@@ -67,7 +70,7 @@ class MovimientoController {
             $fecha_factura = trim($_POST['fecha_factura']);
             
             // REVISA ESTO: Cambia 'id_usuario' por el nombre real de tu variable de sesión
-            $id_usuario = $_SESSION['id_usuario']; 
+            $id_usuario = $_SESSION['user_id']; 
 
             $tasa_iva_global = 16.00;
             $subtotal_factura = 0;
