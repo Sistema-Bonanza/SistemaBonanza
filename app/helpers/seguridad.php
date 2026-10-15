@@ -386,21 +386,29 @@ function validarFecha($valor, bool $permitirFutura = false, int $maxAniosAtras =
     if (!is_string($valor)) {
         return null;
     }
-    // El "!" pone la hora en 00:00:00, así se compara solo la fecha.
-    $fecha = DateTime::createFromFormat('!Y-m-d', $valor);
-    // createFromFormat "corrige" fechas imposibles (31 de febrero pasa a marzo).
-    // Si al reescribirla no coincide con el original, la fecha era falsa.
+    // Fijamos la zona horaria para que "hoy" sea estrictamente el día local
+    $zona = new DateTimeZone('America/Caracas');
+
+    // Le pasamos $zona como tercer parámetro
+    $fecha = DateTime::createFromFormat('!Y-m-d', $valor, $zona);
+    
     if ($fecha === false || $fecha->format('Y-m-d') !== $valor) {
         return null;
     }
-    $hoy = new DateTime('today');
+    
+    // Le pasamos $zona al calcular el día actual
+    $hoy = new DateTime('today', $zona);
+    
     if (!$permitirFutura && $fecha > $hoy) {
         return null;
     }
-    $limite = (new DateTime('today'))->modify('-' . $maxAniosAtras . ' years');
+    
+    // Le pasamos $zona al calcular el límite antiguo
+    $limite = (new DateTime('today', $zona))->modify('-' . $maxAniosAtras . ' years');
     if ($fecha < $limite) {
         return null;
     }
+    
     return $valor;
 }
 

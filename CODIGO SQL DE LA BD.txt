@@ -268,3 +268,30 @@ CREATE TABLE historial_precios (
         precio_venta_anterior  <> precio_venta_nuevo
     )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+//=======================================================================================================================00
+
+-- 1. Crear la tabla de presentaciones (excepciones)
+CREATE TABLE presentaciones (
+    id_presentacion INT         NOT NULL AUTO_INCREMENT,
+    id_producto     INT         NOT NULL,
+    etiqueta        VARCHAR(30) NOT NULL,
+    unidades        INT         NOT NULL,
+    estado          TINYINT(1)  NOT NULL DEFAULT 1,
+    id_usuario      INT         NOT NULL,
+    fecha_creacion  TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id_presentacion),
+    CONSTRAINT uq_present_producto_etiqueta UNIQUE (id_producto, etiqueta),
+    CONSTRAINT fk_present_producto FOREIGN KEY (id_producto)
+        REFERENCES productos (id_producto) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_present_usuario FOREIGN KEY (id_usuario)
+        REFERENCES usuarios (id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT chk_present_unidades CHECK (unidades > 0 AND unidades <= 1000),
+    CONSTRAINT chk_present_estado CHECK (estado IN (0, 1))
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 2. Conectar las compras con las presentaciones
+ALTER TABLE detalle_compras
+    ADD COLUMN id_presentacion INT NULL AFTER id_producto,
+    ADD CONSTRAINT fk_detalle_presentacion FOREIGN KEY (id_presentacion)
+        REFERENCES presentaciones (id_presentacion) ON UPDATE CASCADE ON DELETE RESTRICT;

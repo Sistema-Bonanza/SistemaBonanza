@@ -15,6 +15,7 @@
 
     <!-- SIDEBAR -->
     <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
+    <?php require_once __DIR__ . '/../../helpers/seguridad.php'; ?>
 
     <!-- CONTENIDO PRINCIPAL -->
     <main class="main-content"  style="width: 100%; flex-grow: 1; max-width: 100%; overflow-x: hidden; padding: 30px;">
@@ -36,9 +37,11 @@
                 </div>
             </div>
 
-            <!-- FORMULARIO PRINCIPAL -->
-            <form action="<?= urlAccion('movimiento', 'guardarCompra') ?>" method="POST">
-                <?= campoCsrf() ?>
+            <!-- A12: MOSTRAR MENSAJES FLASH ARRIBA DEL FORMULARIO -->
+            <?php echo mostrarFlash(); ?>
+
+            <form action="<?php echo esc(urlAccion('movimiento', 'guardarCompra')); ?>" method="POST">
+                <?php echo campoCsrf(); ?>
 
                 <!-- 1. DATOS DE LA FACTURA -->
                 <div class="box mb-6">
@@ -51,10 +54,15 @@
                                 <label class="label has-text-grey">Proveedor</label>
                                 <div class="control has-icons-left is-expanded">
                                     <div class="select is-fullwidth">
-                                        <select name="id_proveedor" required class="has-text-weight-semibold">
+                                        <select name="id_proveedor" required class="has-text-weight-semibold" id="<?= esc('id_proveedor') ?>">
                                             <option value="">Seleccione un proveedor...</option>
-                                            <?php foreach($proveedores as $prov): ?>
-                                                <option value="<?= $prov['id_proveedor'] ?>">
+                                            <?php 
+                                            // A12: Repoblar select
+                                            $provSeleccionado = recuperarFormulario('id_proveedor');
+                                            foreach($proveedores as $prov): 
+                                                $selected = ($provSeleccionado == $prov['id_proveedor']) ? 'selected' : '';
+                                            ?>
+                                                <option value="<?= esc($prov['id_proveedor']) ?>" <?= $selected ?>>
                                                     <?= esc($prov['rif'] . ' - ' . $prov['razon_social']) ?>
                                                 </option>
                                             <?php endforeach; ?>
@@ -70,7 +78,8 @@
                             <div class="field">
                                 <label class="label has-text-grey">N° de Factura</label>
                                 <div class="control has-icons-left">
-                                    <input type="text" name="numero_factura" class="input has-text-weight-bold" style="font-family: monospace;" required placeholder="Ej: 001-54321">
+                                    <!-- A12: maxlength y recuperar valor -->
+                                    <input type="text" name="numero_factura" id="<?= esc('numero_factura') ?>" class="input has-text-weight-bold" style="font-family: monospace;" required placeholder="Ej: 001-54321" maxlength="30" value="<?= esc(recuperarFormulario('numero_factura')) ?>">
                                     <span class="icon is-small is-left has-text-grey-light"><i class="fas fa-hashtag"></i></span>
                                 </div>
                             </div>
@@ -81,7 +90,12 @@
                             <div class="field">
                                 <label class="label has-text-grey">Fecha de Emisión</label>
                                 <div class="control has-icons-left">
-                                    <input type="date" name="fecha_factura" class="input" style="font-family: monospace;" required value="<?= date('Y-m-d') ?>">
+                                    <!-- A12: max igual a hoy y recuperar valor -->
+                                    <?php 
+                                        $fechaHoy = date('Y-m-d');
+                                        $fechaValue = recuperarFormulario('fecha_factura') ?: $fechaHoy;
+                                    ?>
+                                    <input type="date" name="fecha_factura" id="<?= esc('fecha_factura') ?>" class="input" style="font-family: monospace;" required value="<?= esc($fechaValue) ?>" max="<?= $fechaHoy ?>">
                                     <span class="icon is-small is-left has-text-grey-light"><i class="fas fa-calendar"></i></span>
                                 </div>
                             </div>
@@ -108,20 +122,35 @@
                                     <th style="width: 35%;">Producto</th>
                                     <th>Empaque</th>
                                     <th class="has-text-centered" style="width: 120px;">Cant.</th>
-                                    <th class="has-text-right" style="width: 180px;">Precio Unitario ($)</th>
+                                    <!-- A12: Renombrar columna -->
+                                    <th class="has-text-right" style="width: 180px;">Costo por empaque ($)</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <?php for ($i = 0; $i < 8; $i++): ?>
+                                <?php 
+                                    // A12: Recuperar arreglos del detalle para repoblar
+                                    $prodsPost = recuperarFormulario('id_producto') ?: [];
+                                    $empaquesPost = recuperarFormulario('tipo_empaque') ?: [];
+                                    $cantsPost = recuperarFormulario('cantidad_empaques') ?: [];
+                                    $costosPost = recuperarFormulario('costo_por_empaque') ?: [];
+                                
+                                    for ($i = 0; $i < 8; $i++): 
+                                        $prodVal = isset($prodsPost[$i]) ? $prodsPost[$i] : '';
+                                        $empVal = isset($empaquesPost[$i]) ? $empaquesPost[$i] : '';
+                                        $cantVal = isset($cantsPost[$i]) ? $cantsPost[$i] : '';
+                                        $costoVal = isset($costosPost[$i]) ? $costosPost[$i] : '';
+                                ?>
                                     <tr>
                                         <td class="has-text-centered has-text-grey-light has-text-weight-bold"><?= $i + 1 ?></td>
                                         
                                         <td>
                                             <div class="select is-small is-fullwidth">
-                                                <select name="id_producto[]">
+                                                <select name="id_producto[]" id="<?= esc('id_producto_' . $i) ?>">
                                                     <option value="">-- Dejar vacío si no se usa --</option>
-                                                    <?php foreach($productos as $prod): ?>
-                                                        <option value="<?= $prod['id_producto'] ?>">
+                                                    <?php foreach($productos as $prod): 
+                                                        $selected = ($prodVal == $prod['id_producto']) ? 'selected' : '';
+                                                    ?>
+                                                        <option value="<?= esc($prod['id_producto']) ?>" <?= $selected ?>>
                                                             <?= esc($prod['codigo'] . ' - ' . $prod['nombre']) ?>
                                                         </option>
                                                     <?php endforeach; ?>
@@ -131,15 +160,14 @@
                                         
                                         <td>
                                             <div class="select is-small is-fullwidth">
-                                                <select name="tipo_empaque[]">
+                                                <select name="tipo_empaque[]" id="<?= esc('tipo_empaque_' . $i) ?>">
                                                     <option value ="">--- Selecciones ---</option>
-                                                    <?php foreach($empaques as $clave => $datosEmpaque): ?>
-
-                                                        <!-- Guardamos la 'clave' (ej. paquete_chimo) en la base de datos -->
-                                                        <option value="<?=  esc($clave) ?>">
-
-                                                            <!-- Imprimimos solo la 'etiqueta' (ej. Paquete Chimo) en pantalla -->
-                                                             <?= esc($datosEmpaque['etiqueta']) ?>
+                                                    <?php foreach($empaques as $clave => $datosEmpaque): 
+                                                        $selected = ($empVal == $clave) ? 'selected' : '';
+                                                    ?>
+                                                        <option value="<?= esc($clave) ?>" <?= $selected ?>>
+                                                            <!-- A12: Mostrar unidades en el texto del select -->
+                                                             <?= esc($datosEmpaque['etiqueta'] . ' (' . $datosEmpaque['unidades'] . ' uds)') ?>
                                                         </option>
                                                     <?php endforeach; ?>
 
@@ -148,12 +176,14 @@
                                         </td>
 
                                         <td>
-                                            <input type="number" name="cantidad_empaques[]" class="input is-small has-text-centered" style="font-family: monospace;" min="1" placeholder="0">
+                                            <!-- A12: step 1, max, y recuperar valor -->
+                                            <input type="number" name="cantidad_empaques[]" id="<?= esc('cantidad_empaques_' . $i) ?>" class="input is-small has-text-centered" style="font-family: monospace;" min="1" step="1" max="1000" placeholder="0" value="<?= esc($cantVal) ?>">
                                         </td>
                                         
                                         <td>
                                             <div class="control has-icons-left">
-                                                <input type="number" step="0.01" name="costo_por_empaque[]" class="input is-small has-text-right" style="font-family: monospace;" min="0" placeholder="0.00">
+                                                <!-- A12: min 0.01 y recuperar valor -->
+                                                <input type="number" step="0.01" name="costo_por_empaque[]" id="<?= esc('costo_por_empaque_' . $i) ?>" class="input is-small has-text-right" style="font-family: monospace;" min="0.01" placeholder="0.00" value="<?= esc($costoVal) ?>">
                                                 <span class="icon is-small is-left has-text-grey-light"><i class="fas fa-dollar-sign"></i></span>
                                             </div>
                                         </td>

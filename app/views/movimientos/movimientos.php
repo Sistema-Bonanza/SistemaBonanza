@@ -14,7 +14,7 @@
 
     <body>
 
-            <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
+        <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
 
         <!-- CONTENIDO PRINCIPAL -->
         <main class="main-content" style="width: 100%; flex-grow: 1; max-width: 100%; overflow-x: hidden; padding: 30px;">
@@ -29,24 +29,30 @@
                     </div>
                     <div class="level-right">
                         <div class="buttons">
-                            <a href="index.php?controller=movimiento&action=crearcompra" class="button is-link has-text-weight-bold">
+                            <!-- A13: Usar urlAccion en lugar de la URL escrita a mano -->
+                            <a href="<?= esc(urlAccion('movimiento', 'crearcompra')) ?>" class="button is-link has-text-weight-bold">
                                 <span class="icon is-small"><i class="fas fa-truck-ramp-box"></i></span>
                                 <span>Registrar Compra</span>
                             </a>
-                            <a href="#" class="button is-success has-text-weight-bold">
+                            <!-- A13: Decorativo / Próximamente -->
+                            <button class="button is-success has-text-weight-bold" disabled title="Próximamente">
                                 <span class="icon is-small"><i class="fas fa-cart-shopping"></i></span>
-                                <span>Registrar Venta</span>
-                            </a>
+                                <span>Registrar Venta (Pronto)</span>
+                            </button>
                         </div>
                     </div>
                 </div>
 
+                <!-- A13: Mostrar el mensaje Flash para confirmar el registro -->
+                <?php echo mostrarFlash(); ?>
+
                 <!-- TARJETAS DE INDICADORES (KPIs) -->
                 <div class="columns is-multiline mb-5">
+                    <!-- A13: KPIs marcados como DEMO -->
                     <div class="column is-4">
                         <div class="box is-flex is-align-items-center is-justify-content-space-between" style="border-left: 4px solid #3e8ed0; height: 100%;">
                             <div>
-                                <p class="heading has-text-grey has-text-weight-bold mb-1">Entradas (Mes)</p>
+                                <p class="heading has-text-grey has-text-weight-bold mb-1">Entradas (Mes) <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span></p>
                                 <p class="title is-3 mb-0">1,250 <span class="is-size-6 has-text-grey has-text-weight-normal">unds.</span></p>
                             </div>
                             <div class="has-background-info-light has-text-info is-flex is-align-items-center is-justify-content-center" style="width: 48px; height: 48px; border-radius: 12px; font-size: 1.5rem;">
@@ -58,7 +64,7 @@
                     <div class="column is-4">
                         <div class="box is-flex is-align-items-center is-justify-content-space-between" style="border-left: 4px solid #48c774; height: 100%;">
                             <div>
-                                <p class="heading has-text-grey has-text-weight-bold mb-1">Salidas (Mes)</p>
+                                <p class="heading has-text-grey has-text-weight-bold mb-1">Salidas (Mes) <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span></p>
                                 <p class="title is-3 mb-0">840 <span class="is-size-6 has-text-grey has-text-weight-normal">unds.</span></p>
                             </div>
                             <div class="has-background-success-light has-text-success is-flex is-align-items-center is-justify-content-center" style="width: 48px; height: 48px; border-radius: 12px; font-size: 1.5rem;">
@@ -70,7 +76,7 @@
                     <div class="column is-4">
                         <div class="box is-flex is-align-items-center is-justify-content-space-between" style="border-left: 4px solid #f14668; height: 100%;">
                             <div>
-                                <p class="heading has-text-grey has-text-weight-bold mb-1">Stock Crítico</p>
+                                <p class="heading has-text-grey has-text-weight-bold mb-1">Stock Crítico <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span></p>
                                 <p class="title is-3 has-text-danger mb-0">8 <span class="is-size-6 has-text-danger-light has-text-weight-normal">SKUs</span></p>
                                 <p class="is-size-7 has-text-danger mt-1"><i class="fas fa-triangle-exclamation"></i> Requieren reabastecimiento</p>
                             </div>
@@ -82,21 +88,20 @@
                 </div>
 
                 <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+                <!-- A13: Deshabilitados y marcados como Próximamente -->
                 <div class="box mb-5">
                     <div class="columns is-vcentered mb-0">
                         <div class="column is-7 pb-0 pt-0">
                             <div class="control has-icons-left">
-                                <input class="input" placeholder="Buscar N° de Documento o Usuario..." type="text">
+                                <input class="input" placeholder="Buscar N° de Documento o Usuario... (Próximamente)" type="text" disabled>
                                 <span class="icon is-small is-left has-text-grey-light"><i class="fas fa-search"></i></span>
                             </div>
                         </div>
                         <div class="column is-5 pb-0 pt-0">
                             <div class="control has-icons-left is-expanded">
                                 <div class="select is-fullwidth">
-                                    <select>
-                                        <option selected>Rango: Últimos 30 días</option>
-                                        <option>Hoy</option>
-                                        <option>Esta Semana</option>
+                                    <select disabled>
+                                        <option selected>Rango: Últimos 30 días (Pronto)</option>
                                     </select>
                                 </div>
                                 <span class="icon is-small is-left has-text-grey-light"><i class="fas fa-calendar-alt"></i></span>
@@ -110,8 +115,9 @@
                     <div class="tabs is-boxed mb-0 pt-3 px-4 has-background-white-ter">
                         <ul>
                             <li class="is-active"><a><span class="icon is-small"><i class="fas fa-list"></i></span><span>Todas</span></a></li>
-                            <li><a class="has-text-info"><span class="icon is-small"><i class="fas fa-arrow-down"></i></span><span>Entradas</span></a></li>
-                            <li><a class="has-text-success"><span class="icon is-small"><i class="fas fa-arrow-up"></i></span><span>Salidas</span></a></li>
+                            <!-- A13: Deshabilitadas -->
+                            <li><a class="has-text-info has-text-grey-light" title="Próximamente"><span class="icon is-small"><i class="fas fa-arrow-down"></i></span><span>Entradas</span></a></li>
+                            <li><a class="has-text-success has-text-grey-light" title="Próximamente"><span class="icon is-small"><i class="fas fa-arrow-up"></i></span><span>Salidas</span></a></li>
                         </ul>
                     </div>
 
@@ -120,9 +126,10 @@
                             <h2 class="has-text-weight-bold is-size-5">Resumen de Operaciones</h2>
                         </div>
                         <div class="level-right">
-                            <button class="button is-small is-light">
+                            <!-- A13: Botón deshabilitado -->
+                            <button class="button is-small is-light" disabled title="Próximamente">
                                 <span class="icon is-small has-text-danger"><i class="fas fa-file-pdf"></i></span>
-                                <span>Exportar PDF</span>
+                                <span>Exportar PDF (Pronto)</span>
                             </button>
                         </div>
                     </div>
@@ -134,63 +141,73 @@
                                     <th>Fecha / Hora</th>
                                     <th>Operación</th>
                                     <th>Documento / Ref.</th>
-                                    <th>Entidad (Prov. / Cliente)</th>
+                                    <th>Entidad / Usuario</th>
                                     <th class="has-text-centered">Monto Total</th>
                                     <th class="has-text-right">Detalles</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- Ciclo Foreach que recorre las compras -->
                                 <?php if(!empty($compras)): ?>
+                                    <?php 
+                                    // A13: Arreglo de meses en español
+                                    $meses_es = ['Jan'=>'Ene', 'Feb'=>'Feb', 'Mar'=>'Mar', 'Apr'=>'Abr', 'May'=>'May', 'Jun'=>'Jun', 'Jul'=>'Jul', 'Aug'=>'Ago', 'Sep'=>'Sep', 'Oct'=>'Oct', 'Nov'=>'Nov', 'Dec'=>'Dic'];
+                                    ?>
                                     <?php foreach ($compras as $compra): ?>
                                     <tr>
                                         <!-- Columna 1: Fecha y Hora -->
                                          <td class="has-text-weight-bold">
                                             <?php 
-                                                //FORMATEAMOS LA FECHA DE REGISTRO (EJ: 08 OCT 2026)
+                                                // A13: FORMATO CON MES EN ESPAÑOL
                                                 $fecha = new DateTime($compra['fecha_registro']);
-                                               echo $fecha->format('d M Y');
+                                                $mesIngles = $fecha->format('M');
+                                                echo $fecha->format('d ') . $meses_es[$mesIngles] . $fecha->format(' Y');
                                             ?>
                                             <br> 
-
-                                            <!--FORMATO DE HORA EN GRIS Y PEQUEÑO (EJ: 11:50 AM)-->
+                                            <!-- A13: SE AGREGA EL ECHO FALTANTE -->
                                             <span class= "has-text-grey is-size-7 has-text-weight-normal">
-                                                <?php  $fecha->format ('h:i A')?>
+                                                <?php echo $fecha->format('h:i A'); ?>
                                             </span>
                                          </td>
 
-
                                         <!--COLUMNA 2: OPERACION -->
                                         <td>
-                                            <span class= tag is-info is-light has-text-weight-bold>COMPRA</span>
+                                            <!-- A13: COMILLAS AGREGADAS A LA CLASE -->
+                                            <span class="tag is-info is-light has-text-weight-bold">COMPRA</span>
+                                            
+                                            <!-- A13: MOSTRAR ESTADO (ANULADA) -->
+                                            <?php if(isset($compra['estado']) && $compra['estado'] == 0): ?>
+                                                <br><span class="tag is-danger is-light is-small mt-1" style="font-size: 0.65rem;">ANULADA</span>
+                                            <?php endif; ?>
                                         </td> 
 
                                         <!--COLUMNA 3 DOCUMENTO / REF -->
                                             <td class="has-text-weight-bold">
-                                                <a href=#>#FACTURA-<?= esc($compra['numero_factura']) ?></a>
+                                                <a href="<?= esc(urlAccion('movimiento', 'verDetalleCompra', ['id' => $compra['id_compra']])) ?>">#FACTURA-<?= esc($compra['numero_factura']) ?></a>
                                             </td>
 
-
-                                        <!--COLUMNA 4: ENTIDAD (PROVEEDOR / CLIENTE) -->
+                                        <!--COLUMNA 4: ENTIDAD (PROVEEDOR / CLIENTE) Y USUARIO -->
                                         <td class="has-text-weight-bold">
                                             <?= esc($compra['nombre_proveedor']) ?>
                                             <br>
-                                            <!--RIF EN GRIS Y PEQUEÑO-->
                                             <span class="has-text-grey is-size-7 has-text-weight-normal">
                                                 <?= esc($compra['rif_proveedor'] ?? 'SIN RIF') ?>
                                             </span>
+                                            <br>
+                                            <!-- A13: MOSTRAR NOMBRE DE USUARIO -->
+                                            <span class="has-text-grey-light is-size-7 has-text-weight-normal">
+                                                <i class="fas fa-user-circle"></i> <?= esc($compra['nombre_usuario'] ?? 'Sistema') ?>
+                                            </span>
                                         </td>
 
-
                                         <!--COLUMNA 5: MONTO-->
-                                        <td class="has-text-weight-bold is-size">
+                                        <td class="has-text-weight-bold is-size has-text-centered">
                                             $<?= number_format($compra['total'], 2, ',', '.') ?>
                                         </td>
 
-                                        <!--COLUMNA 6 DETALLES (BOTON DE VER FACTURA-->
-                                        <td> 
-                                            <!-- Aquí luego pondremos el enlace para ver el detalle de la factura -->
-                                            <a href="<?= urlAccion('movimiento', 'verDetalleCompra') ?>&id=<?= $compra['id_compra'] ?>" class="button is-small is-light">
+                                        <!--COLUMNA 6 DETALLES -->
+                                        <td class="has-text-right"> 
+                                            <!-- A13: USO CORRECTO DE URLACCION CON ARREGLO DE PARÁMETROS -->
+                                            <a href="<?= esc(urlAccion('movimiento', 'verDetalleCompra', ['id' => $compra['id_compra']])) ?>" class="button is-small is-light">
                                                 <span class="icon">
                                                     <i class="fas fa-eye"></i>
                                                 </span>
