@@ -12,8 +12,6 @@
         <a href="index.php?controller=cliente&action=tablaClientes"><i>👥</i> Clientes</a>
         <a href="index.php?controller=proveedor&action=tablaProveedores"><i>👥</i> Proveedores</a>
         <a href="index.php?controller=usuario&action=formusuario"><i>👤</i> Usuarios</a>
-        <a href="#"><i>💲</i> Control de Precios</a>
-        <a href="index.php?controller=Presentacion&action=menuConfig"><i>⚙️</i> Configuración</a>
         <a href="index.php?controller=precio&action=tablaPrecios"><i>💲</i> Control de Precios</a>
         <a href="#"><i>⚙️</i> Configuración</a>
     </nav>
