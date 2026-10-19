@@ -182,7 +182,15 @@
 
                                         <!--COLUMNA 3 DOCUMENTO / REF -->
                                             <td class="has-text-weight-bold">
-                                                <a href="<?= esc(urlAccion('movimiento', 'verDetalleCompra', ['id' => $compra['id_compra']])) ?>">#FACTURA-<?= esc($compra['numero_factura']) ?></a>
+                                                <!-- Número de Operación de la Base de Datos -->
+                                                <a href="<?= esc(urlAccion('movimiento', 'verDetalleCompra', ['id' => $compra['id_compra']])) ?>" class="has-text-success">
+                                                    <?= esc($compra['numero_operacion']) ?>
+                                                </a>
+                                                <br>
+                                                <!-- Referencia Física del Proveedor -->
+                                                <span class="has-text-grey is-size-7 has-text-weight-normal">
+                                                    Ref: Factura <?= esc($compra['numero_factura']) ?>
+                                                </span>
                                             </td>
 
                                         <!--COLUMNA 4: ENTIDAD (PROVEEDOR / CLIENTE) Y USUARIO -->

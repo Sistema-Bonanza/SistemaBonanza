@@ -159,19 +159,27 @@
                                         </td>
                                         
                                         <td>
-                                            <div class="select is-small is-fullwidth">
-                                                <select name="tipo_empaque[]" id="<?= esc('tipo_empaque_' . $i) ?>">
-                                                    <option value ="">--- Selecciones ---</option>
-                                                    <?php foreach($empaques as $clave => $datosEmpaque): 
-                                                        $selected = ($empVal == $clave) ? 'selected' : '';
-                                                    ?>
-                                                        <option value="<?= esc($clave) ?>" <?= $selected ?>>
-                                                            <!-- A12: Mostrar unidades en el texto del select -->
-                                                             <?= esc($datosEmpaque['etiqueta'] . ' (' . $datosEmpaque['unidades'] . ' uds)') ?>
-                                                        </option>
-                                                    <?php endforeach; ?>
-
-                                                </select>
+                                            <div class="field has-addons">
+                                                <div class="control is-expanded">
+                                                    <div class="select is-small is-fullwidth">
+                                                        <select name="tipo_empaque[]" id="<?= esc('tipo_empaque_' . $i) ?>">
+                                                            <option value ="">--- Selecciones ---</option>
+                                                            <?php foreach($empaques as $emp): 
+                                                                $selected = ($empVal == $emp['id_presentacion']) ? 'selected' : '';
+                                                            ?>
+                                                                <option value="<?= esc($emp['id_presentacion']) ?>" <?= $selected ?>>
+                                                                    <!-- Imprimimos: Caja (12 uds) - Nombre del Producto -->
+                                                                    <?= esc($emp['etiqueta'] . ' (' . $emp['unidades'] . ' uds) - ' . $emp['nombre_producto']) ?>
+                                                                </option>
+                                                            <?php endforeach; ?>
+                                                        </select>
+                                                    </div>
+                                                </div>
+                                                <div class="control">
+                                                    <button type="button" class="button is-info is-light is-small" onclick="abrirModalPresentacion()" title="Añadir nueva presentación">
+                                                        <i class="fas fa-plus"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </td>
 
@@ -208,5 +216,148 @@
         </div>
     </main>
 
+    <!-- ======================================================= -->
+    <!-- MODAL PARA CREAR NUEVA PRESENTACIÓN (EMPAQUE) -->
+    <!-- ======================================================= -->
+    <div class="modal" id="modalPresentacion">
+    <div class="modal-background" onclick="cerrarModalPresentacion()"></div>
+    <div class="modal-card">
+        <header class="modal-card-head">
+        <p class="modal-card-title">Registrar Nueva Presentación</p>
+        <button class="delete" aria-label="close" type="button" onclick="cerrarModalPresentacion()"></button>
+        </header>
+        <section class="modal-card-body">
+        <!-- Formulario AJAX -->
+        <form id="formNuevaPresentacion">
+        <!-- El token de seguridad es vital para AJAX también -->
+        <input type="hidden" name="csrf_token" id="csrf_token_modal" value="<?= esc($_SESSION['csrf_token'] ?? '') ?>">
+        
+        <div class="columns is-multiline">
+            <div class="column is-12">
+                <div class="field">
+                    <label class="label">Producto al que pertenece</label>
+                    <div class="control">
+                        <div class="select is-fullwidth">
+                            <!-- Le quitamos el 'required' -->
+                            <select name="id_producto" id="producto_presentacion">
+                                <!-- Opción principal vacía -->
+                                <option value="">-- ★ ESTÁNDAR GLOBAL (Aplica a todos) ★ --</option>
+                                <?php foreach($productos as $prod): ?>
+                                    <option value="<?= esc($prod['id_producto']) ?>">
+                                        <?= esc($prod['codigo'] . ' - ' . $prod['nombre']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="column is-8">
+                <div class="field">
+                    <label class="label">Nombre de la Presentación</label>
+                    <div class="control">
+                        <input class="input" type="text" name="nombre" id="nombre_presentacion" placeholder="Ej. Caja, Bulto, Paca" required>
+                    </div>
+                </div>
+            </div>
+            <div class="column is-4">
+                <div class="field">
+                    <label class="label">Unidades</label>
+                    <div class="control">
+                        <input class="input" type="number" name="unidades" id="unidades_presentacion" min="1" placeholder="Ej. 12" required>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Contenedor para mostrar errores desde AJAX -->
+        <div id="mensajeErrorModal" class="notification is-danger is-hidden is-light is-small"></div>
+      </form>
+        </section>
+        <footer class="modal-card-foot is-justify-content-flex-end">
+        <button class="button" type="button" onclick="cerrarModalPresentacion()">Cancelar</button>
+        <button class="button is-success" type="button" onclick="guardarPresentacionAjax()" id="btnGuardarPresentacion">Guardar Empaque</button>
+        </footer>
+    </div>
+    </div>
+
+    <script>
+    // Abrir el modal
+    function abrirModalPresentacion() {
+        document.getElementById('modalPresentacion').classList.add('is-active');
+    }
+
+    // Cerrar el modal y limpiar los campos
+    function cerrarModalPresentacion() {
+        document.getElementById('modalPresentacion').classList.remove('is-active');
+        document.getElementById('formNuevaPresentacion').reset();
+        document.getElementById('mensajeErrorModal').classList.add('is-hidden');
+        document.getElementById('mensajeErrorModal').innerHTML = '';
+    }
+
+    async function guardarPresentacionAjax() {
+        const btnGuardar = document.getElementById('btnGuardarPresentacion');
+        const mensajeError = document.getElementById('mensajeErrorModal');
+        
+        // Capturamos los datos
+        const id_producto = document.getElementById('producto_presentacion').value;
+        const nombre = document.getElementById('nombre_presentacion').value.trim();
+        const unidades = document.getElementById('unidades_presentacion').value;
+        const csrf = document.getElementById('csrf_token_modal').value;
+
+        // Validación básica frontend
+        if (!nombre || !unidades || unidades <= 0) {
+            mensajeError.innerHTML = "Por favor selecciona un producto y completa todos los campos correctamente.";
+            mensajeError.classList.remove('is-hidden');
+            return;
+        }
+
+        // Efecto visual de carga
+        btnGuardar.classList.add('is-loading');
+        mensajeError.classList.add('is-hidden');
+
+        try {
+            // Preparamos el paquete de datos
+            const formData = new FormData();
+            formData.append('id_producto', id_producto);
+            formData.append('nombre', nombre);
+            formData.append('unidades', unidades);
+            formData.append('csrf_token', csrf);
+
+            // Enviamos los datos a PHP en segundo plano
+            const response = await fetch("<?= urlAccion('movimiento', 'guardarPresentacionAjax') ?>", {
+                method: 'POST',
+                body: formData
+            });
+
+            const result = await response.json();
+
+            if (result.ok) {
+                // ÉXITO: Inyectar la nueva presentación en todos los <select> de la tabla
+                const selectsEmpaques = document.querySelectorAll('select[name="tipo_empaque[]"]');
+                selectsEmpaques.forEach(select => {
+                    const nuevaOpcion = document.createElement('option');
+                    // En el futuro, el value será el ID de la base de datos
+                    nuevaOpcion.value = result.id_presentacion || result.nombre; 
+                    nuevaOpcion.textContent = `${result.nombre} (${result.unidades} uds)`;
+                    select.appendChild(nuevaOpcion);
+                });
+
+                // Cerrar modal
+                cerrarModalPresentacion();
+                alert("¡Presentación creada e inyectada en el formulario con éxito!");
+            } else {
+                // ERROR DESDE PHP
+                mensajeError.innerHTML = result.error || "Error al procesar la solicitud.";
+                mensajeError.classList.remove('is-hidden');
+            }
+
+        } catch (error) {
+            mensajeError.innerHTML = "Error de conexión con el servidor.";
+            mensajeError.classList.remove('is-hidden');
+        } finally {
+            btnGuardar.classList.remove('is-loading');
+        }
+    }
+    </script>
 </body>
-</html>
+</html> 

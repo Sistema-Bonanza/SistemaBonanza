@@ -35,6 +35,13 @@ class MovimientoController {
         //Obtenemos todas las compras desde el modelo
         $compras =$this->movimientoModel->obtenerCompras();
 
+        // 2. FORMATEAMOS EL NÚMERO DE OPERACIÓN INTERNO
+        foreach ($compras as &$compra) {
+            // Rellena con ceros hasta tener 6 dígitos. Ej: COMP-000015
+            $compra['numero_operacion'] = 'COMP-' . str_pad($compra['id_compra'], 6, '0', STR_PAD_LEFT);
+        }
+        unset($compra); // Rompemos la referencia por seguridad
+
         require_once __DIR__ . '/../views/movimientos/movimientos.php';
     }
 
@@ -50,8 +57,8 @@ class MovimientoController {
         $proveedores = $this->proveedorModel->getActivos();
         $productos = $this->productoModel->obtenerProductos();
 
-        // 3. Cargamos el arreglo de empaques desde el archivo
-            $empaques = require __DIR__ . '/../../config/empaques.php';
+        // 3. Cargamos las presentaciones desde la base de datos (Adiós archivo estático)
+        $empaques = $this->productoModel->obtenerTodasLasPresentacionesActivas();
         // 4. redireccionamos a la vista de crear compra
         require_once __DIR__ . '/../views/movimientos/crearCompra.php';
     }
@@ -146,8 +153,6 @@ class MovimientoController {
         $cantidades = postArray('cantidad_empaques');
         $costos_empaque = postArray('costo_por_empaque');
 
-        // Requerimos el archivo de empaques para obtener las unidades por empaque
-        $empaques_config = require __DIR__ . '/../../config/empaques.php'; 
 
         $filas_validas = 0;
         $filas_procesadas_unicas = []; 
@@ -202,6 +207,7 @@ class MovimientoController {
             }
 
             $unidades_por_empaque = 0;
+            $id_presentacion_actual = null; // Declaramos la nueva variable
             $info_empaque = $this->resolverEmpaque($empaque_actual, $prod_id);
             
             if ($info_empaque === null) {
@@ -209,8 +215,8 @@ class MovimientoController {
                 $empaque_actual = null; // Lo invalidamos
             } else {
                 $unidades_por_empaque = $info_empaque['unidades'];
-                // Aquí usamos el tipo_empaque devuelto (preparándonos para la Parte B)
                 $empaque_actual = $info_empaque['tipo_empaque'];
+                $id_presentacion_actual = $info_empaque['id_presentacion']; // Capturamos el ID real de la BD
             }
 
 
@@ -233,21 +239,13 @@ class MovimientoController {
             }
 
             // --- SI LA LÍNEA NO TIENE ERRORES HASTA AQUÍ, CALCULAMOS SUS TOTALES ---
-            // (Si alguna variable es null por fallar validación, no calculamos para no dar error de PHP)
             if ($prod_id !== null && $empaque_actual !== null && $cant !== null && $costo !== null) {
                 
                 $cantidad_unidades_reales = $cant * $unidades_por_empaque;
-                
-                // A6: Costo unitario redondeado a 4 decimales
                 $costo_unitario = ($unidades_por_empaque > 0) ? round(($costo / $unidades_por_empaque), 4) : 0;
-                
-                // A6: Subtotal de línea redondeado a 2 decimales
                 $subtotal_linea = round(($cant * $costo), 2);
-
-                // Sumamos al subtotal global
                 $subtotal_factura += $subtotal_linea;
                 
-                // A6: Cálculo del IVA redondeado a 2 decimales línea por línea
                 if ($aplica_iva == 1) {
                     $iva_linea = round(($subtotal_linea * (TASA_IVA / 100)), 2);
                     $monto_iva_factura += $iva_linea;
@@ -255,14 +253,15 @@ class MovimientoController {
 
                 $detalles_validos[] = [
                     'id_producto' => $prod_id,
+                    'id_presentacion' => $id_presentacion_actual, // ENVIAMOS EL ID AL MOVIMIENTOMODEL
                     'tipo_empaque' => $empaque_actual,
                     'cantidad_empaques' => $cant,
                     'unidades_por_empaque' => $unidades_por_empaque,
                     'cantidad_unidades' => $cantidad_unidades_reales,
                     'costo_por_empaque' => $costo,
-                    'costo_unitario' => $costo_unitario, // Ya a 4 decimales
+                    'costo_unitario' => $costo_unitario,
                     'aplica_iva' => $aplica_iva,
-                    'subtotal_linea' => $subtotal_linea  // Ya a 2 decimales
+                    'subtotal_linea' => $subtotal_linea
                 ];
             }
 
@@ -340,25 +339,72 @@ class MovimientoController {
     //----------------------------------MÉTODO PRIVADO PARA EMPAQUES Y UNIDADES-|----------------------------------------------------
     // ============================================================================================================
 
-    private function resolverEmpaque($valorSeleccionado, $idProducto) {
-        // 1. Validar que no venga vacío
-        if (empty($valorSeleccionado) || !is_string($valorSeleccionado)) {
+    private function resolverEmpaque($idPresentacion, $idProducto) {
+        // 1. Validar que estemos recibiendo números válidos
+        if (empty($idPresentacion) || !is_numeric($idPresentacion)) {
             return null;
         }
 
-        // 2. Cargar directamente el archivo de empaques general
-        $empaques_config = require __DIR__ . '/../../config/empaques.php';
+        // 2. Interrogar a la base de datos (Esto verifica automáticamente que la presentación le pertenezca a ese producto)
+        $presentacion = $this->productoModel->obtenerPresentacionValida($idPresentacion, $idProducto);
 
-        // 3. Verificar si la clave existe exactamente en el arreglo
-        if (array_key_exists($valorSeleccionado, $empaques_config)) {
+        if ($presentacion) {
             return [
-                'tipo_empaque' => $valorSeleccionado,
-                'unidades' => (int) $empaques_config[$valorSeleccionado]['unidades']
+                'id_presentacion' => $presentacion['id_presentacion'],
+                'tipo_empaque'    => $presentacion['etiqueta'],
+                'unidades'        => (int) $presentacion['unidades']
             ];
         }
 
-        // Si no existe, devolvemos null
-        return null;
+        return null; // Si alguien manipula el HTML e intenta meter un ID falso, el sistema lo bloquea aquí
+    }
+
+    // ============================================================================================================
+    // MÉTODO AJAX PARA GUARDAR PRESENTACIÓN DESDE EL MODAL
+    // ============================================================================================================
+    public function guardarPresentacionAjax() {
+        header('Content-Type: application/json');
+
+        if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+            echo json_encode(['ok' => false, 'error' => 'Método no permitido.']);
+            return;
+        }
+
+        if (!validarCsrf($_POST['csrf_token'] ?? null)) {
+            echo json_encode(['ok' => false, 'error' => 'Token de seguridad inválido o expirado.']);
+            return;
+        }
+
+        // Si viene vacío desde el formulario, lo dejamos como null (Estándar Global)
+        $id_producto = !empty($_POST['id_producto']) ? validarEntero($_POST['id_producto'], 1) : null;
+        $etiqueta = validarTexto($_POST['nombre'] ?? null, 1, 30);
+        $unidades = validarEntero($_POST['unidades'] ?? null, 1, 1000);
+
+        // Ya no exigimos $id_producto como obligatorio
+        if (!$etiqueta || !$unidades) {
+            echo json_encode(['ok' => false, 'error' => 'Datos inválidos. Verifica que seleccionaste un producto, un nombre válido y unidades entre 1 y 1000.']);
+            return;
+        }
+
+        $id_usuario = isset($_SESSION['user_id']) ? (int)$_SESSION['user_id'] : 1;
+
+        // Llamar al modelo para guardar en la base de datos
+        $resultado = $this->productoModel->crearPresentacion($id_producto, $etiqueta, $unidades, $id_usuario);
+
+        if ($resultado['ok']) {
+            echo json_encode([
+                'ok' => true,
+                'id_presentacion' => $resultado['id_presentacion'],
+                'nombre' => $etiqueta,
+                'unidades' => $unidades,
+                'id_producto' => $id_producto
+            ]);
+        } else {
+            $msjError = ($resultado['motivo'] === 'duplicado') 
+                ? 'Este producto ya tiene una presentación registrada con ese nombre.' 
+                : 'Error interno en la base de datos.';
+            echo json_encode(['ok' => false, 'error' => $msjError]);
+        }
     }
 }
 

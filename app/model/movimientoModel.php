@@ -61,9 +61,10 @@ Class movimientoModel {
             $id_compra = $this->pdo->lastInsertId();
 
             // 2. Preparar consultas para el ciclo
+            // Agregamos id_presentacion después de id_producto y sumamos un "?" al final
             $sqlDetalle = "INSERT INTO detalle_compras 
-                (id_compra, id_producto, tipo_empaque, cantidad_empaques, unidades_por_empaque, cantidad_unidades, costo_por_empaque, costo_unitario, aplica_iva, subtotal_linea) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                (id_compra, id_producto, id_presentacion, tipo_empaque, cantidad_empaques, unidades_por_empaque, cantidad_unidades, costo_por_empaque, costo_unitario, aplica_iva, subtotal_linea) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             $stmtDetalle = $this->pdo->prepare($sqlDetalle);
 
             $sqlStockActual = "SELECT stock_actual FROM productos WHERE id_producto = ? FOR UPDATE";
@@ -87,6 +88,7 @@ Class movimientoModel {
                 $stmtDetalle->execute([
                     $id_compra,
                     $det['id_producto'],
+                    $det['id_presentacion'], // <-- AÑADIMOS EL NUEVO ENLACE AQUÍ
                     $det['tipo_empaque'],
                     $det['cantidad_empaques'],
                     $det['unidades_por_empaque'],
