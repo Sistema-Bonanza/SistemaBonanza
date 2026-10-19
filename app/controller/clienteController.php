@@ -1,9 +1,15 @@
 <?php
+require_once __DIR__ . '/../helpers/seguridad.php';
+require_once __DIR__ . '/../helpers/validaciones.php';
 require_once __DIR__ . '/../model/clienteModel.php';
 require_once __DIR__ . '/../../config/database.php';
 
 Class clienteController{
 private $clienteModel;
+
+/** Valores que acepta la columna tipo_documento (ENUM de la BD). */
+private const TIPOS_DOCUMENTO = ['V', 'E', 'J', 'G'];
+
 public function __construct(){
     $database = new Database();
     $pdo = $database->getConnection();
@@ -11,79 +17,166 @@ public function __construct(){
 }
 
 public function tablaClientes(){
+    exigirSesion();
+    evitarCache();
     $clientes = $this->clienteModel->getAll();
     require_once __DIR__ . '/../views/clientes/clientes.php';
 }
 public function formcrearcliente(){
+    exigirSesion();
+    evitarCache();
     require_once __DIR__ . '/../views/clientes/crearcliente.php';
 
 }
 
 public function formeditarcliente(){
-     $id = $_GET['id'] ?? '';
-        if (!empty($id)) {
-            $clientes = $this->clienteModel->getById($id);
-            if ($clientes) {
-                require_once __DIR__ . '/../../app/views/clientes/editarcliente.php';
-                return;
-            }
+    exigirSesion();
+    evitarCache();
+
+    $id = validarEntero($_GET['id'] ?? null, 1);
+    if ($id !== null) {
+        $clientes = $this->clienteModel->getById($id);
+        if ($clientes) {
+            require_once __DIR__ . '/../../app/views/clientes/editarcliente.php';
+            return;
         }
-        // Si no se encuentra la categoría, redirigir a la lista de categorías
-        header("Location: index.php?controller=cliente&action=tablaClientes");
-        exit;
+    }
+    // Si no se encuentra el cliente, redirigir a la lista de clientes
+    setFlash('error', 'El cliente no existe.');
+    redirigir(urlAccion('cliente', 'tablaClientes'));
 }
 
 
 public function guardar(){
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-            // Recibimos los datos del formulario
-            
-            $tipo_documento = $_POST['tipo_documento'] ?? '';
-            $num_documento = $_POST['num_documento'] ?? '';
-            $nombre_razon_social = $_POST['nombre_razon_social'] ?? '';
-            $telefono = $_POST['telefono'] ?? '';
-            $email = $_POST['email'] ?? '';
-            $direccion = $_POST['direccion'] ?? '';
+    exigirSesion();
+    $urlFormulario = urlAccion('cliente', 'formcrearcliente');
+    exigirPost($urlFormulario);
 
-            // Enviamos los datos al modelo para hacer el INSERT
-            $exito = $this->clienteModel->createcliente($tipo_documento, $num_documento, $nombre_razon_social, $telefono, $email, $direccion);
+    list($datos, $errores) = $this->validarDatos(null);
+    if (!empty($errores)) {
+        setFlash('error', $errores);
+        redirigir($urlFormulario);
+    }
 
-            if ($exito) {
-                // Si se guardó, redirigimos al dashboard de clientes
-                header("Location: index.php?controller=cliente&action=tablaClientes");
-                exit();
-            } else {
-                echo "Hubo un error al registrar el cliente.";
-            }
-        }
+    // Enviamos los datos ya validados y normalizados al modelo para hacer el INSERT
+    $exito = $this->clienteModel->createcliente(
+        $datos['tipo_documento'], $datos['num_documento'], $datos['nombre_razon_social'],
+        $datos['telefono'], $datos['email'], $datos['direccion']
+    );
+
+    if ($exito) {
+        setFlash('exito', 'Cliente «' . $datos['nombre_razon_social'] . '» registrado correctamente.');
+        redirigir(urlAccion('cliente', 'tablaClientes'));
+    }
+
+    setFlash('error', 'Hubo un error al registrar el cliente.');
+    redirigir($urlFormulario);
 }
 
 public function actualizar(){
+    exigirSesion();
+    exigirPost(urlAccion('cliente', 'tablaClientes'));
 
-//Recibimos los datos del formulario
-        $id = (int) ($_POST['id'] ?? 0);
-        $tipo_documento= trim($_POST['tipo_documento'] ?? '');
-        $num_documento= trim ($_POST['num_documento'] ?? '');
-        $nombre_razon_social= trim($_POST['nombre_razon_social'] ?? '');
-        $telefono= trim ($_POST['telefono'] ?? '');
-        $email= trim ($_POST['email'] ?? '');
-        $direccion= trim ($_POST['direccion'] ?? '');
-        $estado= trim ($_POST['estado'] ?? '');
-        $creado_en= trim ($_POST['creado_en'] ?? '');
-         
-        //verificación de campos
-        if(!empty($id) && !empty($tipo_documento) && !empty($nombre_razon_social) && !empty($num_documento) && !empty($telefono)
-             && !empty($email) && !empty($direccion) && !empty($estado) && !empty($creado_en)){
-            $this->clienteModel->updatecliente($id, $tipo_documento, $nombre_razon_social, 
-            $num_documento, $telefono, $email, $direccion, $estado, $creado_en);
+    $id = validarEntero($_POST['id'] ?? null, 1);
+    $actual = ($id !== null) ? $this->clienteModel->getById($id) : false;
+    if (!$actual) {
+        setFlash('error', 'El cliente que intentas editar no existe.');
+        redirigir(urlAccion('cliente', 'tablaClientes'));
+    }
+
+    $urlFormulario = urlAccion('cliente', 'formeditarcliente', ['id' => $id]);
+
+    list($datos, $errores) = $this->validarDatos($id);
+    if (!empty($errores)) {
+        setFlash('error', $errores);
+        redirigir($urlFormulario);
+    }
+
+    // 'estado' y 'creado_en' NO se toman del formulario: viajaban como campos ocultos y
+    // cualquiera podía alterarlos (reactivar un cliente o falsear su fecha de registro).
+    // Se conserva lo que ya hay en la BD.
+    $exito = $this->clienteModel->updatecliente(
+        $id,
+        $datos['tipo_documento'],
+        $datos['nombre_razon_social'],
+        $datos['num_documento'],
+        $datos['telefono'],
+        $datos['email'],
+        $datos['direccion'],
+        $actual['estado'],
+        $actual['creado_en']
+    );
+
+    if ($exito) {
+        setFlash('exito', 'Cliente «' . $datos['nombre_razon_social'] . '» actualizado correctamente.');
+        redirigir(urlAccion('cliente', 'tablaClientes'));
+    }
+
+    setFlash('error', 'No se pudo actualizar el cliente. Inténtalo de nuevo.');
+    redirigir($urlFormulario);
+}
+
+/**
+ * Validación común de crear y editar.
+ * $idExcluir: al editar, el propio cliente no cuenta como documento repetido.
+ * Devuelve [datos limpios, lista de errores].
+ */
+private function validarDatos(?int $idExcluir): array {
+    $errores = [];
+
+    // tipo_documento es un ENUM: solo V, E, J o G. Cualquier otro valor se cuela vacío en MySQL no estricto.
+    $tipo = validarClave($_POST['tipo_documento'] ?? null, array_flip(self::TIPOS_DOCUMENTO));
+    if ($tipo === null) {
+        $errores[] = 'Elige un tipo de documento válido (V, E, J o G).';
+    }
+
+    // num_documento: formato según el tipo (cédula o RIF) y sin repetirse (columna UNIQUE).
+    $documento = null;
+    if ($tipo !== null) {
+        $documento = validarDocumentoIdentidad($tipo, $_POST['num_documento'] ?? null);
+        if ($documento === null) {
+            $errores[] = ($tipo === 'V' || $tipo === 'E')
+                ? 'La cédula debe tener entre 6 y 9 dígitos (solo números).'
+                : 'El RIF debe tener 8 dígitos más el dígito verificador. Ejemplo: 12345678-9.';
+        } elseif ($this->clienteModel->existeDocumento($documento, $idExcluir)) {
+            $errores[] = 'Ya existe un cliente registrado con el documento ' . $documento . '.';
         }
+    }
 
-        //Redireccionamiento
-        header("Location: index.php?controller=cliente&action=tablaClientes");
-        exit;
+    // nombre_razon_social: VARCHAR(150) NOT NULL
+    $nombre = validarNombreComercial($_POST['nombre_razon_social'] ?? null, 2, 150);
+    if ($nombre === null) {
+        $errores[] = 'El nombre o razón social es obligatorio: de 2 a 150 caracteres (no se permite < ni >).';
+    }
+
+    // Contacto: opcional, pero si se escribe debe ser válido.
+    $tel = opcional($_POST['telefono'] ?? '', 'validarTelefono');
+    if (!$tel['ok']) {
+        $errores[] = 'El teléfono debe tener entre 7 y 15 dígitos. Ejemplo: 0412-1234567.';
+    }
+
+    $correo = opcional($_POST['email'] ?? '', 'validarEmail');
+    if (!$correo['ok']) {
+        $errores[] = 'El correo electrónico no es válido (máximo 100 caracteres).';
+    }
+
+    // direccion: VARCHAR(255) NULL
+    $dir = opcional($_POST['direccion'] ?? '', function ($v) {
+        return validarTextoLibre($v, 3, 255);
+    });
+    if (!$dir['ok']) {
+        $errores[] = 'La dirección debe tener entre 3 y 255 caracteres y no puede contener < ni >.';
+    }
+
+    return [[
+        'tipo_documento'      => $tipo,
+        'num_documento'       => $documento,
+        'nombre_razon_social' => $nombre,
+        'telefono'            => $tel['valor'],
+        'email'               => $correo['valor'],
+        'direccion'           => $dir['valor'],
+    ], $errores];
 }
 
 }
-
-
 ?>

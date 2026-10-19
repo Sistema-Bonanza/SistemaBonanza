@@ -49,6 +49,20 @@
             ':descripcion' => $descripcion,
         ]);
     }
+
+    // ¿Ya existe una categoría con ese nombre? (la comparación ignora mayúsculas y tildes)
+    // $excluirId sirve al EDITAR: la propia categoría no cuenta como duplicado.
+    public function existeNombre($nombre, $excluirId = null){
+        $sql = "SELECT COUNT(*) FROM categorias WHERE nombre = :nombre";
+        $params = [':nombre' => $nombre];
+        if ($excluirId !== null) {
+            $sql .= " AND id_categoria <> :id";
+            $params[':id'] = (int) $excluirId;
+        }
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn() > 0;
+    }
 }
 
 ?>

@@ -65,5 +65,49 @@ class usuarioModel{
             $stmt->execute([':id' => $id]);
             return true; //usuario eliminado exitosamente.
     }
+
+    // ¿Ya existe ese nombre de usuario? (la columna tiene UNIQUE; la comparación ignora mayúsculas)
+    // $excluirId sirve al EDITAR: el propio usuario no cuenta como duplicado.
+    public function existeUsername($username, $excluirId = null){
+        $sql = "SELECT COUNT(*) FROM usuarios WHERE username = :username";
+        $params = [':username' => $username];
+        if ($excluirId !== null) {
+            $sql .= " AND id <> :id";
+            $params[':id'] = (int) $excluirId;
+        }
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn() > 0;
+    }
+
+    // Cuántos usuarios ACTIVOS tienen alguno de esos roles. Sirve para no dejar
+    // el sistema sin administradores. $excluirId deja fuera a un usuario del conteo.
+    public function contarActivosPorRoles(array $roles, $excluirId = null){
+        if (empty($roles)) {
+            return 0;
+        }
+        $marcas = implode(',', array_fill(0, count($roles), '?'));
+        $sql = "SELECT COUNT(*) FROM usuarios WHERE is_active = 1 AND rol IN ($marcas)";
+        $params = array_values($roles);
+        if ($excluirId !== null) {
+            $sql .= " AND id <> ?";
+            $params[] = (int) $excluirId;
+        }
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute($params);
+        return (int) $stmt->fetchColumn();
+    }
+
+    // ¿El usuario ya hizo algo en el sistema (compras, movimientos, cambios de precio)?
+    // Si sí, borrarlo rompería esos registros (claves foráneas) y la auditoría.
+    public function tieneActividad($id){
+        $sql = "SELECT
+                    (SELECT COUNT(*) FROM compras WHERE id_usuario = :a OR id_usuario_anula = :b)
+                  + (SELECT COUNT(*) FROM movimientos WHERE id_usuario = :c)
+                  + (SELECT COUNT(*) FROM historial_precios WHERE id_usuario = :d)";
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([':a' => (int) $id, ':b' => (int) $id, ':c' => (int) $id, ':d' => (int) $id]);
+        return (int) $stmt->fetchColumn() > 0;
+    }
 }
 ?>

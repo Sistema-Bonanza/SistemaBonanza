@@ -33,7 +33,10 @@ class PrecioController
      * que guarda la columna usuarios.rol ('admin' es el usuario semilla;
      * 'Administrador' es lo que guarda el formulario de usuarios).
      */
-    private const ROLES_EDITAR = ['admin', 'Administra'];
+    // 'Administra' es como quedó guardado 'Administrador' cuando la columna usuarios.rol medía solo 10
+    // caracteres. Tras aplicar mejoras_integridad_bd.sql los usuarios pasan a 'Administrador'; se dejan
+    // ambos para que nadie pierda el acceso durante la transición.
+    private const ROLES_EDITAR = ['admin', 'Administrador', 'Administra'];
 
     /** IVA solo para mostrar el precio final referencial (mismo valor fijo que usa movimientoController). */
     private const TASA_IVA = 16.00;

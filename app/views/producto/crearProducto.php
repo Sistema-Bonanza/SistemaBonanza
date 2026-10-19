@@ -21,6 +21,7 @@ if (!isset($_SESSION['user_id'])) {
     <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
     
     <main class="main">
+        <?= mostrarFlash() ?>
         <div class="welcome-card-product">
             <h1>📦 Registrar Nuevo Producto</h1>
             <p>Completa el formulario para añadir mercancía al catálogo de inventario.</p>

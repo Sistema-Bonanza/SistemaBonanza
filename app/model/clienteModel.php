@@ -78,5 +78,18 @@ public function updatecliente($id, $tipo_documento, $nombre_razon_social, $num_d
     }
 }
 
+// ¿Ya existe un cliente con ese número de documento? (la columna tiene UNIQUE)
+// $excluirId sirve al EDITAR: el propio cliente no cuenta como duplicado.
+public function existeDocumento($num_documento, $excluirId = null){
+    $sql = "SELECT COUNT(*) FROM clientes WHERE num_documento = :num";
+    $params = [':num' => $num_documento];
+    if ($excluirId !== null) {
+        $sql .= " AND id_cliente <> :id";
+        $params[':id'] = (int) $excluirId;
+    }
+    $stmt = $this->pdo->prepare($sql);
+    $stmt->execute($params);
+    return (int) $stmt->fetchColumn() > 0;
+}
 }
 ?>

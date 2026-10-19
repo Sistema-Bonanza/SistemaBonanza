@@ -90,6 +90,7 @@ if (!isset($_SESSION['user_id'])) {
     <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
 
     <main class="main">
+        <?= mostrarFlash() ?>
         <div class="welcome-card">
             <h1>🏢 Registrar Nuevo Cliente</h1>
             <p>Complete los datos del cliente para darlo de alta en el sistema.</p>

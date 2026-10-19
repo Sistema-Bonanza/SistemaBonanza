@@ -77,6 +77,19 @@
                 return false; //ERROR AL ACTUALIZAR EL PROVEEDOR.
             }
             }
+
+        // ¿Ya existe un proveedor con ese RIF? (la columna tiene UNIQUE)
+        public function existeRif($rif, $excluirId = null){
+            $sql = "SELECT COUNT(*) FROM proveedores WHERE rif = :rif";
+            $params = [':rif' => $rif];
+            if ($excluirId !== null) {
+                $sql .= " AND id_proveedor <> :id";
+                $params[':id'] = (int) $excluirId;
+            }
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->execute($params);
+            return (int) $stmt->fetchColumn() > 0;
         }
+}
 
     ?>

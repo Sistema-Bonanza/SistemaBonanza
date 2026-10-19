@@ -141,6 +141,7 @@ if (!isset($_SESSION['user_id'])) {
      <!-- ========== AQUÍ CONECTAMOS EL SIDEBAR (LAYOUT) ========== -->
     <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
     <main class="main">
+        <?= mostrarFlash() ?>
 
         <!-- WELCOME CARD -->
         <div class="welcome-card">

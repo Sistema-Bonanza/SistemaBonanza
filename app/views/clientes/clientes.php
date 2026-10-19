@@ -18,6 +18,7 @@ if (!isset($_SESSION['user_id'])) {
     <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
     
     <main class="main">
+        <?= mostrarFlash() ?>
         <div class="welcome-card">
             <h1>👥 Gestión de Clientes</h1>
             <p>Administra los clientes del sistema. Solo los administradores pueden realizar cambios.</p>

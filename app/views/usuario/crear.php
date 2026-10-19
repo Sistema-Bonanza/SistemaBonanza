@@ -164,6 +164,7 @@ if (!isset($_SESSION['user_id'])) {
 
     <!-- ========== MAIN ========== -->
     <main class="main">
+        <?= mostrarFlash() ?>
 
         <!-- WELCOME CARD -->
         <div class="welcome-card">

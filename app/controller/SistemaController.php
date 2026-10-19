@@ -2,6 +2,7 @@
 //cargar archivos.
 
 require_once __DIR__.'/../../config/database.php';
+require_once __DIR__.'/../helpers/seguridad.php';
 require_once __DIR__.'/../model/sistemaModel.php';
 
 
@@ -24,18 +25,29 @@ class SistemaController{
 
     public function procesarLogin(){
         if(isset($_POST['login_form'])){
-            $usuario = $_POST['username'];
-            $password = $_POST['password'];
+            $usuario = $_POST['username'] ?? null;
+            $password = $_POST['password'] ?? null;
+
+            // PASO 0: Las entradas deben ser TEXTO y de tamaño razonable. Si alguien envía un arreglo
+            // (password[]=x), password_verify() lanzaba un error fatal. Se responde igual que con
+            // datos incorrectos, sin dar pistas. (El límite del usuario es el de la columna: 100.)
+            $entradasValidas = is_string($usuario) && is_string($password)
+                && $usuario !== '' && $password !== ''
+                && mb_strlen($usuario, 'UTF-8') <= 100 && strlen($password) <= 1024;
 
             // PASO 1: Obtener los datos del usuario desde la BD
-            $datosUsuario = $this->model->obtenerUsername($usuario);
+            $datosUsuario = $entradasValidas ? $this->model->obtenerUsername($usuario) : false;
 
 
             // PASO 2: Validar si existe el usuario Y si la contraseña coincide con el hash
-            if ($datosUsuario && password_verify($password, $datosUsuario['password_hash'])) {
+            if ($entradasValidas && $datosUsuario && password_verify($password, $datosUsuario['password_hash'])) {
 
             //paso 3: Iniciar sesión y redirigir al usuario a la página de inicio
-    
+
+            // Se renueva el ID de sesión al autenticarse: evita que alguien que conocía el ID
+            // anterior (fijación de sesión) herede la sesión ya autenticada.
+            session_regenerate_id(true);
+
             $_SESSION['user_id'] = $datosUsuario['id'];
             $_SESSION['username'] = $datosUsuario['username'];
             $_SESSION['is_admin'] = $datosUsuario['rol'];
