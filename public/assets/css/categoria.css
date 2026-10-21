@@ -151,20 +151,6 @@
     gap: 10px;
 }
 
-.user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 8px; /* Cuadrado con bordes curvos, diferente al círculo de usuarios */
-    background: linear-gradient(135deg, #10b981, #34d399);
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 13px;
-    text-transform: uppercase;
-    flex-shrink: 0;
-}
 
 /* BOTONES DE ACCIÓN (TABLA) */
 .btn-table {

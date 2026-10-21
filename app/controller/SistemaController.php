@@ -20,7 +20,7 @@ class SistemaController{
 
     public function index(){
         //cargar la vista del login
-        require_once __DIR__.'/../../app/views/login.html';
+        require_once __DIR__.'/../../app/views/login/login.php';
     }
 
     public function procesarLogin(){

@@ -20,60 +20,6 @@ button {
     background: none;
     font-family: inherit;
 }
-
-/* ---------- Sidebar ---------- */
-.sidebar {
-    width: 240px;
-    background: #ffffff;
-    border-right: 1px solid #e2e8f0;
-    padding: 1.5rem 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 2rem;
-    position: sticky;
-    top: 0;
-    height: 100vh;
-    overflow-y: auto;
-}
-.sidebar .logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    color: #0f172a;
-}
-.sidebar .logo span {
-    color: #3b82f6;
-}
-.sidebar nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-}
-.sidebar nav a {
-    padding: 0.6rem 1rem;
-    border-radius: 8px;
-    font-weight: 500;
-    color: #475569;
-    transition: 0.2s;
-}
-.sidebar nav a:hover,
-.sidebar nav a.active {
-    background: #eef2ff;
-    color: #3b82f6;
-}
-.sidebar nav a i {
-    margin-right: 0.75rem;
-    width: 20px;
-    display: inline-block;
-}
-.sidebar-footer {
-    margin-top: auto;
-    font-size: 0.85rem;
-    color: #94a3b8;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 1.5rem;
-}
-
 /* ---------- Main Content ---------- */
 .main {
     flex: 1;

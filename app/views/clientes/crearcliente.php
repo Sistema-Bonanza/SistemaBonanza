@@ -10,6 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 <head>
     <meta charset="UTF-8">
     <title>Nuevo Cliente · POS & Inventario</title>
+    <link rel="stylesheet" href="assets/css/sidebar.css" />
     <link rel="stylesheet" href="assets/css/dashboard.css" />
     <style>
         .data-panel {

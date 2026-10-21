@@ -179,20 +179,6 @@
     gap: 10px;
 }
 
-.user-avatar {
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, #3b82f6, #818cf8);
-    color: #ffffff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: 700;
-    font-size: 13px;
-    text-transform: uppercase;
-    flex-shrink: 0;
-}
 
 /* BADGES DE ROL */
 .badge {

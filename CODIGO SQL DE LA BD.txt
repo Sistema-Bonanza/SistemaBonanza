@@ -269,7 +269,7 @@ CREATE TABLE historial_precios (
     )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-//=======================================================================================================================00
+//=========================================================================================================================
 
 -- 1. Crear la tabla de presentaciones (excepciones)
 CREATE TABLE presentaciones (
@@ -295,3 +295,90 @@ ALTER TABLE detalle_compras
     ADD COLUMN id_presentacion INT NULL AFTER id_producto,
     ADD CONSTRAINT fk_detalle_presentacion FOREIGN KEY (id_presentacion)
         REFERENCES presentaciones (id_presentacion) ON UPDATE CASCADE ON DELETE RESTRICT;
+
+
+//=========================================================================================================================
+
+CREATE TABLE ventas (
+    id_venta INT AUTO_INCREMENT PRIMARY KEY,
+    id_cliente INT NOT NULL,
+    fecha_venta TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    subtotal DECIMAL(12,2) NOT NULL,
+    monto_iva DECIMAL(12,2) NOT NULL,
+    total DECIMAL(12,2) NOT NULL,
+    tasa_iva DECIMAL(5,2) NOT NULL,
+    observaciones VARCHAR(255) NULL,
+    estado TINYINT(1) DEFAULT 1 COMMENT '1 registrada, 0 anulada',
+    id_usuario INT NOT NULL,
+    fecha_anulacion DATETIME NULL,
+    id_usuario_anula INT NULL,
+    motivo_anulacion VARCHAR(255) NULL,
+    CONSTRAINT fk_ventas_cliente FOREIGN KEY (id_cliente) REFERENCES clientes(id_cliente),
+    CONSTRAINT fk_ventas_usuario FOREIGN KEY (id_usuario) REFERENCES usuarios(id)
+);
+
+
+-- 3. Vincular Movimientos con Ventas
+ALTER TABLE movimientos 
+ADD COLUMN id_venta INT NULL AFTER id_usuario,
+ADD CONSTRAINT fk_movimiento_venta FOREIGN KEY (id_venta) REFERENCES ventas(id_venta);
+
+-- 4. Blindar el inventario contra números negativos
+ALTER TABLE productos 
+ADD CONSTRAINT chk_productos_stock CHECK (stock_actual >= 0);
+
+
+-- 1.1 estado y fecha_venta no deben aceptar NULL
+ALTER TABLE ventas
+    MODIFY fecha_venta TIMESTAMP  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    MODIFY estado      TINYINT(1) NOT NULL DEFAULT 1 COMMENT '1 registrada, 0 anulada';
+ 
+-- 1.2 FK de quien anula + CHECK (igual que en compras)
+ALTER TABLE ventas
+    ADD CONSTRAINT fk_ventas_usuario_anula FOREIGN KEY (id_usuario_anula)
+        REFERENCES usuarios (id) ON UPDATE CASCADE ON DELETE RESTRICT,
+    ADD CONSTRAINT chk_ventas_estado CHECK (estado IN (0, 1)),
+    ADD CONSTRAINT chk_ventas_montos CHECK (subtotal >= 0 AND monto_iva >= 0 AND total >= 0),
+    ADD CONSTRAINT chk_ventas_tasa   CHECK (tasa_iva >= 0 AND tasa_iva <= 100),
+    ADD CONSTRAINT chk_ventas_total  CHECK (total = subtotal + monto_iva);
+
+
+
+
+CREATE TABLE detalle_ventas (
+    id_detalle       INT           NOT NULL AUTO_INCREMENT,
+    id_venta         INT           NOT NULL,
+    id_producto      INT           NOT NULL,
+    cantidad         INT           NOT NULL,           -- siempre en unidades
+    precio_unitario  DECIMAL(10,2) NOT NULL,           -- copia historica de productos.precio_venta
+    aplica_iva       TINYINT(1)    NOT NULL,           -- copia historica
+    subtotal_linea   DECIMAL(12,2) NOT NULL,           -- cantidad x precio_unitario
+    costo_unitario   DECIMAL(12,4) NULL,               -- opcional: ultimo costo, para ganancias en Reportes
+ 
+    PRIMARY KEY (id_detalle),
+ 
+    -- No tiene sentido vender dos veces el mismo producto en la misma venta.
+    CONSTRAINT uq_detventa_venta_producto UNIQUE (id_venta, id_producto),
+ 
+    CONSTRAINT fk_detventa_venta FOREIGN KEY (id_venta)
+        REFERENCES ventas (id_venta) ON UPDATE CASCADE ON DELETE RESTRICT,
+    CONSTRAINT fk_detventa_producto FOREIGN KEY (id_producto)
+        REFERENCES productos (id_producto) ON UPDATE CASCADE ON DELETE RESTRICT,
+ 
+    CONSTRAINT chk_detv_cantidad  CHECK (cantidad > 0),
+    CONSTRAINT chk_detv_precio    CHECK (precio_unitario > 0),
+    CONSTRAINT chk_detv_aplica    CHECK (aplica_iva IN (0, 1)),
+    CONSTRAINT chk_detv_subtotal  CHECK (subtotal_linea = cantidad * precio_unitario),
+    CONSTRAINT chk_detv_costo     CHECK (costo_unitario IS NULL OR costo_unitario >= 0)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+
+ALTER TABLE movimientos
+    ADD COLUMN id_venta INT NULL AFTER id_usuario,
+    ADD CONSTRAINT fk_movimiento_venta FOREIGN KEY (id_venta) REFERENCES ventas (id_venta);
+
+
+
+
+

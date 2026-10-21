@@ -143,5 +143,72 @@ Class productoModel{
         return (int) $stmt->fetchColumn() > 0;
     }
     //==================================================================================
+
+
+    // ============================================================================================================
+    // REGISTRO DE PRESENTACIONES (EMPAQUES)
+    // ============================================================================================================
+    public function crearPresentacion($id_producto, $etiqueta, $unidades, $id_usuario) {
+        try {
+            $sql = "INSERT INTO presentaciones (id_producto, etiqueta, unidades, id_usuario) 
+                    VALUES (:id_producto, :etiqueta, :unidades, :id_usuario)";
+            
+            $stmt = $this->pdo->prepare($sql);
+            
+            // Forzamos la etiqueta a mayúsculas (y quitamos espacios extra) para evitar duplicados por errores de tipeo
+            $stmt->execute([
+                ':id_producto' => $id_producto,
+                ':etiqueta'    => strtoupper(trim($etiqueta)), 
+                ':unidades'    => $unidades,
+                ':id_usuario'  => $id_usuario
+            ]);
+
+            // Devolvemos el éxito y el ID autogenerado
+            return [
+                'ok' => true,
+                'id_presentacion' => $this->pdo->lastInsertId()
+            ];
+
+        } catch (PDOException $e) {
+            // El código 1062 en MySQL identifica la violación de una restricción UNIQUE 
+            // Esto se activa automáticamente por tu CONSTRAINT uq_present_producto_etiqueta
+            if ($e->errorInfo[1] == 1062) {
+                return ['ok' => false, 'motivo' => 'duplicado'];
+            }
+            
+            // Cualquier otro error de base de datos se registra silenciosamente en el log
+            error_log("Error al crear presentación: " . $e->getMessage());
+            return ['ok' => false, 'motivo' => 'error_interno'];
+        }
+    }
+
+    // ============================================================================================================
+    // OBTENER TODAS LAS PRESENTACIONES (PARA LLENAR EL FORMULARIO)
+    // ============================================================================================================
+    public function obtenerTodasLasPresentacionesActivas() {
+        // Usamos LEFT JOIN y COALESCE: Si no tiene producto, dice "ESTÁNDAR GLOBAL"
+        $sql = "SELECT p.id_presentacion, p.etiqueta, p.unidades, 
+                COALESCE(prod.nombre, '★ ESTÁNDAR GLOBAL ★') as nombre_producto 
+                FROM presentaciones p
+                LEFT JOIN productos prod ON p.id_producto = prod.id_producto
+                WHERE p.estado = 1
+                ORDER BY p.id_producto IS NULL DESC, p.etiqueta ASC";
+        
+        return $this->pdo->query($sql)->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    // ============================================================================================================
+    // VALIDAR QUE UNA PRESENTACIÓN EXISTE Y PERTENECE AL PRODUCTO SELECCIONADO
+    // ============================================================================================================
+    public function obtenerPresentacionValida($id_presentacion, $id_producto) {
+        // Ahora es válida si es Específica (id_producto = ?) O si es Global (id_producto IS NULL)
+        $sql = "SELECT id_presentacion, etiqueta, unidades 
+                FROM presentaciones 
+                WHERE id_presentacion = ? AND (id_producto = ? OR id_producto IS NULL) AND estado = 1";
+        
+        $stmt = $this->pdo->prepare($sql);
+        $stmt->execute([$id_presentacion, $id_producto]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
 }
     ?>

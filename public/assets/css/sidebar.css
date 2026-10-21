@@ -1,101 +1,189 @@
 /* ==========================================
-   ESTILOS EXCLUSIVOS DEL SIDEBAR
+   PALETA DE COLORES DEL SIDEBAR (MODIFICABLE)
    ========================================== */
+:root {
+    --sidebar-bg: #1e293b;       /* Fondo principal (Azul acero medio) */
+    --sidebar-border: #334155;   /* Borde un poco más claro */
+    --sidebar-text: #f8fafc;     /* Texto blanco brillante */
+    --sidebar-text-muted: #94a3b8; /* Texto secundario */
+    --sidebar-hover: #334155;    /* Fondo al pasar el mouse */
+    --bonanza-blue: #3b82f6;     /* Azul de acento para el botón activo */
+}
 
-/* Garantiza que la barra lateral y el contenido queden al lado */
+/* ==========================================
+   ESTILOS BASE
+   ========================================== */
 body {
     display: flex;
     min-height: 100vh;
     margin: 0;
-    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif; /* <-- ¡Añadido aquí! */
-    background-color: #f4f6f9; /* (Opcional) Si quieres que el fondo gris aplique globalmente */
+    font-family: 'Inter', 'Segoe UI', Roboto, sans-serif;
+    background-color: #f4f6f9; 
 }
 
+/* Contenedor principal del Sidebar */
 .sidebar {
-    width: 240px;
-    min-width: 240px;
-    background: #ffffff;
-    border-right: 1px solid #e2e8f0;
-    padding: 1.5rem 1rem;
+    width: 256px;
+    min-width: 256px;
+    background-color: var(--sidebar-bg) !important; 
+    border-right: 1px solid var(--sidebar-border) !important;
     display: flex;
     flex-direction: column;
-    gap: 2rem;
     position: sticky;
     top: 0;
     height: 100vh;
-    overflow-y: auto;
+    box-sizing: border-box;
+    color: var(--sidebar-text-muted);
+}
+
+/* Cabecera del Sidebar (Logo y Badge) */
+.sidebar-header {
+    padding: 1.25rem;
+    border-bottom: 1px solid var(--sidebar-border);
+}
+
+.sidebar-logo-container {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+}
+
+.sidebar-logo-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 0.75rem;
+    background-color: var(--bonanza-blue);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 10px 15px -3px rgba(59, 130, 246, 0.3);
+}
+
+.sidebar-logo-text { overflow: hidden; }
+
+.sidebar-logo-text h1 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--sidebar-text);
+    line-height: 1.2;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.sidebar-logo-text p {
+    font-size: 0.75rem;
+    font-weight: 500;
+    color: var(--sidebar-text-muted);
+}
+
+/* Indicador de Estado */
+.sidebar-status {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 0.5rem;
+    background-color: rgba(2, 44, 34, 0.6);
+    border: 1px solid rgba(6, 78, 59, 0.5);
+    font-size: 11px;
+    font-weight: 600;
+    color: #34d399;
+    width: 100%;
     box-sizing: border-box;
 }
 
-.sidebar .logo {
-    font-size: 1.5rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    color: #0f172a;
+.status-dot-wrapper { position: relative; display: flex; height: 8px; width: 8px; }
+.status-dot-solid { position: relative; border-radius: 50%; height: 8px; width: 8px; background-color: #10b981; }
+.status-dot-ping {
+    position: absolute; height: 100%; width: 100%; border-radius: 50%;
+    background-color: #34d399; opacity: 0.75;
+    animation: ping-indicator 1.5s cubic-bezier(0, 0, 0.2, 1) infinite;
 }
+@keyframes ping-indicator { 75%, 100% { transform: scale(2.5); opacity: 0; } }
 
-.sidebar .logo span {
-    color: #3b82f6;
-}
-
+/* Navegación y Enlaces */
 .sidebar nav {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
+    flex-grow: 1; display: flex; flex-direction: column; gap: 0.25rem;
+    padding: 1rem 0.75rem; overflow-y: auto;
 }
+
+.sidebar nav::-webkit-scrollbar { width: 6px; }
+.sidebar nav::-webkit-scrollbar-track { background: transparent; }
+.sidebar nav::-webkit-scrollbar-thumb { background-color: var(--sidebar-border); border-radius: 10px; }
 
 .sidebar nav a {
-    padding: 0.6rem 1rem;
-    border-radius: 8px;
-    font-weight: 500;
-    color: #475569;
-    text-decoration: none;
-    transition: background 0.2s, color 0.2s;
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0.75rem 1rem; border-radius: 0.75rem;
+    font-size: 0.875rem; font-weight: 500;
+    color: var(--sidebar-text-muted); text-decoration: none;
+    transition: all 0.2s ease;
 }
 
-.sidebar nav a:hover,
+.sidebar nav a:hover { background-color: var(--sidebar-hover); color: var(--sidebar-text); }
 .sidebar nav a.active {
-    background: #eef2ff;
-    color: #3b82f6;
+    background-color: var(--bonanza-blue); color: #ffffff;
+    box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.25);
 }
 
-.sidebar nav a i {
-    margin-right: 0.75rem;
-    width: 20px;
-    display: inline-block;
-    font-style: normal !important;
+.sidebar nav a svg, .sidebar nav a i { width: 24px; height: 24px; flex-shrink: 0; }
+
+.sidebar-badge {
+    margin-left: auto; padding: 2px 8px; font-size: 10px; font-weight: 600;
+    background-color: var(--sidebar-border); color: var(--sidebar-text);
+    border-radius: 4px;
 }
 
+/* Pie del Sidebar */
 .sidebar-footer {
-    margin-top: auto;
-    font-size: 0.85rem;
-    color: #94a3b8;
-    border-top: 1px solid #e2e8f0;
-    padding-top: 1.5rem;
+    padding: 0.75rem; border-top: 1px solid var(--sidebar-border);
+    background-color: var(--sidebar-footer);
+    display: flex; flex-direction: column; gap: 0.5rem; margin-top: auto;
 }
 
-.sidebar-footer a {
-    text-decoration: none;
+.user-card {
+    display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem;
+    border-radius: 0.75rem; background-color: var(--sidebar-bg);
+    border: 1px solid var(--sidebar-border);
 }
 
-/* Responsivo para móviles */
-@media (max-width: 640px) {
-    .sidebar {
-        display: none;
-    }
+.user-avatar {
+    width: 32px; height: 32px; border-radius: 0.5rem;
+    background-color: #172554; border: 1px solid rgba(29, 78, 216, 0.6);
+    color: #60a5fa; font-size: 12px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center; flex-shrink: 0; text-transform: uppercase;
 }
 
-
-/* ==========================================================
-   MENSAJES (los genera mostrarFlash() de seguridad.php)
-   ========================================================== */
-.mensaje {
-    padding: 12px 16px;
-    border-radius: 8px;
-    margin: 0 0 20px 0;
-    font-size: 14px;
-    border: 1px solid transparent;
+.user-info { min-width: 0; flex-grow: 1; }
+.user-name {
+    font-size: 12px; font-weight: 600; color: var(--sidebar-text);
+    display: flex; align-items: center; gap: 4px;
 }
+.user-name .dot { width: 6px; height: 6px; border-radius: 50%; background-color: #10b981; }
+.user-role { font-size: 10px; color: var(--sidebar-text-muted); }
+
+.btn-logout {
+    display: flex; align-items: center; justify-content: center; gap: 0.5rem;
+    padding: 0.5rem; border-radius: 0.5rem; color: #fb7185;
+    font-size: 12px; font-weight: 600; text-decoration: none; border: 1px solid transparent; transition: all 0.2s ease;
+}
+.btn-logout svg { width: 16px; height: 16px; }
+.btn-logout:hover { background-color: rgba(76, 5, 25, 0.4); border-color: rgba(136, 19, 55, 0.5); color: #f43f5e; }
+
+/* Responsivo */
+@media (max-width: 768px) { .sidebar { display: none; } }
+
+/* ==========================================
+   🛡️ BLINDAJE CONTRA BULMA / BOOTSTRAP
+   ========================================== */
+.sidebar, .sidebar nav a { line-height: 1.2 !important; box-sizing: border-box !important; }
+.sidebar p, .sidebar h1 { margin: 0 !important; padding: 0 !important; }
+.sidebar svg { display: block !important; }
+
+/* Mensajes Flash */
+.mensaje { padding: 12px 16px; border-radius: 8px; margin: 0 0 20px 0; font-size: 14px; border: 1px solid transparent; }
 .mensaje p { margin: 0; }
 .mensaje p + p { margin-top: 6px; }
 .mensaje-exito { background: #dcfce7; color: #166534; border-color: #bbf7d0; }
