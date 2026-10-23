@@ -183,7 +183,7 @@ require_once __DIR__.'/../model/usuarioModel.php';
         $urlLista = urlAccion('usuario', 'formusuario');
 
         //Recolección del ID del usuario a eliminar
-        $id = validarEntero($_GET['id'] ?? null, 1);
+        $id = validarEntero($_POST['id'] ?? null, 1);
         $usuario = ($id !== null) ? $this->model->getById($id) : false;
         if(!$usuario){
             setFlash('error', 'El usuario que intentas eliminar no existe.');

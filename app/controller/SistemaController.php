@@ -58,9 +58,9 @@ class SistemaController{
 
             }else{
                 //si el usuario no existe o la contraseña es incorrecta, mostrar un mensaje de error
-                echo "<p style='color:red;'>Datos Invalidos. Por favor, verifica tu usuario y contraseña.</p>";
-                require_once __DIR__ . '/../views/login.html'; // o login.html
-
+                $errorLogin = "Datos inválidos. Por favor, verifica tu usuario y contraseña.";
+                require_once __DIR__ . '/../views/login/login.php'; 
+                exit();
 
             }
         }
@@ -79,17 +79,17 @@ class SistemaController{
 
     //Cargar la vista
     require_once __DIR__ . '/../views/dashboard.php';
-}
+    }
 
-public function logout(){
-    //Limpiamos todas las variables de la sesion
-    $_SESSION = array();
+    public function logout(){
+        //Limpiamos todas las variables de la sesion
+        $_SESSION = array();
 
- //destruimos completamente la sesion
-    session_destroy();
+    //destruimos completamente la sesion
+        session_destroy();
 
-    //redireccionamos al login
-    header("Location: index.php");
-    exit();
-}
-}   
+        //redireccionamos al login
+        header("Location: index.php");
+        exit();
+    }
+} 

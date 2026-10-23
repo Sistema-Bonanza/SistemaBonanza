@@ -116,7 +116,7 @@ Class productoModel{
         try{
             //No se borrara registros de la base de dato, se hara un borrado logico al acualizar el estatus del producto a 0 (inactivo)
             //asi no se borra los datos de facturas antiguas con los productos fuera del disponibilidad.
-            $sql = "UPDATE productos SET estado = 0 WHERE id_producto = :id_producto";
+            $sql = "UPDATE tbl_productos SET estado = 0 WHERE id_producto = :id";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':id_producto' => $id_producto]);
             return true;

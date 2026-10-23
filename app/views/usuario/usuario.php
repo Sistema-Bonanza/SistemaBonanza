@@ -103,12 +103,14 @@ if (!isset($_SESSION['user_id'])) {
                                                    title="Editar usuario">
                                                     <span class="icon-edit"></span>
                                                 </a>
-                                                <a href="index.php?controller=usuario&action=eliminar&id=<?= $a['id'] ?>" 
-                                                   class="btn-table btn-delete-table" 
-                                                   title="Eliminar usuario"
-                                                   onclick="return confirm('¿Estás seguro de eliminar este usuario?');">
-                                                    <span class="icon-delete-table"></span>
-                                                </a>
+                                                <form action="index.php?controller=usuario&action=eliminar" method="POST" style="display: inline-block;" onsubmit="return confirm('¿Estás seguro de suspender el acceso a este usuario?');">
+                                                    <?= campoCsrf() ?>
+                                                    <input type="hidden" name="id" value="<?= htmlspecialchars($usuario['id_usuario']) ?>">
+                                                    
+                                                    <button type="submit" class="button is-warning is-small is-light" title="Desactivar Usuario">
+                                                        <span class="icon"><span class="material-symbols-outlined is-size-6">person_off</span></span>
+                                                    </button>
+                                                </form>
                                             </div>
                                         </td>
                                     </tr>

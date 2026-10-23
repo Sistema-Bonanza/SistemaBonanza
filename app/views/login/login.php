@@ -83,6 +83,8 @@
                     </div>
                     <?php endif; ?>
 
+
+                        <?= mostrarFlash() ?>
                     <form action="index.php?controller=sistema&action=procesarLogin" method="POST" id="loginForm" onsubmit="return handleLogin();">
                         <input type="hidden" name="login_form" value="1">
 
@@ -123,40 +125,29 @@
                 </div>
 
                 <footer class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap pt-4 mt-6" style="border-top: 1px solid #e2e8f0;">
-                    <p class="is-size-7 has-text-grey m-0">
-                        © <?php echo date('Y'); ?> <strong class="has-text-dark">Industrias Bonanza</strong> 
-                    </p>
-                    <div class="is-flex is-align-items-center is-size-7" style="gap: 12px;">
-                        <a href="javascript:void(0)" class="has-text-grey hover-link" style="text-decoration: none;">Soporte Técnico</a>
-                        <span class="has-text-grey-light">•</span>
-                        <a href="javascript:void(0)" class="has-text-grey hover-link" style="text-decoration: none;">Normativa Almacén</a>
-                    </div>
-                </footer>
-            </div>
-        </section>
-    </div>
-</main>
+                     <p class="is-size-7 has-text-grey m-0">
+                            © <?php echo date('Y'); ?> <strong class="has-text-dark">Industrias Bonanza</strong> 
+                        </p>
+                        <div class="is-flex is-align-items-center is-size-7" style="gap: 12px;">
+                            <a href="javascript:void(0)" class="has-text-grey hover-link" style="text-decoration: none;">Soporte Técnico</a>
+                            <span class="has-text-grey-light">•</span>
+                            <a href="javascript:void(0)" class="has-text-grey hover-link" style="text-decoration: none;">Normativa Almacén</a>
+                        </div>
+                    </footer>
+                </div>
+            </section>
+        </div>
+    </main>
 
-<script>
-    function togglePasswordVisibility() {
-        const pwdInput = document.getElementById('password');
-        const toggleIcon = document.getElementById('password-toggle-icon');
-        if (pwdInput.type === 'password') {
-            pwdInput.type = 'text';
-            toggleIcon.classList.remove('fa-eye');
-            toggleIcon.classList.add('fa-eye-slash');
-        } else {
-            pwdInput.type = 'password';
-            toggleIcon.classList.remove('fa-eye-slash');
-            toggleIcon.classList.add('fa-eye');
-        }
-    }
+     <!-- CDN de SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    function handleLogin() {
-        const btn = document.getElementById('submit-btn');
-        btn.classList.add('is-loading');
-        return true;
-    }
-</script>
+    <script>
+        // Puente seguro: Pasamos el error de PHP a una variable global de JS
+        const errorMessage = "<?= isset($errorLogin) && !empty($errorLogin) ? htmlspecialchars($errorLogin) : '' ?>";
+    </script>
+
+    <!-- Archivo JavaScript externo y desacoplado -->
+    <script src="assets/js/login.js"></script>
 </body>
 </html>

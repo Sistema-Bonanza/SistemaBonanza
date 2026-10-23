@@ -170,33 +170,46 @@ Class productoController{
         redirigir($urlFormulario);
     }
 
-    public function eliminarProducto(){
+    public function eliminarProducto() {
         exigirSesion();
-        $urlLista = urlAccion('producto', 'TablaProductos');
+        $urlLista = urlAccion('producto', 'tablaproductos'); // Ajusta a 'TablaProductos' si así se llama tu ruta
 
-        // Capturamos el ID ya sea que venga por URL (GET) o por Formulario oculto (POST)
-        $id = validarEntero($_GET['id'] ?? $_POST['id'] ?? null, 1);
+        // 1. Capturamos el ID de forma segura
+        $idBruto = $_POST['id'] ?? $_POST['id_producto'] ?? null;
+        $id = validarEntero($idBruto, 1);
+        
         $producto = ($id !== null) ? $this->productoModel->obtenerProductoPorId($id) : false;
 
-        if(!$producto || (int) $producto['estado'] !== 1){
-            setFlash('error', 'El producto no existe o ya está desactivado.');
+        // 2. Validaciones estrictas
+        if(!$producto) {
+            setFlash('error', 'Fallo de ID: No se recibió un ID válido o el producto no existe.');
             redirigir($urlLista);
         }
 
-        // Regla de consistencia: un producto desactivado desaparece de las listas, así que
-        // si aún tiene unidades en stock, esas existencias quedarían "invisibles" en el inventario.
+        if(!isset($producto['estado'])) {
+            setFlash('error', 'Fallo de SQL: La función obtenerProductoPorId() en tu Modelo no está seleccionando la columna "estado".');
+            redirigir($urlLista);
+        }
+
+        if((int) $producto['estado'] !== 1){
+            setFlash('error', 'El producto ya se encuentra desactivado en el sistema.');
+            redirigir($urlLista);
+        }
+
         if((int) $producto['stock_actual'] > 0){
-            setFlash('error', 'No se puede desactivar «' . $producto['nombre'] . '»: todavía tiene '
-                . (int) $producto['stock_actual'] . ' unidad(es) en stock.');
+            // Guardamos el error en una variable de sesión única para SweetAlert
+            $_SESSION['sweet_error_stock'] = 'No se puede desactivar «' . $producto['nombre'] . '»: todavía tiene ' . (int) $producto['stock_actual'] . ' unidad(es) en almacén.';
             redirigir($urlLista);
         }
 
-        // Ejecutamos el borrado lógico en el modelo
+        // 3. Ejecutamos el borrado lógico (UPDATE) en el modelo
         if($this->productoModel->eliminarProducto($id)){
-            setFlash('exito', 'Producto «' . $producto['nombre'] . '» desactivado.');
+            setFlash('exito', 'Producto «' . $producto['nombre'] . '» desactivado exitosamente.');
         } else {
-            setFlash('error', 'Ocurrió un problema al intentar desactivar el producto.');
+            setFlash('error', 'Ocurrió un problema en la base de datos al intentar desactivar el producto.');
         }
+        
+        // 4. Redirigimos de vuelta a la tabla (Esto es lo que evita la pantalla en blanco)
         redirigir($urlLista);
     }
 

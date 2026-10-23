@@ -61,7 +61,7 @@ class usuarioModel{
     }
 
     public function deleteUsuario($id){
-            $stmt = $this->pdo->prepare("DELETE FROM usuarios WHERE id = :id");
+            $stmt = $this->pdo->prepare("UPDATE usuarios SET is_active = 0 WHERE id_usuario = :id");
             $stmt->execute([':id' => $id]);
             return true; //usuario eliminado exitosamente.
     }

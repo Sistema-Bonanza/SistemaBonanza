@@ -1,0 +1,32 @@
+/* --- ESTILOS PARA LA VISTA DE EDITAR PRODUCTO --- */
+.banner-gradient {
+        background: linear-gradient(to right, #003ea8, #004ac6, #2563eb);
+        border: none;
+        position: relative;
+        overflow: hidden;
+    }
+    .banner-glow {
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        width: 250px;
+        height: 250px;
+        background: rgba(255,255,255,0.1);
+        border-radius: 50%;
+        filter: blur(40px);
+        pointer-events: none;   
+    }
+
+    .form-field-custom {
+        margin-bottom: 1.25rem;
+    }
+
+    .banner-gradient {
+        background: linear-gradient(135deg, #2563eb, #2656bd);
+        color: #ffffff;
+        padding: 25px;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        position: relative;
+        overflow: hidden;
+    }
