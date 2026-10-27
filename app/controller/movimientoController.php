@@ -406,4 +406,78 @@ class MovimientoController {
             echo json_encode(['ok' => false, 'error' => $msjError]);
         }
     }
+
+    public function buscarAjax() {
+    // 1. Recibir variables de JS
+    $busqueda = $_POST['busqueda'] ?? '';
+    $filtro = $_POST['filtro'] ?? 'todas';
+    $pagina = isset($_POST['pagina']) ? (int)$_POST['pagina'] : 1;
+    $limitePorPagina = 10;
+    $offset = ($pagina - 1) * $limitePorPagina;
+
+    // 2. Pedir al modelo que ejecute la consulta SQL
+    // (Necesitarás crear esta función en tu Modelo)
+    $resultados = $this->movimientoModel->obtenerMovimientosPaginados($busqueda, $filtro, $offset, $limitePorPagina);
+    $totalRegistros = $this->movimientoModel->contarMovimientosPaginados($busqueda, $filtro);
+
+    // 3. Construir el HTML de las filas (<tr>)
+    $filasHTML = '';
+    if(!empty($resultados)) {
+        foreach($resultados as $compra) {
+            // Usamos un buffer de salida para no ensuciar el controlador con HTML
+            ob_start();
+            
+            // Reutiliza tus cálculos (fecha en español, iniciales, etc)
+            $fecha = new DateTime($compra['fecha_registro']);
+            // ... (Copia aquí tu lógica de variables para la fila) ...
+
+            // Generamos el HTML exacto de la fila (Copia tu <tr> actual aquí adentro)
+            ?>
+            <tr>
+                <td class="is-vcentered px-4">
+                    <p class="has-text-weight-bold has-text-dark mb-0"><?= $fecha->format('d M Y') ?></p>
+                </td>
+                <!-- ... Resto de tus columnas ... -->
+            </tr>
+            <?php
+            // Guardamos la fila construida y limpiamos el buffer
+            $filasHTML .= ob_get_clean(); 
+        }
+    } else {
+        $filasHTML = '<tr><td colspan="7" class="has-text-centered py-6 has-text-grey">No se encontraron resultados para su búsqueda.</td></tr>';
+    }
+
+    // 4. Construir HTML de paginación matemáticamente
+    $paginacionHTML = ''; 
+    $totalPaginas = ceil($totalRegistros / $limitePorPagina);
+
+    if ($totalPaginas > 0) {
+        // Botón Anterior
+        $prevDisabled = ($pagina <= 1) ? 'disabled' : '';
+        $prevPage = $pagina - 1;
+        $paginacionHTML .= "<a class='pagination-previous' data-pagina='{$prevPage}' {$prevDisabled}><span class='icon'><span class='material-symbols-outlined'>chevron_left</span></span></a>";
+
+        // Botón Siguiente
+        $nextDisabled = ($pagina >= $totalPaginas) ? 'disabled' : '';
+        $nextPage = $pagina + 1;
+        $paginacionHTML .= "<a class='pagination-next' data-pagina='{$nextPage}' {$nextDisabled}><span class='icon'><span class='material-symbols-outlined'>chevron_right</span></span></a>";
+
+        // Números de Página
+        $paginacionHTML .= "<ul class='pagination-list'>";
+        for ($i = 1; $i <= $totalPaginas; $i++) {
+            $isCurrent = ($i == $pagina) ? 'is-current has-background-link has-border-link' : '';
+            $paginacionHTML .= "<li><a class='pagination-link {$isCurrent}' data-pagina='{$i}'>{$i}</a></li>";
+        }
+        $paginacionHTML .= "</ul>";
+    }
+
+    // 5. Responder a JavaScript en formato JSON
+    header('Content-Type: application/json');
+    echo json_encode([
+        'filasHTML' => $filasHTML,
+        'paginacionHTML' => $paginacionHTML,
+        'totalRegistros' => $totalRegistros
+    ]);
+    exit; // Importante para que no se imprima el layout principal
+}
 }

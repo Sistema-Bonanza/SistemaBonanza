@@ -155,4 +155,107 @@ Class movimientoModel {
             return ['ok' => false, 'motivo' => 'error'];
         }
     }
+
+    // ==================================================================================
+    // OBTENER MOVIMIENTOS CON FILTROS Y PAGINACIÓN (SEGURO CONTRA SQL INJECTION)
+    // ==================================================================================
+    public function obtenerMovimientosPaginados($busqueda, $filtro, $offset, $limite) {
+        try {
+            $whereClause = "WHERE 1=1";
+            $params = [];
+
+            // 1. Validación de Búsqueda Segura
+            if (!empty($busqueda)) {
+                // Buscamos coincidencias en factura, proveedor (nombre o RIF) y usuario
+                $whereClause .= " AND (c.numero_factura LIKE :busqueda 
+                                   OR p.razon_social LIKE :busqueda 
+                                   OR p.rif LIKE :busqueda 
+                                   OR u.username LIKE :busqueda)";
+                // Preparamos el comodín % desde PHP, NO desde SQL
+                $params[':busqueda'] = "%{$busqueda}%";
+            }
+
+            // 2. Validación de Filtros (Entradas / Salidas)
+            if ($filtro === 'salidas') {
+                // Como las ventas dicen "Pronto", forzamos 0 resultados de forma segura
+                $whereClause .= " AND 1=0"; 
+            } 
+            // Si es 'entradas' o 'todas', consulta normal a compras. (A futuro aquí añadirás UNION con la tabla ventas).
+
+            $sql = "SELECT 
+                        c.id_compra, c.numero_factura, c.fecha_factura, 
+                        c.fecha_registro, c.total, c.estado,
+                        p.razon_social AS nombre_proveedor, p.rif AS rif_proveedor, 
+                        u.username AS nombre_usuario
+                    FROM compras c
+                    INNER JOIN proveedores p ON c.id_proveedor = p.id_proveedor
+                    INNER JOIN usuarios u ON c.id_usuario = u.id
+                    $whereClause
+                    ORDER BY c.fecha_registro DESC
+                    LIMIT :limite OFFSET :offset";
+
+            $stmt = $this->pdo->prepare($sql);
+
+            // 3. Bind Dinámico de Textos (Buscador)
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value, PDO::PARAM_STR);
+            }
+
+            // 4. Bind Estricto de Enteros (Paginación)
+            // Esto evita que un atacante envíe "?pagina=1; DROP TABLE usuarios"
+            $stmt->bindValue(':limite', (int)$limite, PDO::PARAM_INT);
+            $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
+
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        } catch(PDOException $e) {
+            // Guardamos el error en el log interno, pero no le mostramos la estructura SQL al usuario
+            error_log("Error en obtenerMovimientosPaginados: " . $e->getMessage());
+            return [];
+        }
+    }
+
+    // ==================================================================================
+    // CONTAR TOTAL DE REGISTROS PARA DIBUJAR LA PAGINACIÓN EXACTA
+    // ==================================================================================
+    public function contarMovimientosPaginados($busqueda, $filtro) {
+        try {
+            $whereClause = "WHERE 1=1";
+            $params = [];
+
+            if (!empty($busqueda)) {
+                $whereClause .= " AND (c.numero_factura LIKE :busqueda 
+                                   OR p.razon_social LIKE :busqueda 
+                                   OR p.rif LIKE :busqueda 
+                                   OR u.username LIKE :busqueda)";
+                $params[':busqueda'] = "%{$busqueda}%";
+            }
+
+            if ($filtro === 'salidas') {
+                $whereClause .= " AND 1=0";
+            }
+
+            // Usamos COUNT(*) para no sobrecargar la memoria trayendo datos que no usaremos
+            $sql = "SELECT COUNT(*) 
+                    FROM compras c
+                    INNER JOIN proveedores p ON c.id_proveedor = p.id_proveedor
+                    INNER JOIN usuarios u ON c.id_usuario = u.id
+                    $whereClause";
+
+            $stmt = $this->pdo->prepare($sql);
+            
+            foreach ($params as $key => $value) {
+                $stmt->bindValue($key, $value, PDO::PARAM_STR);
+            }
+            
+            $stmt->execute();
+            // fetchColumn() extrae directamente el número del COUNT
+            return (int) $stmt->fetchColumn();
+
+        } catch(PDOException $e) {
+            error_log("Error en contarMovimientosPaginados: " . $e->getMessage());
+            return 0;
+        }
+    }
 }   

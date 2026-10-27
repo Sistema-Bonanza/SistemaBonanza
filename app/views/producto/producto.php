@@ -31,7 +31,7 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
     
     <!-- 3. CSS externos originales de tu sistema -->
     <link rel="stylesheet" href="assets/css/sidebar.css" />
-    <link rel="stylesheet" href="assets/css/producto.css" />
+    <link rel="stylesheet" href="assets/css/tablas.css" />
 </head>
 <body class="is-flex" style="height: 100vh; overflow: hidden; width: 100%;">
     
@@ -44,55 +44,66 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
 
         <div class="p-5" style="width: 100%;">
             
-            <!-- 1. BANNER PRINCIPAL (HERO) -->
-            <div class="box mb-5 is-shadowless" style="background: linear-gradient(to right, #003ea8, #004ac6, #2563eb); position: relative; overflow: hidden;">
-                <!-- Efecto de brillo de fondo -->
-                <div style="position: absolute; top: -30px; right: -30px; width: 250px; height: 250px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(40px); pointer-events: none;"></div>
+            <!-- ========================================== -->
+    <!-- BANNER PRINCIPAL (Estandarizado) -->
+    <!-- ========================================== -->
+    <div class="box mb-5" style="background: linear-gradient(90deg, #003899 0%, #004ac6 50%, #2563eb 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+        <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
+            
+            <div class="is-flex is-align-items-center" style="gap: 1rem;">
+                <!-- Icono translúcido estandarizado -->
+                <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                    <span class="material-symbols-outlined is-size-3 has-text-white">inventory_2</span>
+                </div>
                 
-                <div class="is-flex is-flex-direction-column-touch is-align-items-center-desktop is-justify-content-space-between" style="position: relative; z-index: 10; gap: 1rem;">
-                    <div class="is-flex is-align-items-center" style="gap: 1rem;">
-                        <div style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
-                            <span class="material-symbols-outlined has-text-white is-size-4">inventory_2</span>
-                        </div>
-                        <div>
-                            <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
-                                <h1 class="title is-4 has-text-white mb-0">Gestión de Inventario</h1>
-                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">Matriz Bonanza</span>
-                            </div>
-                            <p class="has-text-white-ter is-size-7 mt-1">Administra los productos de Distribuidora Bonanza C.A. Controla costos, precios y niveles de stock con trazabilidad total.</p>
-                        </div>
+                <!-- Textos -->
+                <div>
+                    <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
+                        <h1 class="title is-4 has-text-white mb-0">Gestión de Inventario</h1>
+                        <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">Matriz Bonanza</span>
                     </div>
-                    <div>
-                        <a href="index.php?controller=producto&action=formCrear" class="button is-white has-text-link has-text-weight-bold">
-                            <span class="icon"><span class="material-symbols-outlined">add</span></span>
-                            <span>Añadir Producto</span>
-                        </a>
-                    </div>
+                    <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
+                        Administra los productos de Distribuidora Bonanza C.A. Controla costos, precios y niveles de stock con trazabilidad total.
+                    </p>
                 </div>
             </div>
 
+            <!-- Botón de Acción Estandarizado -->
+            <div class="buttons mb-0">
+                <!-- Asegúrate de que el action de urlAccion coincida con tu enrutador -->
+                <a href="<?= esc(urlAccion('producto', 'formCrear')) ?>" class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;">
+                    <span class="icon"><span class="material-symbols-outlined">add</span></span>
+                    <span>Añadir Producto</span>
+                </a>
+            </div>
+            
+        </div>
+    </div>
+
             <!-- 2. TARJETAS DE MÉTRICAS (KPIs DINÁMICOS) -->
             <div class="columns is-multiline mb-4">
-                <!-- KPI 1 -->
+                
+                <!-- KPI 1: Total Registrados (Azul / Información) -->
                 <div class="column is-4-desktop">
-                    <div class="box is-shadowless is-flex is-justify-content-space-between is-align-items-center" style="border: 1px solid #e2e8f0; border-radius: 12px;">
+                    <div class="box is-shadowless is-flex is-justify-content-space-between is-align-items-center" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #3e8ed0;">
                         <div>
                             <p class="heading has-text-grey mb-1">Total Registrados</p>
                             <div class="is-flex is-align-items-baseline" style="gap: 0.5rem;">
                                 <p class="title is-3 mb-0"><?= $totalProductos ?></p>
-                                <p class="is-size-7 has-text-success has-text-weight-bold is-flex is-align-items-center">
+                                <p class="is-size-7 has-text-info has-text-weight-bold is-flex is-align-items-center">
                                     <span class="material-symbols-outlined is-size-6 mr-1">check_circle</span> <?= $porcentajeActivos ?>% Activos
                                 </p>
                             </div>
                         </div>
-                        <div class="has-background-info-light has-text-link" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
-                            <span class="material-symbols-outlined">category</span>
+                        <div class="has-background-info-light has-text-info" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">
+                            <span class="material-symbols-outlined is-size-4">category</span>
                         </div>
                     </div>
                 </div>
-                <!-- KPI 2 -->
+                
+                <!-- KPI 2: Stock Total (Turquesa / Volumen) -->
                 <div class="column is-4-desktop">
-                    <div class="box is-shadowless is-flex is-justify-content-space-between is-align-items-center" style="border: 1px solid #e2e8f0; border-radius: 12px;">
+                    <div class="box is-shadowless is-flex is-justify-content-space-between is-align-items-center" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #00d1b2;">
                         <div>
                             <p class="heading has-text-grey mb-1">Stock Total en Almacén</p>
                             <div class="is-flex is-align-items-baseline" style="gap: 0.5rem;">
@@ -100,24 +111,26 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                 <p class="is-size-7 has-text-grey">unidades físicas</p>
                             </div>
                         </div>
-                        <div class="has-background-info-light has-text-link" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
-                            <span class="material-symbols-outlined">pallet</span>
+                        <div class="has-background-primary-light has-text-primary" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">
+                            <span class="material-symbols-outlined is-size-4">pallet</span>
                         </div>
                     </div>
                 </div>
-                <!-- KPI 3 -->
+                
+                <!-- KPI 3: Estado de Salud (Verde / Éxito) -->
                 <div class="column is-4-desktop">
-                    <div class="box is-shadowless is-flex is-justify-content-space-between is-align-items-center" style="border: 1px solid #e2e8f0; border-radius: 12px;">
+                    <div class="box is-shadowless is-flex is-justify-content-space-between is-align-items-center" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #48c774;">
                         <div>
                             <p class="heading has-text-grey mb-1">Estado de Salud</p>
-                            <p class="title is-5 mb-0">Óptimo</p>
+                            <p class="title is-5 mb-0 has-text-success">Óptimo</p>
                             <p class="is-size-7 has-text-grey mt-1"><?= $activos ?> de <?= $totalProductos ?> listos para venta</p>
                         </div>
-                        <div class="has-background-info-light has-text-link" style="width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
-                            <span class="material-symbols-outlined">verified</span>
+                        <div class="has-background-success-light has-text-success" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">
+                            <span class="material-symbols-outlined is-size-4">verified</span>
                         </div>
                     </div>
                 </div>
+                
             </div>
 
             <!-- 3. BARRA DE FILTROS Y BÚSQUEDA -->
