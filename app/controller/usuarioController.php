@@ -160,7 +160,7 @@ require_once __DIR__.'/../model/usuarioModel.php';
         // updateUsuario() no atrapa errores de la BD: se captura aquí para no mostrar un error fatal.
         $guardado = false;
         try {
-            $guardado = $this->model->updateUsuario($id, $username, $password_hash, $rol);
+            $guardado = $this->model->updateUsuario($id, $username, $rol, $password_hash);
         } catch (PDOException $e) {
             error_log('usuarioController::editar -> ' . $e->getMessage());
         }

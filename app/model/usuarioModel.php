@@ -39,7 +39,7 @@ class usuarioModel{
         }
     }
 
-    public function updateUsuario($id, $username, $password_hash='null', $rol){
+    public function updateUsuario($id, $username, $rol, $password_hash=null){
             
           // Si no se proporciona contraseña, mantener la existente
             if(empty($password_hash)){
