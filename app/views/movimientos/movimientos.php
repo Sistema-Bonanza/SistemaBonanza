@@ -5,358 +5,234 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial de Operaciones · Bonanza</title>
     
-    <!-- Fuentes y Recursos de Iconos -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
     
     <!-- Ruta absoluta a tu CSS centralizado -->
-    <link rel="stylesheet" href="assets/css/sidebar.css" />
-    <link rel="stylesheet" href="assets/css/tablas.css" />
+     <link rel="stylesheet" href="assets/css/sidebar.css" />
 </head>
 
-<body>
+    <body>
 
-    <!-- SIDEBAR ORIGINAL -->
-    <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
+        <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
 
-
-    <!-- CONTENIDO PRINCIPAL (Estilo Productos) -->
-    <main class="main is-flex-grow-1" style="background-color: #f8f9ff; width: 100%; height: 100vh; overflow-y: auto; overflow-x: hidden;">
-        
-        <!-- Mensajes Flash del Sistema -->
-        <?= mostrarFlash(); ?>
-
-        <!-- Contenedor con el mismo padding p-5 que Productos -->
-        <div class="p-5" style="width: 100%;">
-
-            <!-- ========================================== -->
-            <!-- 1. BANNER PRINCIPAL (Heredado de Productos) -->
-            <!-- ========================================== -->
-            <div class="box mb-5" style="background: linear-gradient(90deg, #003899 0%, #004ac6 50%, #2563eb 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
-                <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-                    
-                    <div class="is-flex is-align-items-center" style="gap: 1rem;">
-                        <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
-                            <span class="material-symbols-outlined is-size-3 has-text-white">sync_alt</span>
-                        </div>
-                        <div>
-                            <!-- Título y Etiqueta con las mismas clases y tamaños -->
-                            <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
-                                <h1 class="title is-4 has-text-white mb-0">Módulo de Movimientos</h1>
-                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">Auditoría Kardex</span>
-                            </div>
-                            <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
-                                Auditoría general de ingresos y salidas del almacén central. Control estricto de trazabilidad física, inventario valorizado y comprobantes fiscales.
-                            </p>
-                        </div>
-                    </div>
-
-                    <!-- Botones Dinámicos de Acción -->
-                    <div class="buttons mb-0">
-                        <a href="<?= esc(urlAccion('movimiento', 'crearcompra')) ?>" class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;">
-                            <span class="icon"><span class="material-symbols-outlined">add_circle</span></span>
-                            <span>Registrar Compra</span>
-                        </a>
-                        <button class="button is-ghost has-text-white" disabled title="Próximamente" style="border-radius: 8px; background: rgba(255,255,255,0.15);">
-                            <span class="icon"><span class="material-symbols-outlined">output</span></span>
-                            <span>Registrar Venta (Pronto)</span>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-        <!-- ========================================== -->
-        <!-- 2. TARJETAS DE MÉTRICAS (KPIs) -->
-        <!-- ========================================== -->
-        <div class="columns is-multiline mb-4">
-            
-            <div class="column is-12-mobile is-6-tablet is-3-desktop">
-                <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #3e8ed0;">
-                    <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-                        <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Entradas (Mes)</span>
-                        <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span>
-                    </div>
-                    <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
-                        <div>
-                            <h2 class="title is-3 mb-1">1,250 <span class="is-size-6 has-text-grey has-text-weight-normal">unds.</span></h2>
-                            <p class="is-size-7 has-text-info has-text-weight-bold is-flex is-align-items-center">
-                                <span class="material-symbols-outlined is-size-6 mr-1">trending_up</span> +$4,820.50 val.
-                            </p>
-                        </div>
-                        <div class="has-background-info-light has-text-info is-flex is-align-items-center is-justify-content-center p-2" style="border-radius: 10px;">
-                            <span class="material-symbols-outlined is-size-4">inventory_2</span>
-                        </div>
-                    </div>
-                    <progress class="progress is-info is-small mb-0" value="74" max="100">74%</progress>
-                </div>
-            </div>
-
-            <div class="column is-12-mobile is-6-tablet is-3-desktop">
-                <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #48c774;">
-                    <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-                        <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Salidas (Mes)</span>
-                        <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span>
-                    </div>
-                    <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
-                        <div>
-                            <h2 class="title is-3 mb-1">840 <span class="is-size-6 has-text-grey has-text-weight-normal">unds.</span></h2>
-                            <p class="is-size-7 has-text-success has-text-weight-bold is-flex is-align-items-center">
-                                <span class="material-symbols-outlined is-size-6 mr-1">local_shipping</span> 67.2% rotación
-                            </p>
-                        </div>
-                        <div class="has-background-success-light has-text-success is-flex is-align-items-center is-justify-content-center p-2" style="border-radius: 10px;">
-                            <span class="material-symbols-outlined is-size-4">airport_shuttle</span>
-                        </div>
-                    </div>
-                    <progress class="progress is-success is-small mb-0" value="58" max="100">58%</progress>
-                </div>
-            </div>
-
-            <div class="column is-12-mobile is-6-tablet is-3-desktop">
-                <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #f14668;">
-                    <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-                        <span class="is-size-7 has-text-danger has-text-weight-bold is-uppercase">Stock Crítico</span>
-                        <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span>
-                    </div>
-                    <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
-                        <div>
-                            <h2 class="title is-3 mb-1 has-text-danger">8 <span class="is-size-6 has-text-danger has-text-weight-normal">SKUs</span></h2>
-                            <p class="is-size-7 has-text-danger has-text-weight-bold is-flex is-align-items-center">
-                                <span class="material-symbols-outlined is-size-6 mr-1">warning</span> Requieren compra
-                            </p>
-                        </div>
-                        <div class="has-background-danger-light has-text-danger is-flex is-align-items-center is-justify-content-center p-2" style="border-radius: 10px;">
-                            <span class="material-symbols-outlined is-size-4">battery_alert</span>
-                        </div>
-                    </div>
-                    <progress class="progress is-danger is-small mb-0" value="25" max="100">25%</progress>
-                </div>
-            </div>
-
-            <div class="column is-12-mobile is-6-tablet is-3-desktop">
-                <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #4a4a4a;">
-                    <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-                        <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Auditoría</span>
-                        <span class="tag is-dark is-light">Total Kardex</span>
-                    </div>
-                    <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
-                        <div>
-                            <h2 class="title is-3 mb-1"><?= !empty($compras) ? count($compras) : 0 ?> <span class="is-size-6 has-text-grey has-text-weight-normal">movs.</span></h2>
-                            <p class="is-size-7 has-text-link has-text-weight-bold is-flex is-align-items-center">
-                                <span class="material-symbols-outlined is-size-6 mr-1">verified</span> 100% conciliado
-                            </p>
-                        </div>
-                        <div class="has-background-link-light has-text-link is-flex is-align-items-center is-justify-content-center p-2" style="border-radius: 10px;">
-                            <span class="material-symbols-outlined is-size-4">receipt_long</span>
-                        </div>
-                    </div>
-                    <progress class="progress is-link is-small mb-0" value="100" max="100">100%</progress>
-                </div>
-            </div>
-        </div>
-
-        <!-- ========================================== -->
-        <!-- 3. BARRA DE FILTROS Y BÚSQUEDA -->
-        <!-- ========================================== -->
-        <div class="box is-shadowless mb-5 p-4" style="border: 1px solid #e2e8f0; border-radius: 12px;">
-            <div class="is-flex is-flex-wrap-wrap is-align-items-center is-justify-content-space-between" style="gap: 1rem;">
-                <div class="control has-icons-left" style="flex-grow: 1; max-width: 400px;">
-                    <input class="input" type="text" id="input-busqueda" placeholder="Buscar documento o usuario..." style="border-radius: 8px; background-color: #f8fafc;">
-                    <span class="icon is-left has-text-grey-light"><span class="material-symbols-outlined">search</span></span>
-                </div>
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="main-content" style="width: 100%; flex-grow: 1; max-width: 100%; overflow-x: hidden; padding: 30px;">
                 
-                <div class="is-flex is-align-items-center is-flex-wrap-wrap" style="gap: 1rem;">
-                    <button class="button is-link is-selected btn-filtro" data-filtro="todas" style="border-radius: 6px 0 0 6px;">
-                        <span class="icon is-small"><span class="material-symbols-outlined">list</span></span><span>Todas</span>
-                    </button>
-                    <button class="button btn-filtro" data-filtro="entradas">
-                        <span class="icon is-small has-text-info"><span class="material-symbols-outlined">south_east</span></span><span>Entradas</span>
-                    </button>
-                    <button class="button btn-filtro" data-filtro="salidas" style="border-radius: 0 6px 6px 0;">
-                        <span class="icon is-small has-text-success"><span class="material-symbols-outlined">north_east</span></span><span>Salidas</span>
-                    </button>
-                </div>
-                    <div class="control">
-                        <div class="select">
-                            <select style="border-radius: 6px; background-color: #f8fafc;" disabled>
-                                <option>Rango: Últimos 30 días (Pronto)</option>
-                            </select>
+                <!-- CABECERA -->
+                <div class="level mb-5">
+                    <div class="level-left">
+                        <div>
+                            <h1 class="title is-4 mb-1">Módulo de Movimientos</h1>
+                            <p class="has-text-grey mt-1">Auditoría general de ingresos y salidas del almacén.</p>
                         </div>
                     </div>
-                    <button class="button is-light" disabled style="border-radius: 6px;">
-                        <span class="icon"><span class="material-symbols-outlined">download</span></span>
-                        <span>Exportar PDF</span>
-                    </button>
+                    <div class="level-right">
+                        <div class="buttons">
+                            <!-- A13: Usar urlAccion en lugar de la URL escrita a mano -->
+                            <a href="<?= esc(urlAccion('movimiento', 'crearcompra')) ?>" class="button is-link has-text-weight-bold">
+                                <span class="icon is-small"><i class="fas fa-truck-ramp-box"></i></span>
+                                <span>Registrar Compra</span>
+                            </a>
+                            <a href="<?= esc(urlAccion('venta', 'crearVenta')) ?>" class="button is-success has-text-weight-bold">
+                                <span class="icon is-small"><i class="fas fa-cart-shopping"></i></span>
+                                <span>Registrar Venta</span>
+                            </a>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <!-- ========================================== -->
-        <!-- 4. TABLA DE OPERACIONES DINÁMICA -->
-        <!-- ========================================== -->
-        <div class="box is-shadowless p-0 mb-5" style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
-            <div class="p-4 is-flex is-align-items-center is-justify-content-space-between has-background-white-ter" style="border-bottom: 1px solid #e2e8f0;">
-                <div class="is-flex is-align-items-center" style="gap: 1rem;">
-                    <h2 class="title is-5 mb-0 has-text-dark">Resumen de Operaciones</h2>
-                    <span class="tag is-white" style="border: 1px solid #cbd5e1;">Auditoría Permanente</span>
+                <!-- A13: Mostrar el mensaje Flash para confirmar el registro -->
+                <?php echo mostrarFlash(); ?>
+
+                <!-- TARJETAS DE INDICADORES (KPIs) -->
+                <div class="columns is-multiline mb-5">
+                    <!-- A13: KPIs marcados como DEMO -->
+                    <div class="column is-4">
+                        <div class="box is-flex is-align-items-center is-justify-content-space-between" style="border-left: 4px solid #3e8ed0; height: 100%;">
+                            <div>
+                                <p class="heading has-text-grey has-text-weight-bold mb-1">Entradas (Mes) <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span></p>
+                                <p class="title is-3 mb-0">1,250 <span class="is-size-6 has-text-grey has-text-weight-normal">unds.</span></p>
+                            </div>
+                            <div class="has-background-info-light has-text-info is-flex is-align-items-center is-justify-content-center" style="width: 48px; height: 48px; border-radius: 12px; font-size: 1.5rem;">
+                                <i class="fas fa-box-open"></i>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="column is-4">
+                        <div class="box is-flex is-align-items-center is-justify-content-space-between" style="border-left: 4px solid #48c774; height: 100%;">
+                            <div>
+                                <p class="heading has-text-grey has-text-weight-bold mb-1">Salidas (Mes) <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span></p>
+                                <p class="title is-3 mb-0">840 <span class="is-size-6 has-text-grey has-text-weight-normal">unds.</span></p>
+                            </div>
+                            <div class="has-background-success-light has-text-success is-flex is-align-items-center is-justify-content-center" style="width: 48px; height: 48px; border-radius: 12px; font-size: 1.5rem;">
+                                <i class="fas fa-truck-fast"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="column is-4">
+                        <div class="box is-flex is-align-items-center is-justify-content-space-between" style="border-left: 4px solid #f14668; height: 100%;">
+                            <div>
+                                <p class="heading has-text-grey has-text-weight-bold mb-1">Stock Crítico <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span></p>
+                                <p class="title is-3 has-text-danger mb-0">8 <span class="is-size-6 has-text-danger-light has-text-weight-normal">SKUs</span></p>
+                                <p class="is-size-7 has-text-danger mt-1"><i class="fas fa-triangle-exclamation"></i> Requieren reabastecimiento</p>
+                            </div>
+                            <div class="has-background-danger-light has-text-danger is-flex is-align-items-center is-justify-content-center" style="width: 48px; height: 48px; border-radius: 12px; font-size: 1.5rem;">
+                                <i class="fas fa-battery-quarter"></i>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <div class="table-container mb-0">
-                <table class="table is-fullwidth is-hoverable is-striped mb-0">
-                    <thead>
-                        <tr class="is-size-7 has-text-grey is-uppercase" style="background-color: #f8fafc;">
-                            <th class="py-3 px-4">Fecha / Hora</th>
-                            <th class="py-3 px-4">Operación</th>
-                            <th class="py-3 px-4">Documento / Ref.</th>
-                            <th class="py-3 px-4">Entidad / Usuario</th>
-                            <th class="py-3 px-4 has-text-right">Monto Total</th>
-                            <th class="py-3 px-4 has-text-centered">Estado Kardex</th>
-                            <th class="py-3 px-4 has-text-right">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="is-size-6 id=tbody-movimientos">
-                        <?php if(!empty($compras)): ?>
-                            <?php 
-                                $meses_es = ['Jan'=>'Ene', 'Feb'=>'Feb', 'Mar'=>'Mar', 'Apr'=>'Abr', 'May'=>'May', 'Jun'=>'Jun', 'Jul'=>'Jul', 'Aug'=>'Ago', 'Sep'=>'Sep', 'Oct'=>'Oct', 'Nov'=>'Nov', 'Dec'=>'Dic'];
-                            ?>
-                            
-                            <?php foreach ($compras as $compra): ?>
-                                <?php 
-                                    // Formateo de Fechas en Español
-                                    $fecha = new DateTime($compra['fecha_registro']);
-                                    $mesIngles = $fecha->format('M');
-                                    $fechaFormat = $fecha->format('d ') . $meses_es[$mesIngles] . $fecha->format(' Y');
-                                    $horaFormat = $fecha->format('h:i A');
-                                    
-                                    // Generador de Iniciales (Avatar)
-                                    $iniciales = strtoupper(substr(esc($compra['nombre_proveedor']), 0, 2));
-                                ?>
+
+                <!-- BARRA DE BÚSQUEDA Y FILTROS -->
+                <!-- A13: Deshabilitados y marcados como Próximamente -->
+                <div class="box mb-5">
+                    <div class="columns is-vcentered mb-0">
+                        <div class="column is-7 pb-0 pt-0">
+                            <div class="control has-icons-left">
+                                <input class="input" placeholder="Buscar N° de Documento o Usuario... (Próximamente)" type="text" disabled>
+                                <span class="icon is-small is-left has-text-grey-light"><i class="fas fa-search"></i></span>
+                            </div>
+                        </div>
+                        <div class="column is-5 pb-0 pt-0">
+                            <div class="control has-icons-left is-expanded">
+                                <div class="select is-fullwidth">
+                                    <select disabled>
+                                        <option selected>Rango: Últimos 30 días (Pronto)</option>
+                                    </select>
+                                </div>
+                                <span class="icon is-small is-left has-text-grey-light"><i class="fas fa-calendar-alt"></i></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TABLA PRINCIPAL -->
+                <div class="box p-0" style="overflow: hidden;">
+                    <div class="tabs is-boxed mb-0 pt-3 px-4 has-background-white-ter">
+                        <ul>
+                            <li class="is-active"><a><span class="icon is-small"><i class="fas fa-list"></i></span><span>Todas</span></a></li>
+                            <!-- A13: Deshabilitadas -->
+                            <li><a class="has-text-info has-text-grey-light" title="Próximamente"><span class="icon is-small"><i class="fas fa-arrow-down"></i></span><span>Entradas</span></a></li>
+                            <li><a class="has-text-success has-text-grey-light" title="Próximamente"><span class="icon is-small"><i class="fas fa-arrow-up"></i></span><span>Salidas</span></a></li>
+                        </ul>
+                    </div>
+
+                    <div class="level px-4 py-3 mb-0" style="border-bottom: 1px solid #ededed;">
+                        <div class="level-left">
+                            <h2 class="has-text-weight-bold is-size-5">Resumen de Operaciones</h2>
+                        </div>
+                        <div class="level-right">
+                            <!-- A13: Botón deshabilitado -->
+                            <button class="button is-small is-light" disabled title="Próximamente">
+                                <span class="icon is-small has-text-danger"><i class="fas fa-file-pdf"></i></span>
+                                <span>Exportar PDF (Pronto)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <div class="table-container mb-0">
+                        <table class="table is-fullwidth is-hoverable is-vcentered mb-0">
+                            <thead class="has-background-white-ter">
                                 <tr>
-                                    <!-- Col 1: Fecha / Hora -->
-                                    <td class="is-vcentered px-4">
-                                        <p class="has-text-weight-bold has-text-dark mb-0"><?= $fechaFormat ?></p>
-                                        <p class="is-size-7 has-text-grey is-flex is-align-items-center mt-1">
-                                            <span class="material-symbols-outlined is-size-7 mr-1">schedule</span> <?= $horaFormat ?>
-                                        </p>
-                                    </td>
-
-                                    <!-- Col 2: Operación -->
-                                    <td class="is-vcentered px-4">
-                                        <span class="tag is-info is-light has-text-weight-bold">
-                                            <span class="material-symbols-outlined is-size-6 mr-1">south_east</span> COMPRA
-                                        </span>
-                                        <?php if(isset($compra['estado']) && $compra['estado'] == 0): ?>
-                                            <br><span class="tag is-danger is-light is-small mt-1" style="font-size: 0.65rem;">ANULADA</span>
-                                        <?php endif; ?>
-                                    </td>
-
-                                    <!-- Col 3: Documento / Ref -->
-                                    <td class="is-vcentered px-4">
-                                        <a href="<?= esc(urlAccion('movimiento', 'verDetalleCompra', ['id' => $compra['id_compra']])) ?>" class="has-text-weight-bold has-text-success mb-0 is-block" style="font-family: monospace;">
-                                            <?= esc($compra['numero_operacion']) ?>
-                                        </a>
-                                        <p class="is-size-7 has-text-grey mt-1">Ref: Factura <?= esc($compra['numero_factura']) ?></p>
-                                    </td>
-
-                                    <!-- Col 4: Entidad / Usuario -->
-                                    <td class="is-vcentered px-4">
-                                        <div class="is-flex is-align-items-center" style="gap: 0.75rem;">
-                                            <div class="has-background-link-light has-text-link has-text-weight-bold is-flex is-align-items-center is-justify-content-center" style="width: 32px; height: 32px; border-radius: 50%;">
-                                                <?= $iniciales ?>
-                                            </div>
-                                            <div>
-                                                <p class="has-text-weight-bold has-text-dark mb-0"><?= esc($compra['nombre_proveedor']) ?></p>
-                                                <p class="is-size-7 has-text-grey is-flex is-align-items-center mt-1">
-                                                    <?= esc($compra['rif_proveedor'] ?? 'SIN RIF') ?> 
-                                                    <span class="mx-1">•</span> 
-                                                    <span class="has-text-link is-flex is-align-items-center">
-                                                        <span class="material-symbols-outlined is-size-7 mr-1">person</span> 
-                                                        <?= esc($compra['nombre_usuario'] ?? 'Sistema') ?>
-                                                    </span>
-                                                </p>
-                                            </div>
-                                        </div>
-                                    </td>
-
-                                    <!-- Col 5: Monto Total -->
-                                    <td class="is-vcentered px-4 has-text-right">
-                                        <p class="has-text-weight-bold has-text-dark mb-0 is-size-5">$<?= number_format($compra['total'], 2, ',', '.') ?></p>
-                                        <p class="is-size-7 has-text-grey mt-1">USD Base</p>
-                                    </td>
-
-                                    <!-- Col 6: Estado Kardex -->
-                                    <td class="is-vcentered px-4 has-text-centered">
-                                        <?php if(isset($compra['estado']) && $compra['estado'] == 0): ?>
-                                            <span class="tag is-rounded is-danger is-light">
-                                                <span style="width: 6px; height: 6px; border-radius: 50%; background: #f14668; margin-right: 6px;"></span> Revertido
-                                            </span>
-                                        <?php else: ?>
-                                            <span class="tag is-rounded is-success is-light">
-                                                <span style="width: 6px; height: 6px; border-radius: 50%; background: #48c774; margin-right: 6px;"></span> Asentado
-                                            </span>
-                                        <?php endif; ?>
-                                    </td>
-
-                                    <!-- Col 7: Acciones -->
-                                    <td class="is-vcentered px-4 has-text-right">
-                                        <div class="buttons is-right mb-0">
-                                            <a href="<?= esc(urlAccion('movimiento', 'verDetalleCompra', ['id' => $compra['id_compra']])) ?>" class="button is-small is-light" title="Ver Detalle">
-                                                <span class="icon has-text-grey"><span class="material-symbols-outlined">visibility</span></span>
-                                            </a>
-                                            <button class="button is-small is-light" title="Descargar Comprobante (Pronto)" disabled>
-                                                <span class="icon has-text-grey-light"><span class="material-symbols-outlined">description</span></span>
-                                            </button>
-                                        </div>
-                                    </td>
+                                    <th>Fecha / Hora</th>
+                                    <th>Operación</th>
+                                    <th>Documento / Ref.</th>
+                                    <th>Entidad / Usuario</th>
+                                    <th class="has-text-centered">Monto Total</th>
+                                    <th class="has-text-right">Detalles</th>
                                 </tr>
-                            <?php endforeach; ?>
-                        <?php else: ?>
-                            <!-- Estado Vacío -->
-                            <tr>
-                                <td colspan="7" class="has-text-centered py-6">
-                                    <div class="is-flex is-flex-direction-column is-align-items-center">
-                                        <span class="material-symbols-outlined has-text-grey-light mb-3" style="font-size: 3rem;">inventory_2</span>
-                                        <p class="has-text-grey has-text-weight-bold is-size-5">No hay operaciones registradas.</p>
-                                        <p class="has-text-grey-light is-size-7 mt-1">Haz clic en "Registrar Compra" para comenzar a poblar el Kardex.</p>
-                                    </div>
-                                </td>
-                            </tr>
-                        <?php endif; ?>
-                    </tbody>
-                </table>
-            </div>
-            
-            <!-- Paginación Footer -->
-            <div class="p-4 has-background-white-ter is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="border-top: 1px solid #e2e8f0; gap: 1rem;">
-                <p class="is-size-7 has-text-grey">
-                    Total registros: <strong class="has-text-dark"><?= !empty($compras) ? count($compras) : 0 ?></strong>
-                </p>
-                <!-- Paginación UI (Estática temporalmente) -->
-                <nav id="contenedor-paginacion" class="pagination is-small is-right mb-0" role="navigation" aria-label="pagination">
-                    <a class="pagination-previous" disabled>
-                        <span class="icon"><span class="material-symbols-outlined">chevron_left</span></span>
-                    </a>
-                    <a class="pagination-next" disabled>
-                        <span class="icon"><span class="material-symbols-outlined">chevron_right</span></span>
-                    </a>
-                    <ul class="pagination-list">
-                        <li><a class="pagination-link is-current has-background-link has-border-link">1</a></li>
-                    </ul>
-                </nav>
-            </div>
-        </div>
-        </div>
-        <!-- Pasamos el token CSRF a JavaScript de forma segura -->
-        <script>
-            window.csrfToken = "<?= $_SESSION['csrf_token'] ?? '' ?>"; 
-            // Nota: Si tu sistema usa una función específica para obtener el token en vez de $_SESSION, 
-            // como generarTokenCsrf(), cámbiala aquí.
-        </script>
+                            </thead>
+                            <tbody>
+                                <?php if(!empty($compras)): ?>
+                                    <?php 
+                                    // A13: Arreglo de meses en español
+                                    $meses_es = ['Jan'=>'Ene', 'Feb'=>'Feb', 'Mar'=>'Mar', 'Apr'=>'Abr', 'May'=>'May', 'Jun'=>'Jun', 'Jul'=>'Jul', 'Aug'=>'Ago', 'Sep'=>'Sep', 'Oct'=>'Oct', 'Nov'=>'Nov', 'Dec'=>'Dic'];
+                                    ?>
+                                    <?php foreach ($compras as $compra): ?>
+                                    <tr>
+                                        <!-- Columna 1: Fecha y Hora -->
+                                         <td class="has-text-weight-bold">
+                                            <?php 
+                                                // A13: FORMATO CON MES EN ESPAÑOL
+                                                $fecha = new DateTime($compra['fecha_registro']);
+                                                $mesIngles = $fecha->format('M');
+                                                echo $fecha->format('d ') . $meses_es[$mesIngles] . $fecha->format(' Y');
+                                            ?>
+                                            <br> 
+                                            <!-- A13: SE AGREGA EL ECHO FALTANTE -->
+                                            <span class= "has-text-grey is-size-7 has-text-weight-normal">
+                                                <?php echo $fecha->format('h:i A'); ?>
+                                            </span>
+                                         </td>
 
-        <!-- Conexión del motor AJAX -->
-        <script src="assets/js/movimientos.js?v=<?= time() ?>"></script>
-    </main>
-</body>
+                                        <!--COLUMNA 2: OPERACION -->
+                                        <td>
+                                            <!-- A13: COMILLAS AGREGADAS A LA CLASE -->
+                                            <span class="tag is-info is-light has-text-weight-bold">COMPRA</span>
+                                            
+                                            <!-- A13: MOSTRAR ESTADO (ANULADA) -->
+                                            <?php if(isset($compra['estado']) && $compra['estado'] == 0): ?>
+                                                <br><span class="tag is-danger is-light is-small mt-1" style="font-size: 0.65rem;">ANULADA</span>
+                                            <?php endif; ?>
+                                        </td> 
+
+                                        <!--COLUMNA 3 DOCUMENTO / REF -->
+                                            <td class="has-text-weight-bold">
+                                                <!-- Número de Operación de la Base de Datos -->
+                                                <a href="<?= esc(urlAccion('movimiento', 'verDetalleCompra', ['id' => $compra['id_compra']])) ?>" class="has-text-success">
+                                                    <?= esc($compra['numero_operacion']) ?>
+                                                </a>
+                                                <br>
+                                                <!-- Referencia Física del Proveedor -->
+                                                <span class="has-text-grey is-size-7 has-text-weight-normal">
+                                                    Ref: Factura <?= esc($compra['numero_factura']) ?>
+                                                </span>
+                                            </td>
+
+                                        <!--COLUMNA 4: ENTIDAD (PROVEEDOR / CLIENTE) Y USUARIO -->
+                                        <td class="has-text-weight-bold">
+                                            <?= esc($compra['nombre_proveedor']) ?>
+                                            <br>
+                                            <span class="has-text-grey is-size-7 has-text-weight-normal">
+                                                <?= esc($compra['rif_proveedor'] ?? 'SIN RIF') ?>
+                                            </span>
+                                            <br>
+                                            <!-- A13: MOSTRAR NOMBRE DE USUARIO -->
+                                            <span class="has-text-grey-light is-size-7 has-text-weight-normal">
+                                                <i class="fas fa-user-circle"></i> <?= esc($compra['nombre_usuario'] ?? 'Sistema') ?>
+                                            </span>
+                                        </td>
+
+                                        <!--COLUMNA 5: MONTO-->
+                                        <td class="has-text-weight-bold is-size has-text-centered">
+                                            $<?= number_format($compra['total'], 2, ',', '.') ?>
+                                        </td>
+
+                                        <!--COLUMNA 6 DETALLES -->
+                                        <td class="has-text-right"> 
+                                            <!-- A13: USO CORRECTO DE URLACCION CON ARREGLO DE PARÁMETROS -->
+                                            <a href="<?= esc(urlAccion('movimiento', 'verDetalleCompra', ['id' => $compra['id_compra']])) ?>" class="button is-small is-light">
+                                                <span class="icon">
+                                                    <i class="fas fa-eye"></i>
+                                                </span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <tr>
+                                        <td colspan="6" class="has-text-centered py-5 has-text-grey">
+                                            No hay operaciones registradas.
+                                        </td>
+                                    </tr>
+                                <?php endif; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+        </main>
+    </body>
 </html>

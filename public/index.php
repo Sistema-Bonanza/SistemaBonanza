@@ -53,7 +53,7 @@ const SESION_MAX      = 28800;   // duración máxima absoluta de una sesión (8
 const REVALIDAR_CADA  = 60;      // cada cuántos segundos se consulta la BD (0 = en cada petición)
 
 // Conjuntos de roles (siempre en minúsculas)
-const ROLES_ADMIN        = ['admin'];
+const ROLES_ADMIN        = ['admin'];  // el que administra usuarios y precios
 const ROLES_TODOS        = ['admin', 'operador'];             // los que operan el sistema
 const ROLES_AUTENTICADOS = ['admin', 'operador', 'usuario'];  // cualquier usuario con login
 
@@ -252,18 +252,18 @@ $rutas = [
         ],
     ],
 
-    // Descomenta cuando construyamos el módulo de Ventas:
-    // 'venta' => [
-    //     'archivo'  => 'ventaController.php',
-    //     'clase'    => 'VentaController',
-    //     'acciones' => [
-    //         'index'   => ruta('GET',  ROLES_TODOS),
-    //         'crear'   => ruta('GET',  ROLES_TODOS),
-    //         'guardar' => ruta('POST', ROLES_TODOS),
-    //         'ver'     => ruta('GET',  ROLES_TODOS),
-    //         'anular'  => ruta('POST', ROLES_ADMIN),
-    //     ],
-    // ],
+
+     'venta' => [
+         'archivo'  => 'VentaController.php',
+         'clase'    => 'VentaController',
+         'acciones' => [
+             'tablaventas'   => ruta('GET',  ROLES_TODOS),
+             'verdetalleventa'   => ruta('GET',  ROLES_TODOS),
+             'crearventa' => ruta('GET', ROLES_TODOS),
+             'guardarventa' => ruta('POST', ROLES_TODOS), 
+             'anularventa' => ruta('POST', ROLES_ADMIN),
+         ],
+     ],
 ];
 
 

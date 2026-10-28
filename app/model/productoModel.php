@@ -21,7 +21,8 @@ Class productoModel{
                     c.nombre AS nombre_categoria,
                     prod.stock_actual,
                     prod.precio_compra,
-                    prod.precio_venta
+                    prod.precio_venta,
+                    prod.aplica_iva
                     FROM productos prod
                     INNER JOIN categorias c ON prod.id_categoria = c.id_categoria
                     WHERE prod.estado = 1 
@@ -116,7 +117,7 @@ Class productoModel{
         try{
             //No se borrara registros de la base de dato, se hara un borrado logico al acualizar el estatus del producto a 0 (inactivo)
             //asi no se borra los datos de facturas antiguas con los productos fuera del disponibilidad.
-            $sql = "UPDATE tbl_productos SET estado = 0 WHERE id_producto = :id";
+            $sql = "UPDATE productos SET estado = 0 WHERE id_producto = :id_producto";
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([':id_producto' => $id_producto]);
             return true;
