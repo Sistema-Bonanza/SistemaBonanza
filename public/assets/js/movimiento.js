@@ -8,61 +8,68 @@ document.addEventListener('DOMContentLoaded', () => {
     let paginaActual = 1;
     let temporizadorBuscador;
 
-    // 1. Función principal que hace la petición AJAX
     const cargarMovimientos = async () => {
-        const termino = inputBusqueda.value.trim();
+        const termino = inputBusqueda ? inputBusqueda.value.trim() : '';
         
-        // Creamos un FormData para enviar por POST
-        const data = new FormData();
-        data.append('busqueda', termino);
-        data.append('filtro', filtroActual);
-        data.append('pagina', paginaActual);
-        
-        // ¡NUEVO! Enviamos el token de seguridad que pide tu enrutador
-        if (window.csrfToken) {
-            data.append('csrf_token', window.csrfToken); 
-        }
+        // 1. Construimos los parámetros para enviarlos por la URL (Método GET)
+        const params = new URLSearchParams({
+            busqueda: termino,
+            filtro: filtroActual,
+            pagina: paginaActual
+        });
 
         try {
-            // Ajusta la URL según tu enrutador (index.php?controller=...)
-            const respuesta = await fetch('index.php?controller=movimiento&action=buscarAjax', {
-                method: 'POST',
-                body: data
+            // 2. Enviamos la petición por GET con la firma oficial de AJAX
+            const respuesta = await fetch(`index.php?controller=movimiento&action=buscarajax&${params.toString()}`, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
             });
             
-            const json = await respuesta.json();
+            const textoRespuesta = await respuesta.text();
+            let json;
             
-            // Inyectamos el HTML que nos devuelva PHP
-            tbody.innerHTML = json.filasHTML;
-            paginacion.innerHTML = json.paginacionHTML;
+            try {
+                json = JSON.parse(textoRespuesta);
+            } catch (e) {
+                throw new Error("Respuesta no válida del servidor. Código HTTP: " + respuesta.status);
+            }
             
-            // Actualizamos el contador total si existe
+            if (!respuesta.ok) {
+                throw new Error(json.message || "Error interno del servidor");
+            }
+            
+            // 3. Pintamos los datos si todo salió bien
+            if (tbody) tbody.innerHTML = json.filasHTML;
+            if (paginacion) paginacion.innerHTML = json.paginacionHTML;
+            
             const totalLabel = document.querySelector('#total-registros-label');
-            if(totalLabel) totalLabel.textContent = json.totalRegistros;
+            if (totalLabel) totalLabel.textContent = json.totalRegistros;
 
         } catch (error) {
-            console.error("Error en AJAX:", error);
-            tbody.innerHTML = '<tr><td colspan="7" class="has-text-centered has-text-danger">Error de conexión. Intente nuevamente.</td></tr>';
+            console.error("Error capturado:", error);
+            // Mostrará el error real en la tabla en lugar de quedarse en blanco
+            if (tbody) {
+                tbody.innerHTML = `<tr><td colspan="7" class="has-text-centered has-text-danger py-5">
+                    <span class="material-symbols-outlined mb-2 is-size-3">error</span><br>
+                    <strong>Error en la búsqueda:</strong> ${error.message}
+                </td></tr>`;
+            }
         }
     };
 
-    // 2. Evento: Escribir en el buscador (con "Debounce" para no saturar la base de datos por cada letra)
-    inputBusqueda.addEventListener('keyup', () => {
-        clearTimeout(temporizadorBuscador);
-        paginaActual = 1; // Volver a la página 1 al buscar
-        temporizadorBuscador = setTimeout(cargarMovimientos, 400); // Espera 400ms después de dejar de escribir
-    });
+    if (inputBusqueda) {
+        inputBusqueda.addEventListener('keyup', () => {
+            clearTimeout(temporizadorBuscador);
+            paginaActual = 1;
+            temporizadorBuscador = setTimeout(cargarMovimientos, 400);
+        });
+    }
 
-    // 3. Evento: Clic en los botones de filtro
     botonesFiltro.forEach(btn => {
         btn.addEventListener('click', (e) => {
-            // Quitar clase activa a todos los botones
-            botonesFiltro.forEach(b => {
-                b.classList.remove('is-link', 'is-selected');
-                // Devolver el color original al icono según tu diseño
-            });
-            
-            // Agregar clase activa al botón presionado
+            botonesFiltro.forEach(b => b.classList.remove('is-link', 'is-selected'));
             const botonPresionado = e.currentTarget;
             botonPresionado.classList.add('is-link', 'is-selected');
             
@@ -72,13 +79,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // 4. Evento: Clic en botones de paginación (Delegación de eventos porque los botones se recrean dinámicamente)
-    paginacion.addEventListener('click', (e) => {
-        // Buscar si hicimos clic en un enlace de paginación
-        const link = e.target.closest('.pagination-link');
-        if (link && !link.hasAttribute('disabled')) {
-            paginaActual = link.getAttribute('data-pagina');
-            cargarMovimientos();
-        }
-    });
+    if (paginacion) {
+        paginacion.addEventListener('click', (e) => {
+            const link = e.target.closest('.pagination-link, .pagination-previous, .pagination-next');
+            if (link && !link.hasAttribute('disabled')) {
+                paginaActual = link.getAttribute('data-pagina');
+                cargarMovimientos();
+            }
+        });
+    }
+
+    // Disparamos la carga inicial al entrar
+    cargarMovimientos();
 });

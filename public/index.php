@@ -219,8 +219,8 @@ $rutas = [
             'guardarcompra'           => ruta('POST', ROLES_TODOS),                 // ya lleva token
             // Decisión pendiente: ¿puede el operador crear presentaciones desde el modal?
             // Si sí, cambia ROLES_ADMIN por ROLES_TODOS.
-            'guardarpresentacionajax' => ruta('POST', ROLES_ADMIN, true, true),     // fetch: errores en JSON
-            'buscarAjax' => ruta('POST', ROLES_TODOS, true, true),
+            'guardarpresentacionajax' => ruta('POST', ROLES_TODOS, true, true),     // fetch: errores en JSON
+            'buscarajax' => ruta('GET', ROLES_TODOS, true, true),
             // Descomenta cuando exista el método en el controlador (la vista ya lo enlaza):
             // 'verdetallecompra'     => ruta('GET',  ROLES_TODOS),
         ],
