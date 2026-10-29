@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Historial de Operaciones · Bonanza</title>
     
+    <!-- Fuentes y Recursos de Iconos -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
     
     <!-- CSS del sistema -->
@@ -51,20 +53,20 @@
                             </p>
                         </div>
                     </div>
-                    <div class="level-right">
-                        <div class="buttons">
-                            <!-- A13: Usar urlAccion en lugar de la URL escrita a mano -->
-                            <a href="<?= esc(urlAccion('movimiento', 'crearcompra')) ?>" class="button is-link has-text-weight-bold">
-                                <span class="icon is-small"><i class="fas fa-truck-ramp-box"></i></span>
-                                <span>Registrar Compra</span>
-                            </a>
-                            <a href="<?= esc(urlAccion('venta', 'crearVenta')) ?>" class="button is-success has-text-weight-bold">
-                                <span class="icon is-small"><i class="fas fa-cart-shopping"></i></span>
-                                <span>Registrar Venta</span>
-                            </a>
-                        </div>
+
+                    <!-- Botones Dinámicos de Acción -->
+                    <div class="buttons mb-0">
+                        <a href="<?= esc(urlAccion('movimiento', 'crearcompra')) ?>" class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;">
+                            <span class="icon"><span class="material-symbols-outlined">add_circle</span></span>
+                            <span>Registrar Entrada (Compra)</span>
+                        </a>
+                        <a href="<?= esc(urlAccion('venta', 'crearVenta')) ?>" class="button is-ghost has-text-white" style="border-radius: 8px; background: rgba(255,255,255,0.15);">
+                            <span class="icon"><span class="material-symbols-outlined">output</span></span>
+                            <span>Registrar Salida / Venta</span>
+                        </a>
                     </div>
                 </div>
+            </div>
 
             <!-- ========================================== -->
             <!-- 2. TARJETAS DE MÉTRICAS (KPIs) -->
@@ -75,7 +77,7 @@
                 <div class="column is-12-mobile is-6-tablet is-3-desktop">
                     <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #3e8ed0;">
                         <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-                            <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Entradas (Mes)</span>
+                            <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Entradas (Mes) <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span></span>
                             <span class="tag is-info is-light is-rounded" style="font-size: 0.6rem;">Período Actual</span>
                         </div>
                         <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
@@ -97,7 +99,7 @@
                 <div class="column is-12-mobile is-6-tablet is-3-desktop">
                     <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #48c774;">
                         <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-                            <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Salidas (Mes)</span>
+                            <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Salidas (Mes) <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span></span>
                             <span class="tag is-success is-light is-rounded" style="font-size: 0.6rem;">Despachos</span>
                         </div>
                         <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
@@ -119,7 +121,7 @@
                 <div class="column is-12-mobile is-6-tablet is-3-desktop">
                     <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #f14668;">
                         <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-                            <span class="is-size-7 has-text-danger has-text-weight-bold is-uppercase">Stock Crítico</span>
+                            <span class="is-size-7 has-text-danger has-text-weight-bold is-uppercase">Stock Crítico <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span></span>
                             <span class="tag is-danger is-light is-rounded" style="font-size: 0.6rem;">Urgente</span>
                         </div>
                         <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
@@ -259,7 +261,7 @@
 
         <!-- Inyectar Token de Seguridad -->
         <script>
-            window.csrfToken = "<?= $_SESSION['csrf_token'] ?? '' ?>";
+            window.csrfToken = "<?= esc(tokenCsrf()) ?>";
         </script>
         
        <!-- 1. Cargamos SweetAlert2 primero -->
@@ -279,15 +281,23 @@
                 
                 // Capturamos el mensaje exacto
                 let textoMensaje = cajaFlash.innerText.trim();
-                
+
+                // El tipo viene en la clase del mensaje que genera mostrarFlash():
+                // mensaje-exito, mensaje-error o mensaje-aviso
+                const aviso = cajaFlash.querySelector('.mensaje');
+                let tipo = 'success';
+                if (aviso && aviso.classList.contains('mensaje-error')) tipo = 'error';
+                else if (aviso && aviso.classList.contains('mensaje-aviso')) tipo = 'warning';
+                const titulos = { success: '¡Operación exitosa!', error: 'No se pudo completar', warning: 'Aviso' };
+
                 // Disparamos el SweetAlert moderno
                 Swal.fire({
-                    icon: 'success',
-                    title: '¡Operación Exitosa!',
+                    icon: tipo,
+                    title: titulos[tipo],
                     text: textoMensaje,
                     confirmButtonColor: '#2563eb',
-                    timer: 4000,
-                    timerProgressBar: true
+                    timer: tipo === 'error' ? undefined : 4000,
+                    timerProgressBar: tipo !== 'error'
                 });
                 
                 // Vaciamos la caja por precaución
