@@ -1,0 +1,38 @@
+MODULO DE VENTAS - Sistema Bonanza (version 2: pagos, buscador y factura)
+=========================================================================
+
+ORDEN DE INSTALACION
+1. BASE DE DATOS: ejecuta migracion_pagos_factura.sql (bloque por bloque) en phpMyAdmin.
+   Crea la tabla venta_pagos y las columnas ventas.tipo_pago y ventas.numero_factura.
+   Sin esto, registrar una venta da error de base de datos.
+2. ARCHIVOS: copia el contenido de esta carpeta sobre tu proyecto, respetando rutas.
+   OJO: si ya adaptaste archivos del modulo a tu sistema, COMPARA antes de reemplazar:
+   los que cambiaron en esta version son los marcados [V2].
+3. index.php (front controller): no necesita cambios nuevos (mismas 5 acciones).
+
+ARCHIVOS
+[V2] app/controller/VentaController.php   tipo de pago, pagos mixtos, sin limite de lineas
+[V2] app/model/ventaModel.php             factura, venta_pagos, kardex con numero de factura
+[V2] app/views/ventas/crearVenta.php      buscador, forma de pago, modal de pago mixto
+[V2] app/views/ventas/detalleVenta.php    ahora es la FACTURA (con detalle del pago)
+[V2] public/assets/js/venta.js
+[V2] public/assets/css/ventas.css
+[V2] config/constantes.php                METODOS_PAGO / TIPOS_PAGO_VENTA
+     app/views/ventas/ventas.php          SIN CAMBIOS (el listado queda como estaba)
+     app/helpers/formato.php | app/model/productoModel.php | sidebar.php | movimientos.php
+                                          igual que en la version 1
+
+QUE HACE CADA VENTA AHORA
+- Factura FAC-000015 (mismo correlativo de la venta VEN-000015), guardada en ventas.numero_factura.
+- Cada salida del Kardex (tabla movimientos) lleva en "motivo": "Factura FAC-000015" y su id_venta.
+- Al anular: entradas de devolucion con "Anulacion factura FAC-000015".
+- Forma de pago guardada en ventas.tipo_pago; el desglose en venta_pagos
+  (1 fila si es un solo metodo, varias si es Pago Mixto; siempre suman el total).
+
+PRUEBAS SUGERIDAS
+ 1. Buscar un producto por nombre y por codigo; Enter lo agrega. Agregar mas de 8 productos.
+ 2. Venta en Efectivo: abre la factura; el Kardex del producto muestra "Factura FAC-...".
+ 3. Pago Mixto: Efectivo + Tarjeta que sumen el total -> guarda. Que sobre/falte un centavo -> no guarda.
+ 4. "Registrar e imprimir": abre la factura y el dialogo de impresion.
+ 5. Anular como admin: el stock vuelve y la factura queda con sello ANULADA.
+ 6. Doble clic en "Registrar": una sola venta.

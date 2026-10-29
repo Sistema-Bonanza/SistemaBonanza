@@ -1,0 +1,269 @@
+/* ==========================================
+   MÓDULO DE VENTAS
+   Se carga DESPUÉS de sidebar.css y de Bulma.
+   La mayor parte del aspecto sale de Bulma (igual que Compras);
+   aquí solo va lo que Bulma no trae.
+   ========================================== */
+
+/* Contenedor principal: el mismo que Compras define "en línea" en cada vista. */
+.main-content {
+    width: 100%;
+    flex-grow: 1;
+    max-width: 100%;
+    overflow-x: hidden;
+    padding: 30px;
+}
+
+/* ---------- Listado ---------- */
+
+/* Venta anulada: se ve apagada y con el total tachado, sin esconderla. */
+.venta-anulada td { opacity: 0.6; }
+.venta-anulada td.celda-total { text-decoration: line-through; }
+.venta-anulada td:last-child { opacity: 1; }   /* el botón de detalle siempre legible */
+
+.tabla-ventas .tag { white-space: nowrap; }
+
+/* ---------- Formulario de venta ---------- */
+
+.tabla-lineas td { vertical-align: middle; }
+.tabla-lineas .input,
+.tabla-lineas select { font-family: monospace; }
+
+/* Celdas que rellena el JavaScript al elegir un producto. */
+.celda-stock,
+.celda-iva { text-align: center; color: #7a7a7a; font-size: 0.85rem; }
+.celda-precio,
+.celda-subtotal { text-align: right; font-family: monospace; font-weight: 600; }
+
+/* Bloque de totales bajo la tabla. */
+.totales-venta {
+    min-width: 280px;
+    margin-left: auto;
+}
+.totales-venta .fila-total {
+    display: flex;
+    justify-content: space-between;
+    gap: 2rem;
+    padding: 0.35rem 0;
+    font-family: monospace;
+}
+.totales-venta .fila-total.total-final {
+    margin-top: 0.4rem;
+    padding-top: 0.6rem;
+    border-top: 2px solid #dbdbdb;
+    font-size: 1.25rem;
+    font-weight: 700;
+}
+
+/* ---------- Buscador de productos ---------- */
+
+.buscador-productos { position: relative; }
+.resultados-productos[hidden],
+.resumen-mixto[hidden] { display: none; }
+
+.resultados-productos {
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    top: calc(100% - 1.6rem);   /* justo bajo el campo, por encima del texto de ayuda */
+    max-height: 340px;
+    overflow-y: auto;
+    background: #fff;
+    border: 1px solid #dbdbdb;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(10, 10, 10, 0.15);
+    z-index: 40;
+}
+.resultado-producto {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.6rem 0.9rem;
+    border-bottom: 1px solid #f1f1f1;
+    cursor: pointer;
+}
+.resultado-producto:last-child { border-bottom: none; }
+.resultado-producto.activo { background: #eef6fc; }
+.resultado-producto.deshabilitado { opacity: 0.55; cursor: not-allowed; }
+.sin-resultados { padding: 0.9rem; color: #7a7a7a; }
+
+/* Fila recién agregada o actualizada */
+.fila-resaltada td { background: #effaf3 !important; transition: background 0.4s; }
+.tabla-lineas .delete { vertical-align: middle; }
+
+/* ---------- Forma de pago ---------- */
+
+.barra-pago { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.opcion-pago { position: relative; flex: 1 1 150px; margin: 0; cursor: pointer; }
+.opcion-pago input {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    margin: 0;
+    opacity: 0;
+    cursor: pointer;
+}
+.opcion-pago span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.75rem 0.5rem;
+    border: 2px solid #dbdbdb;
+    border-radius: 8px;
+    background: #fff;
+    font-weight: 600;
+    transition: border-color 0.15s, background 0.15s;
+}
+.opcion-pago:hover span { border-color: #b5b5b5; }
+.opcion-pago input:checked + span { border-color: #48c774; background: #effaf3; color: #257942; }
+.opcion-pago input:focus-visible + span { outline: 3px solid #3e8ed0; outline-offset: 2px; }
+
+.resumen-mixto { padding: 0.75rem 1rem; background: #f5f5f5; border-radius: 8px; }
+
+/* ---------- Modal de pago mixto (basado en la pantalla "Finalizar venta") ---------- */
+
+.modal-pago { width: min(920px, 96vw); }
+.campos-pago { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 1rem; }
+.campo-pago label {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    margin-bottom: 0.35rem;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+.campo-pago .input {
+    background: #bfe3f5;
+    border-color: #8ec9e8;
+    font-family: monospace;
+    font-size: 1.05rem;
+}
+.campo-pago .input:focus { background: #fff; }
+
+.saldo-mixto {
+    margin: 0;
+    padding: 0.5rem 1rem 0.9rem;
+    max-width: 380px;
+    border: 1px solid #dbdbdb;
+    border-radius: 8px;
+    background: #fafafa;
+}
+.saldo-mixto legend { padding: 0 0.4rem; font-size: 0.85rem; color: #7a7a7a; font-weight: 600; }
+.saldo-valor { font-family: monospace; font-size: 1.35rem; font-weight: 700; margin: 0; }
+.saldo-mixto.es-falta   { border-color: #ffdd57; background: #fffbeb; }
+.saldo-mixto.es-excede  { border-color: #f14668; background: #feecf0; color: #cc0f35; }
+.saldo-mixto.es-completo { border-color: #48c774; background: #effaf3; color: #257942; }
+.saldo-mixto.sacudir { animation: sacudir 0.35s; }
+@keyframes sacudir {
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+}
+@media (prefers-reduced-motion: reduce) {
+    .saldo-mixto.sacudir { animation: none; }
+}
+
+/* ---------- Factura ---------- */
+
+.nota {
+    position: relative;
+    padding: 2rem 2.25rem;
+}
+
+.nota-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding-bottom: 1.25rem;
+    margin-bottom: 1.25rem;
+    border-bottom: 2px solid #363636;
+}
+.nota-empresa { font-size: 1.4rem; font-weight: 700; line-height: 1.2; }
+.nota-titulo  { text-align: right; }
+.nota-titulo .tipo   { font-size: 1.1rem; font-weight: 700; letter-spacing: 0.04em; }
+.nota-titulo .numero { font-family: monospace; font-size: 1.5rem; font-weight: 700; }
+
+.nota-datos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1rem 2rem;
+    margin-bottom: 1.5rem;
+}
+.nota-datos .rotulo { font-size: 0.75rem; color: #7a7a7a; }
+.nota-datos .valor  { font-weight: 600; }
+
+.nota table { margin-bottom: 0; }
+.nota th { background: #f5f5f5; }
+.nota .num { text-align: right; font-family: monospace; white-space: nowrap; }
+
+.pagos-factura { margin-top: 1rem; font-size: 0.9rem; }
+.pagos-factura table { max-width: 360px; margin-left: auto; }
+.pagos-factura td, .pagos-factura th { padding: 0.25rem 0.5rem; }
+
+.nota-firmas {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3rem;
+    margin-top: 3.5rem;
+}
+.nota-firmas div {
+    padding-top: 0.4rem;
+    border-top: 1px solid #363636;
+    text-align: center;
+    font-size: 0.85rem;
+}
+
+/* Sello diagonal para ventas anuladas. */
+.nota-anulada .tabla-nota,
+.nota-anulada .nota-datos { opacity: 0.55; }
+.sello-anulada {
+    position: absolute;
+    top: 38%;
+    left: 50%;
+    transform: translate(-50%, -50%) rotate(-18deg);
+    padding: 0.2rem 1.5rem;
+    border: 5px solid #f14668;
+    border-radius: 8px;
+    color: #f14668;
+    font-size: 3.2rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    opacity: 0.55;
+    pointer-events: none;
+}
+
+/* ---------- Pantallas pequeñas ---------- */
+@media (max-width: 768px) {
+    .main-content { padding: 16px; }
+    .nota { padding: 1.25rem; }
+    .nota-encabezado { flex-direction: column; }
+    .nota-titulo { text-align: left; }
+    .nota-datos,
+    .nota-firmas { grid-template-columns: 1fr; }
+    .sello-anulada { font-size: 2.2rem; }
+    .campos-pago { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .resultados-productos { left: 0.5rem; right: 0.5rem; }
+}
+
+/* ---------- Impresión: solo se imprime la nota ---------- */
+@media print {
+    .sidebar,
+    .no-print,
+    .modal { display: none !important; }
+
+    body { display: block; background: #fff; }
+    .main-content { padding: 0; overflow: visible; }
+
+    .box.nota {
+        box-shadow: none;
+        border: none;
+        padding: 0;
+    }
+    /* Que los colores de fondo (encabezado de tabla, sello) no se pierdan al imprimir. */
+    .nota th, .sello-anulada {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+    .nota-firmas { page-break-inside: avoid; }
+}

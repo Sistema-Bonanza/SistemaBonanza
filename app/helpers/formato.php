@@ -69,3 +69,70 @@ function formatoFecha(?string $fecha, bool $conHora = false): string
     }
     return date($conHora ? 'd/m/Y H:i' : 'd/m/Y', $marca);
 }
+
+/**
+ * Número de operación legible a partir del id.
+ * numeroOperacion('VEN', 15) => "VEN-000015"   (Compras usa el mismo formato con 'COMP').
+ */
+function numeroOperacion(string $prefijo, $id, int $largo = 6): string
+{
+    return $prefijo . '-' . str_pad((string) (int) $id, $largo, '0', STR_PAD_LEFT);
+}
+
+
+// ============================================================
+// CÁLCULOS DE DOCUMENTOS (ventas, y compras si las migras)
+// ------------------------------------------------------------
+// Los montos se manejan en CENTAVOS ENTEROS mientras se calcula.
+// Con floats, 0.1 + 0.2 da 0.30000000000000004 y la BD tiene un
+// CHECK (total = subtotal + monto_iva) que exige exactitud.
+// Los resultados salen como texto con 2 decimales ("37.50"),
+// listos para enlazar a una columna DECIMAL.
+// ============================================================
+
+/** "12.35" => 1235. Redondea al centavo más cercano. */
+function aCentavos($valor): int
+{
+    return (int) round(((float) $valor) * 100);
+}
+
+/** 1235 => "12.35" (punto decimal, sin separador de miles). */
+function deCentavos(int $centavos): string
+{
+    return number_format($centavos / 100, 2, '.', '');
+}
+
+/** Subtotal de una línea: cantidad x precio, exacto. subtotalLinea(3, '12.50') => "37.50" */
+function subtotalLinea(int $cantidad, $precioUnitario): string
+{
+    return deCentavos($cantidad * aCentavos($precioUnitario));
+}
+
+/**
+ * Totales de un documento a partir de sus líneas.
+ * Cada línea necesita 'subtotal_linea' y 'aplica_iva' (0 o 1).
+ *
+ * El IVA se calcula POR LÍNEA (redondeado al centavo) y se suma: es la misma
+ * regla que usa Compras, así los dos módulos cuadran igual.
+ *
+ * Devuelve ['subtotal' => '0.00', 'monto_iva' => '0.00', 'total' => '0.00'].
+ */
+function calcularTotalesDocumento(array $lineas, float $tasaIva): array
+{
+    $subtotal = 0;
+    $iva      = 0;
+
+    foreach ($lineas as $linea) {
+        $centavos  = aCentavos($linea['subtotal_linea']);
+        $subtotal += $centavos;
+        if ((int) $linea['aplica_iva'] === 1) {
+            $iva += (int) round($centavos * $tasaIva / 100);
+        }
+    }
+
+    return [
+        'subtotal'  => deCentavos($subtotal),
+        'monto_iva' => deCentavos($iva),
+        'total'     => deCentavos($subtotal + $iva),
+    ];
+}
