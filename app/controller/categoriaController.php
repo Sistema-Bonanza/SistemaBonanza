@@ -16,13 +16,27 @@ class CategoriaController {
     public function formcategoria() {
         exigirSesion();
         evitarCache();
+        
+        // 1. Extraemos las categorías con el conteo de artículos
         $categorias = $this->categoriaModel->getAll();
+        
+        // 2. Extraemos los KPIs en tiempo real
+        $kpis = $this->categoriaModel->getKpis();
+        
+        // 3. Declaramos las variables exactas que espera la vista
+        $kpiTotalProductos = $kpis['total_productos'];
+        $kpiHuerfanos      = $kpis['huerfanos'];
+        $kpiMayorRotacion  = $kpis['mayor_rotacion'];
+
+        // 4. Renderizamos la vista
         require_once __DIR__ . '/../../app/views/categorias/categorias.php';
     }
 
     public function fromcrearCategoria() {
         exigirSesion();
         evitarCache();
+
+        $categorias = $this->categoriaModel->getAll();
         require_once __DIR__ . '/../../app/views/categorias/crearCategoria.php';
     }
 
@@ -30,17 +44,22 @@ class CategoriaController {
         exigirSesion();
         evitarCache();
 
-        // El id viene por URL: se exige un entero positivo, nada más.
         $id = validarEntero($_GET['id'] ?? null, 1);
         if ($id !== null) {
             $categoria = $this->categoriaModel->getById($id);
             if ($categoria) {
+                // 1. Extraemos los productos reales de esta categoría
+                $productosAsociados = $this->categoriaModel->getProductosByCategoria($id);
+                
+                // 2. Calculamos los totales dinámicos (Cambiamos 'stock' a 'stock_actual')
+                $totalArticulos = count($productosAsociados);
+                $stockTotal = array_sum(array_column($productosAsociados, 'stock_actual'));
+
                 require_once __DIR__ . '/../../app/views/categorias/editarCategoria.php';
                 return;
             }
         }
 
-        // Si no se encuentra la categoría, redirigir a la lista de categorías
         setFlash('error', 'La categoría no existe.');
         redirigir(urlAccion('categoria', 'formcategoria'));
     }
@@ -120,6 +139,25 @@ class CategoriaController {
         }
 
         return [['nombre' => $nombre, 'descripcion' => $desc['valor']], $errores];
+    }
+
+    public function eliminarCategoria() {
+        exigirSesion();
+        
+        $id = validarEntero($_GET['id'] ?? null, 1);
+        if ($id === null || !$this->categoriaModel->getById($id)) {
+            setFlash('error', 'La categoría no existe o ya fue procesada.');
+            redirigir(urlAccion('categoria', 'formcategoria'));
+        }
+
+        // Ejecutamos el borrado lógico
+        if ($this->categoriaModel->inactivarCategoria($id)) {
+            setFlash('exito', 'Categoría inactivada correctamente. Se conservará en el historial de Kardex.');
+        } else {
+            setFlash('error', 'Error al intentar inactivar la categoría.');
+        }
+        
+        redirigir(urlAccion('categoria', 'formcategoria'));
     }
 }
 ?>
