@@ -23,8 +23,7 @@ public function tablaClientes(){
     require_once __DIR__ . '/../views/clientes/clientes.php';
 }
 public function formcrearcliente(){
-    exigirSesion();
-    evitarCache();
+    $clientes = $this->clienteModel->getAll();
     require_once __DIR__ . '/../views/clientes/crearcliente.php';
 
 }
