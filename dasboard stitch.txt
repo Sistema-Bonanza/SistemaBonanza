@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+
+<html lang="es"><head><meta charset="utf-8"/><meta content="width=device-width, initial-scale=1.0" name="viewport"/><meta content="web_dashboard" name="shell-type"/><link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet"/><link href="https://fonts.googleapis.com" rel="preconnect"/><link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&amp;family=Plus+Jakarta+Sans:wght@600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/><style>@layer base{html,body{margin:0;padding:0;}body{overscroll-behavior:none;}main>:first-child{margin-top:0!important;}main>:last-child{margin-bottom:0!important;}}::-webkit-scrollbar{display:none;}</style><script src="https://cdn.tailwindcss.com"></script><script id="tailwind-config">tailwind.config = { darkMode: "class", theme: { extend: { "colors": { "on-tertiary-fixed": "#002113", "secondary-fixed-dim": "#bec6e0", "on-secondary-fixed-variant": "#3f465c", "on-primary-fixed-variant": "#003ea8", "tertiary-fixed": "#6ffbbe", "error": "#ba1a1a", "on-error-container": "#93000a", "inverse-primary": "#b4c5ff", "surface-variant": "#d3e4fe", "tertiary": "#006242", "outline": "#737686", "on-secondary-fixed": "#131b2e", "secondary-fixed": "#dae2fd", "outline-variant": "#c3c6d7", "primary-fixed-dim": "#b4c5ff", "primary-fixed": "#dbe1ff", "on-primary-container": "#eeefff", "inverse-on-surface": "#eaf1ff", "on-primary": "#ffffff", "on-tertiary-fixed-variant": "#005236", "background": "#f8f9ff", "on-background": "#0b1c30", "on-tertiary": "#ffffff", "on-secondary": "#ffffff", "surface-dim": "#cbdbf5", "surface-bright": "#f8f9ff", "inverse-surface": "#213145", "surface-tint": "#0053db", "surface-container-lowest": "#ffffff", "error-container": "#ffdad6", "on-primary-fixed": "#00174b", "on-tertiary-container": "#bdffdb", "surface": "#f8f9ff", "surface-container-low": "#eff4ff", "on-error": "#ffffff", "tertiary-fixed-dim": "#4edea3", "primary": "#004ac6", "surface-container": "#e5eeff", "tertiary-container": "#007d55", "primary-container": "#2563eb", "surface-container-highest": "#d3e4fe", "secondary-container": "#dae2fd", "on-surface-variant": "#434655", "surface-container-high": "#dce9ff", "secondary": "#565e74", "on-surface": "#0b1c30", "on-secondary-container": "#5c647a" }, "borderRadius": { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" }, "spacing": { "margin": "2rem", "space-md": "1rem", "gutter": "1.5rem", "space-xl": "2rem", "space-sm": "0.5rem", "space-xs": "0.25rem", "space-lg": "1.5rem" }, "fontFamily": { "label-lg": [ "Inter" ], "headline-md": [ "Plus Jakarta Sans" ], "body-md": [ "Inter" ], "body-lg": [ "Inter" ], "label-md": [ "Inter" ], "headline-lg": [ "Plus Jakarta Sans" ], "label-sm": [ "Inter" ], "headline-xl-mobile": [ "Plus Jakarta Sans" ], "headline-sm": [ "Plus Jakarta Sans" ], "headline-xl": [ "Plus Jakarta Sans" ], "headline-lg-mobile": [ "Plus Jakarta Sans" ], "body-sm": [ "Inter" ] }, "fontSize": { "label-lg": [ "14px", { "lineHeight": "20px", "letterSpacing": "0.01em", "fontWeight": "600" } ], "headline-md": [ "22px", { "lineHeight": "28px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "body-md": [ "14px", { "lineHeight": "20px", "letterSpacing": "0em", "fontWeight": "400" } ], "body-lg": [ "16px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "400" } ], "label-md": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.02em", "fontWeight": "600" } ], "headline-lg": [ "30px", { "lineHeight": "38px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "label-sm": [ "11px", { "lineHeight": "14px", "letterSpacing": "0.04em", "fontWeight": "600" } ], "headline-xl-mobile": [ "28px", { "lineHeight": "36px", "letterSpacing": "-0.01em", "fontWeight": "700" } ], "headline-sm": [ "18px", { "lineHeight": "24px", "letterSpacing": "0em", "fontWeight": "600" } ], "headline-xl": [ "36px", { "lineHeight": "44px", "letterSpacing": "-0.02em", "fontWeight": "700" } ], "headline-lg-mobile": [ "24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" } ], "body-sm": [ "12px", { "lineHeight": "16px", "letterSpacing": "0.01em", "fontWeight": "400" } ] } } } };</script></head><body class="bg-surface font-body-md text-body-md text-on-surface"><aside class="fixed left-0 top-0 h-full w-72 bg-inverse-surface text-inverse-on-surface z-50 flex flex-col justify-between shadow-[0_1px_8px_rgba(0,0,0,0.04)]"><div class="flex flex-col"><div class="p-space-lg bg-inverse-surface"><div class="flex items-center gap-space-sm mb-space-xs"><div class="w-9 h-9 rounded-lg bg-primary-container flex items-center justify-center text-on-primary font-headline-sm text-headline-sm"><span class="material-symbols-outlined text-on-primary text-[22px]">warehouse</span></div><div><div class="font-headline-sm text-headline-sm tracking-tight text-inverse-on-surface">BONANZA</div><div class="font-label-sm text-label-sm text-inverse-primary uppercase tracking-wider">Control de Almacén</div></div></div><div class="flex items-center gap-space-xs mt-space-sm py-space-xs px-space-sm bg-surface-container-lowest/10 rounded-DEFAULT"><span class="w-2 h-2 rounded-full bg-tertiary-fixed"></span><span class="font-label-sm text-label-sm text-inverse-on-surface">Sistema Operativo en Línea</span></div></div><div class="px-space-md py-space-xs"><div class="font-label-sm text-label-sm uppercase tracking-wider text-outline-variant px-space-sm mb-space-xs">Módulos de Gestión</div><nav class="flex flex-col gap-space-xs" data-active-classes="bg-primary-container text-on-primary font-label-lg rounded-xl shadow-[0_4px_14px_0_rgba(37,99,235,0.25)]"><a aria-current="page" class="flex items-center justify-between px-space-md py-space-sm transition-all bg-primary-container text-on-primary font-label-lg rounded-xl shadow-[0_4px_14px_0_rgba(37,99,235,0.25)]" data-path="dashboard" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">grid_view</span><span>Dashboard</span></div></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-lowest/10 hover:text-inverse-on-surface transition-all font-label-lg text-label-lg" data-path="productos" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">inventory_2</span><span>Productos</span></div></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-lowest/10 hover:text-inverse-on-surface transition-all font-label-lg text-label-lg" data-path="movimientos" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">sync_alt</span><span>Movimientos</span></div><span class="px-space-xs py-0.5 rounded-full bg-tertiary text-on-tertiary font-label-sm text-label-sm tracking-wide">ENT/SAL</span></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-lowest/10 hover:text-inverse-on-surface transition-all font-label-lg text-label-lg" data-path="ventas" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">point_of_sale</span><span>Ventas</span></div></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-lowest/10 hover:text-inverse-on-surface transition-all font-label-lg text-label-lg" data-path="categorias" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">category</span><span>Categorías</span></div></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-lowest/10 hover:text-inverse-on-surface transition-all font-label-lg text-label-lg" data-path="reportes" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">bar_chart</span><span>Reportes</span></div></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-lowest/10 hover:text-inverse-on-surface transition-all font-label-lg text-label-lg" data-path="clientes" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">group</span><span>Clientes</span></div></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-lowest/10 hover:text-inverse-on-surface transition-all font-label-lg text-label-lg" data-path="proveedores" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">local_shipping</span><span>Proveedores</span></div></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-lowest/10 hover:text-inverse-on-surface transition-all font-label-lg text-label-lg" data-path="control-de-precios" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">price_change</span><span>Control de Precios</span></div></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-lowest/10 hover:text-inverse-on-surface transition-all font-label-lg text-label-lg" data-path="usuarios" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">manage_accounts</span><span>Usuarios</span></div></a><a class="flex items-center justify-between px-space-md py-space-sm rounded-xl text-inverse-on-surface/80 hover:bg-surface-container-lowest/10 hover:text-inverse-on-surface transition-all font-label-lg text-label-lg" data-path="configuracion" href="#"><div class="flex items-center gap-space-sm"><span class="material-symbols-outlined text-[20px]">settings</span><span>Configuración</span></div></a></nav></div></div><div class="p-space-md bg-inverse-surface"><div class="flex items-center justify-between p-space-sm rounded-xl bg-surface-container-lowest/10 mb-space-sm"><div class="flex items-center gap-space-sm"><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div><div class="flex flex-col"><span class="font-label-md text-label-md text-inverse-on-surface">admin</span><span class="font-label-sm text-label-sm text-inverse-primary">Supervisor General</span></div></div><span class="w-2 h-2 rounded-full bg-tertiary-fixed"></span></div><a class="flex items-center justify-center gap-space-xs w-full py-space-sm px-space-md rounded-xl bg-error/15 text-error-container hover:bg-error hover:text-on-error transition-all font-label-lg text-label-lg" data-path="login" href="#"><span class="material-symbols-outlined text-[18px]">logout</span><span>Salir del sistema</span></a></div></aside><div class="pl-72"><header class="fixed top-0 left-72 right-0 h-16 bg-surface/80 backdrop-blur-xl shadow-[0_1px_8px_rgba(0,0,0,0.04)] z-40 flex items-center justify-between px-space-xl"><div class="flex items-center gap-space-lg"><div class="flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">calendar_today</span><span>Turno Matutino - Almacén Central</span></div><div class="hidden md:flex items-center gap-space-xs text-on-surface-variant font-label-md text-label-md"><span class="material-symbols-outlined text-[18px]">schedule</span><span>Zona Horaria: UTC-5</span></div></div><div class="flex items-center gap-space-md"><div class="relative flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container-high transition-colors cursor-pointer text-on-surface-variant hover:text-on-surface"><span class="material-symbols-outlined text-[20px]">notifications</span><span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error"></span></div><div class="h-6 w-px bg-outline-variant"></div><div class="flex items-center gap-space-sm"><div class="text-right hidden sm:block"><div class="font-label-md text-label-md text-on-surface">admin</div><div class="font-label-sm text-label-sm text-on-surface-variant">Turno Operativo</div></div><div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center"><span class="material-symbols-outlined text-on-primary text-[18px]">person</span></div></div></div></header><main class="w-full pt-16 bg-surface px-space-xl pb-space-xl"><div class="flex flex-col w-full">
+<!-- BANNER HERO INSTITUCIONAL -->
+<div class="relative overflow-hidden rounded-xl bg-gradient-to-r from-primary to-primary-container text-on-primary p-space-lg shadow-md mb-space-lg">
+<!-- Faint structural backdrop overlay -->
+<div class="absolute -right-10 -bottom-10 w-72 h-72 rounded-full bg-surface-container-lowest/5 blur-2xl pointer-events-none"></div>
+<div class="absolute left-1/3 -top-12 w-64 h-64 rounded-full bg-inverse-primary/10 blur-xl pointer-events-none"></div>
+<div class="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-space-md">
+<!-- Left side: Corporate Identity & Context -->
+<div class="flex flex-col gap-space-xs">
+<div class="inline-flex items-center gap-space-xs w-fit py-0.5 px-space-sm rounded-full bg-surface-container-lowest/15 backdrop-blur-md">
+<span class="w-2 h-2 rounded-full bg-tertiary-fixed animate-pulse"></span>
+<span class="font-label-sm text-label-sm tracking-wider uppercase text-inverse-on-surface">Operaciones Globales • Control de Almacén Central</span>
+</div>
+<div class="flex items-center gap-space-sm mt-space-xs">
+<div class="w-10 h-10 rounded-lg bg-surface-container-lowest/20 flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary text-[26px]">dashboard_customize</span>
+</div>
+<div>
+<h1 class="font-headline-lg text-headline-lg tracking-tight text-on-primary leading-tight">Panel de Control General</h1>
+<p class="font-body-sm text-body-sm text-surface-container-high">Planta Central • Almacén General de Dotaciones e Insumos Industriales</p>
+</div>
+</div>
+</div>
+<!-- Right side: Quick Telemetry & Primary Action -->
+<div class="flex flex-wrap items-center gap-space-sm lg:self-center">
+<!-- Live status chip -->
+<div class="flex items-center gap-space-xs px-space-md py-space-xs rounded-xl bg-surface-container-lowest/15 backdrop-blur-md">
+<span class="w-2.5 h-2.5 rounded-full bg-tertiary-fixed"></span>
+<span class="font-label-md text-label-md text-on-primary">Despacho Operativo</span>
+</div>
+<!-- Clock synchronizer -->
+<div class="hidden sm:flex items-center gap-space-xs px-space-md py-space-xs rounded-xl bg-surface-container-lowest/10">
+<span class="material-symbols-outlined text-[16px] text-surface-container-high">schedule</span>
+<span class="font-label-sm text-label-sm text-surface-container-high" id="live-chronometer">Miércoles, 24 Octubre • 10:42:15 AM</span>
+</div>
+<!-- Call to Action -->
+<button class="inline-flex items-center gap-space-xs px-space-md py-space-sm rounded-xl bg-surface-container-lowest text-primary font-label-lg text-label-lg shadow-sm hover:bg-surface-container-low transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">add_circle</span>
+<span>+ Nueva Entrada</span>
+</button>
+</div>
+</div>
+</div>
+<!-- FILA DE TARJETAS KPI (4 MÉTRICAS) -->
+<div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-space-md mb-space-lg">
+<!-- Card 1: Productos en Total -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Productos en Total</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">inventory</span>
+</div>
+</div>
+<div class="mt-space-sm flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface">124</span>
+<span class="inline-flex items-center px-space-xs py-0.5 rounded-full bg-tertiary-container/15 text-tertiary font-label-sm text-label-sm">
+          +12%
+        </span>
+</div>
+<div class="mt-space-xs flex items-center justify-between text-outline text-body-sm font-body-sm">
+<span>Registrados en catálogo</span>
+<span class="material-symbols-outlined text-[16px] text-tertiary">trending_up</span>
+</div>
+</div>
+<!-- Card 2: Productos Disponibles -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Productos Disponibles</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-tertiary">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+</div>
+</div>
+<div class="mt-space-sm flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface">98</span>
+<span class="inline-flex items-center px-space-xs py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm">
+          79% aptos
+        </span>
+</div>
+<div class="mt-space-xs flex items-center justify-between text-outline text-body-sm font-body-sm">
+<span>Listos para salida inmediata</span>
+<span class="w-16 h-1.5 rounded-full bg-surface-container overflow-hidden inline-flex">
+<span class="w-[79%] h-full bg-tertiary rounded-full"></span>
+</span>
+</div>
+</div>
+<!-- Card 3: Stock Total -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Stock Total</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-primary-container">
+<span class="material-symbols-outlined text-[18px]">package_2</span>
+</div>
+</div>
+<div class="mt-space-sm flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface">1,450</span>
+<span class="font-label-md text-label-md text-outline">unidades</span>
+</div>
+<div class="mt-space-xs flex items-center justify-between text-outline text-body-sm font-body-sm">
+<span>Valor aprox: <strong class="text-on-surface">$42,850.00</strong></span>
+<span class="material-symbols-outlined text-[16px] text-primary">analytics</span>
+</div>
+</div>
+<!-- Card 4: Proveedores Activos -->
+<div class="relative overflow-hidden bg-surface-container-lowest p-space-md rounded-xl shadow-sm flex flex-col justify-between">
+<div class="flex items-start justify-between">
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline">Proveedores Activos</span>
+<div class="w-8 h-8 rounded-lg bg-surface-container flex items-center justify-center text-secondary">
+<span class="material-symbols-outlined text-[18px]">local_shipping</span>
+</div>
+</div>
+<div class="mt-space-sm flex items-baseline gap-space-xs">
+<span class="font-headline-xl text-headline-xl text-on-surface">18</span>
+<span class="inline-flex items-center px-space-xs py-0.5 rounded-full bg-tertiary-container/15 text-tertiary font-label-sm text-label-sm">
+          100% activos
+        </span>
+</div>
+<div class="mt-space-xs flex items-center justify-between text-outline text-body-sm font-body-sm">
+<span>Industriales certificados</span>
+<span class="material-symbols-outlined text-[16px] text-tertiary">verified</span>
+</div>
+</div>
+</div>
+<!-- ÁREA INTERMEDIA: CATÁLOGO RÁPIDO + CARRITO DE DESPACHO -->
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-space-lg mb-space-lg">
+<!-- Columna Izquierda: Catálogo Rápido (8 cols) -->
+<div class="lg:col-span-8 flex flex-col bg-surface-container-lowest rounded-xl p-space-lg shadow-sm">
+<!-- Section Header with Category Pills -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-space-sm pb-space-md mb-space-md bg-surface-container-low/30 p-space-sm rounded-lg">
+<div>
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-primary text-[20px]">bolt</span>
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Catálogo Rápido de Productos</h2>
+</div>
+<p class="font-body-sm text-body-sm text-outline mt-0.5">Haz clic en + para agregar ítems a la orden de despacho</p>
+</div>
+<!-- Filter pills -->
+<div class="flex items-center gap-space-xs flex-wrap" id="category-filters">
+<button class="filter-pill px-space-md py-1 rounded-full font-label-sm text-label-sm bg-primary text-on-primary shadow-sm transition-all" type="button">Todos</button>
+<button class="filter-pill px-space-md py-1 rounded-full font-label-sm text-label-sm bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all" type="button">Seguridad</button>
+<button class="filter-pill px-space-md py-1 rounded-full font-label-sm text-label-sm bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all" type="button">Calzado</button>
+<button class="filter-pill px-space-md py-1 rounded-full font-label-sm text-label-sm bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all" type="button">Textil</button>
+</div>
+</div>
+<!-- Product Cards Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-space-md">
+<!-- Tarjeta 1: Casco Dieléctrico -->
+<div class="flex flex-col justify-between p-space-md rounded-xl bg-surface-container-low/50 hover:bg-surface-container-low transition-all shadow-sm">
+<div class="flex flex-col">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-primary-fixed text-primary font-mono">SKU-BON-0101</span>
+<span class="font-label-sm text-label-sm text-tertiary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                Stock: 48 unids
+              </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface text-[15px] leading-snug mt-space-xs">Casco Dieléctrico Tipo I Clase E</h3>
+<p class="font-body-sm text-body-sm text-outline mt-1">Talla: <strong class="text-on-surface-variant">Ajustable</strong> • Prov: <span class="text-on-surface-variant">Segurind</span></p>
+</div>
+<div class="mt-space-md pt-space-sm flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Precio Unit.</span>
+<span class="font-headline-md text-headline-md text-on-surface text-[20px]">$18.50</span>
+</div>
+<button class="w-9 h-9 rounded-xl bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all" onclick="addItemToCart('Casco Dieléctrico', 18.50)" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+<!-- Tarjeta 2: Camisa Drill -->
+<div class="flex flex-col justify-between p-space-md rounded-xl bg-surface-container-low/50 hover:bg-surface-container-low transition-all shadow-sm">
+<div class="flex flex-col">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-primary-fixed text-primary font-mono">SKU-BON-0340</span>
+<span class="font-label-sm text-label-sm text-tertiary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                Stock: 65 piezas
+              </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface text-[15px] leading-snug mt-space-xs">Camisa Drill Reforzada Manga Larga</h3>
+<p class="font-body-sm text-body-sm text-outline mt-1">Talla: <strong class="text-on-surface-variant">L (40-42)</strong> • Prov: <span class="text-on-surface-variant">Textil Ind.</span></p>
+</div>
+<div class="mt-space-md pt-space-sm flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Precio Unit.</span>
+<span class="font-headline-md text-headline-md text-on-surface text-[20px]">$22.00</span>
+</div>
+<button class="w-9 h-9 rounded-xl bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all" onclick="addItemToCart('Camisa Drill (L)', 22.00)" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+<!-- Tarjeta 3: Guantes de Nitrilo -->
+<div class="flex flex-col justify-between p-space-md rounded-xl bg-surface-container-low/50 hover:bg-surface-container-low transition-all shadow-sm">
+<div class="flex flex-col">
+<div class="flex items-center justify-between mb-space-xs">
+<span class="font-label-sm text-label-sm px-space-xs py-0.5 rounded bg-secondary-container text-on-secondary-fixed font-mono">SKU-BON-0488</span>
+<span class="font-label-sm text-label-sm text-secondary flex items-center gap-1">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                Stock: 6 cajas
+              </span>
+</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface text-[15px] leading-snug mt-space-xs">Guantes de Nitrilo Industrial</h3>
+<p class="font-body-sm text-body-sm text-outline mt-1">Talla: <strong class="text-on-surface-variant">M</strong> • Prov: <span class="text-on-surface-variant">Segurind</span></p>
+</div>
+<div class="mt-space-md pt-space-sm flex items-center justify-between">
+<div>
+<span class="font-label-sm text-label-sm uppercase tracking-wider text-outline block">Precio Unit.</span>
+<span class="font-headline-md text-headline-md text-on-surface text-[20px]">$8.20</span>
+</div>
+<button class="w-9 h-9 rounded-xl bg-primary hover:bg-primary-container text-on-primary flex items-center justify-center shadow-sm hover:scale-105 active:scale-95 transition-all" onclick="addItemToCart('Guantes de Nitrilo (M)', 8.20)" type="button">
+<span class="material-symbols-outlined text-[20px]">add</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Quick industrial illustration/banner banner strip -->
+<div class="mt-space-md p-space-sm rounded-xl bg-surface-container flex items-center justify-between">
+<div class="flex items-center gap-space-sm">
+<span class="material-symbols-outlined text-primary text-[20px]">qr_code_scanner</span>
+<span class="font-body-sm text-body-sm text-on-surface">Escáner óptico activo para despacho por pistola Zebra / Honeywell</span>
+</div>
+<span class="font-label-sm text-label-sm px-space-sm py-0.5 rounded-full bg-tertiary-fixed text-on-tertiary-fixed uppercase">Conectado</span>
+</div>
+</div>
+<!-- Columna Derecha: Carrito de Despacho (4 cols) -->
+<div class="lg:col-span-4 flex flex-col bg-surface-container-lowest rounded-xl p-space-lg shadow-sm">
+<!-- Order Header -->
+<div class="flex items-center justify-between pb-space-sm mb-space-sm">
+<div class="flex items-center gap-space-xs">
+<div class="w-8 h-8 rounded-lg bg-primary-fixed flex items-center justify-center text-primary">
+<span class="material-symbols-outlined text-[18px]">shopping_cart_checkout</span>
+</div>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-on-surface text-[17px]">Carrito Despacho</h2>
+<span class="font-label-sm text-label-sm text-outline font-mono">ORD-2023-089</span>
+</div>
+</div>
+<span class="px-space-sm py-0.5 rounded-full bg-primary-fixed text-primary font-label-sm text-label-sm font-semibold" id="cart-item-count">2 ítems</span>
+</div>
+<!-- Item Rows List -->
+<div class="flex flex-col gap-space-sm flex-grow mb-space-md">
+<!-- Item 1: Casco -->
+<div class="p-space-sm rounded-xl bg-surface-container-low flex flex-col justify-between" id="row-casco">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-md text-label-md text-on-surface block font-semibold">Casco Dieléctrico</span>
+<span class="font-body-sm text-body-sm text-outline">$18.50 c/u</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface text-[15px]" id="total-casco">$37.00</span>
+</div>
+<div class="flex items-center justify-between mt-space-xs pt-space-xs">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-xs py-0.5 rounded-lg shadow-sm">
+<button class="w-6 h-6 flex items-center justify-center text-outline hover:text-on-surface font-bold text-sm" onclick="updateQty('casco', -1, 18.50)" type="button">−</button>
+<span class="font-label-md text-label-md px-1" id="qty-casco">2</span>
+<button class="w-6 h-6 flex items-center justify-center text-outline hover:text-on-surface font-bold text-sm" onclick="updateQty('casco', 1, 18.50)" type="button">+</button>
+</div>
+<button class="font-label-sm text-label-sm text-error hover:underline flex items-center gap-0.5" onclick="removeItem('row-casco')" type="button">
+<span class="material-symbols-outlined text-[14px]">delete</span>
+<span>Quitar</span>
+</button>
+</div>
+</div>
+<!-- Item 2: Camisa Drill -->
+<div class="p-space-sm rounded-xl bg-surface-container-low flex flex-col justify-between" id="row-camisa">
+<div class="flex items-start justify-between">
+<div>
+<span class="font-label-md text-label-md text-on-surface block font-semibold">Camisa Drill (L)</span>
+<span class="font-body-sm text-body-sm text-outline">$22.00 c/u</span>
+</div>
+<span class="font-headline-sm text-headline-sm text-on-surface text-[15px]" id="total-camisa">$22.00</span>
+</div>
+<div class="flex items-center justify-between mt-space-xs pt-space-xs">
+<div class="flex items-center gap-space-xs bg-surface-container-lowest px-space-xs py-0.5 rounded-lg shadow-sm">
+<button class="w-6 h-6 flex items-center justify-center text-outline hover:text-on-surface font-bold text-sm" onclick="updateQty('camisa', -1, 22.00)" type="button">−</button>
+<span class="font-label-md text-label-md px-1" id="qty-camisa">1</span>
+<button class="w-6 h-6 flex items-center justify-center text-outline hover:text-on-surface font-bold text-sm" onclick="updateQty('camisa', 1, 22.00)" type="button">+</button>
+</div>
+<button class="font-label-sm text-label-sm text-error hover:underline flex items-center gap-0.5" onclick="removeItem('row-camisa')" type="button">
+<span class="material-symbols-outlined text-[14px]">delete</span>
+<span>Quitar</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Financial Calculation Summary -->
+<div class="p-space-md rounded-xl bg-surface-container-low/70 flex flex-col gap-space-xs mb-space-md">
+<div class="flex items-center justify-between text-body-sm font-body-sm text-outline">
+<span>Subtotal</span>
+<span class="font-label-md text-label-md text-on-surface" id="cart-subtotal">$59.00</span>
+</div>
+<div class="flex items-center justify-between text-body-sm font-body-sm text-outline">
+<span>IVA (16%)</span>
+<span class="font-label-md text-label-md text-on-surface" id="cart-tax">$9.44</span>
+</div>
+<div class="h-px bg-outline-variant/30 my-space-xs"></div>
+<div class="flex items-baseline justify-between">
+<span class="font-label-lg text-label-lg text-on-surface">Total Liquidado</span>
+<span class="font-headline-lg text-headline-lg text-primary" id="cart-total">$68.44</span>
+</div>
+</div>
+<!-- Bottom Action Buttons -->
+<div class="grid grid-cols-2 gap-space-sm">
+<button class="py-space-sm px-space-md rounded-xl bg-error-container text-on-error-container hover:bg-error/20 transition-all font-label-lg text-label-lg flex items-center justify-center gap-space-xs" onclick="resetCart()" type="button">
+<span class="material-symbols-outlined text-[18px]">restart_alt</span>
+<span>Reset</span>
+</button>
+<button class="py-space-sm px-space-md rounded-xl bg-primary-container text-on-primary hover:bg-primary transition-all font-label-lg text-label-lg shadow-sm flex items-center justify-center gap-space-xs" onclick="triggerCheckout()" type="button">
+<span class="material-symbols-outlined text-[18px]">payments</span>
+<span>Cobrar</span>
+</button>
+</div>
+</div>
+</div>
+<!-- TABLA INFERIOR DE INVENTARIO COMPLETO -->
+<div class="flex flex-col bg-surface-container-lowest rounded-xl p-space-lg shadow-sm">
+<!-- Master Header & Search Box -->
+<div class="flex flex-col md:flex-row md:items-center md:justify-between gap-space-md pb-space-md mb-space-md">
+<div>
+<div class="flex items-center gap-space-xs">
+<h2 class="font-headline-sm text-headline-sm text-on-surface">Inventario Completo</h2>
+<span class="px-space-xs py-0.5 rounded-full bg-surface-container font-label-sm text-label-sm text-outline">5 ítems visualizados</span>
+</div>
+<p class="font-body-sm text-body-sm text-outline mt-0.5">Listado general de existencias registradas en el servidor de planta</p>
+</div>
+<div class="flex items-center gap-space-sm flex-wrap sm:flex-nowrap">
+<!-- Search Input -->
+<div class="relative w-full sm:w-80">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[18px] text-outline">search</span>
+<input class="w-full h-10 pl-9 pr-12 rounded-lg bg-surface-container-low text-body-sm font-body-sm text-on-surface focus:outline-none focus:bg-surface-container transition-all" placeholder="Buscar por código SKU, producto o proveedor..." type="text"/>
+<span class="absolute right-2.5 top-1/2 -translate-y-1/2 font-label-sm text-label-sm text-outline px-1.5 py-0.5 rounded bg-surface-container-lowest shadow-sm">Ctrl+K</span>
+</div>
+<!-- Add Button -->
+<button class="inline-flex items-center gap-space-xs px-space-md h-10 rounded-xl bg-primary hover:bg-primary-container text-on-primary font-label-lg text-label-lg shadow-sm transition-all whitespace-nowrap" type="button">
+<span class="material-symbols-outlined text-[18px]">add_box</span>
+<span>Añadir Producto</span>
+</button>
+</div>
+</div>
+<!-- Data Table Container -->
+<div class="overflow-x-auto">
+<table class="w-full text-left">
+<thead>
+<tr class="bg-surface-container-low text-outline uppercase font-label-sm text-label-sm tracking-wider">
+<th class="py-space-sm px-space-md rounded-l-lg">SKU</th>
+<th class="py-space-sm px-space-md">Producto</th>
+<th class="py-space-sm px-space-md">Talla</th>
+<th class="py-space-sm px-space-md text-right">Stock</th>
+<th class="py-space-sm px-space-md text-right">Precio</th>
+<th class="py-space-sm px-space-md text-center">Estado</th>
+<th class="py-space-sm px-space-md rounded-r-lg text-right">Acciones</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container/60">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-space-md px-space-md font-mono font-label-sm text-label-sm text-primary font-semibold">SKU-00101</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[18px]">autorenew</span>
+<span class="font-label-md text-label-md text-on-surface">Casco Dieléctrico Tipo I</span>
+</div>
+</td>
+<td class="py-space-md px-space-md font-body-sm text-body-sm text-on-surface-variant">Única</td>
+<td class="py-space-md px-space-md font-headline-sm text-headline-sm text-right text-on-surface text-[15px]">48</td>
+<td class="py-space-md px-space-md font-headline-sm text-headline-sm text-right text-on-surface text-[15px]">$18.50</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-tertiary-container/15 text-tertiary font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                En Stock
+              </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="inline-flex items-center gap-1">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container flex items-center justify-center text-outline hover:text-primary transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container flex items-center justify-center text-outline hover:text-primary transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-space-md px-space-md font-mono font-label-sm text-label-sm text-primary font-semibold">SKU-00488</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[18px]">front_hand</span>
+<span class="font-label-md text-label-md text-on-surface">Guantes de Nitrilo</span>
+</div>
+</td>
+<td class="py-space-md px-space-md font-body-sm text-body-sm text-on-surface-variant">M</td>
+<td class="py-space-md px-space-md font-headline-sm text-headline-sm text-right text-error text-[15px]">6</td>
+<td class="py-space-md px-space-md font-headline-sm text-headline-sm text-right text-on-surface text-[15px]">$8.20</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-secondary-container text-on-secondary-fixed-variant font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+                Bajo Stock
+              </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="inline-flex items-center gap-1">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container flex items-center justify-center text-outline hover:text-primary transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container flex items-center justify-center text-outline hover:text-primary transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-space-md px-space-md font-mono font-label-sm text-label-sm text-primary font-semibold">SKU-00340</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[18px]">checkroom</span>
+<span class="font-label-md text-label-md text-on-surface">Camisa Drill Reforzada</span>
+</div>
+</td>
+<td class="py-space-md px-space-md font-body-sm text-body-sm text-on-surface-variant">L</td>
+<td class="py-space-md px-space-md font-headline-sm text-headline-sm text-right text-on-surface text-[15px]">65</td>
+<td class="py-space-md px-space-md font-headline-sm text-headline-sm text-right text-on-surface text-[15px]">$22.00</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-tertiary-container/15 text-tertiary font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                En Stock
+              </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="inline-flex items-center gap-1">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container flex items-center justify-center text-outline hover:text-primary transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container flex items-center justify-center text-outline hover:text-primary transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low/40 transition-colors">
+<td class="py-space-md px-space-md font-mono font-label-sm text-label-sm text-primary font-semibold">SKU-00215</td>
+<td class="py-space-md px-space-md">
+<div class="flex items-center gap-space-xs">
+<span class="material-symbols-outlined text-outline text-[18px]">hiking</span>
+<span class="font-label-md text-label-md text-on-surface">Bota de Seguridad Caña Alta</span>
+</div>
+</td>
+<td class="py-space-md px-space-md font-body-sm text-body-sm text-on-surface-variant">42</td>
+<td class="py-space-md px-space-md font-headline-sm text-headline-sm text-right text-on-surface text-[15px]">14</td>
+<td class="py-space-md px-space-md font-headline-sm text-headline-sm text-right text-on-surface text-[15px]">$45.00</td>
+<td class="py-space-md px-space-md text-center">
+<span class="inline-flex items-center gap-1 px-space-sm py-0.5 rounded-full bg-tertiary-container/15 text-tertiary font-label-sm text-label-sm">
+<span class="w-1.5 h-1.5 rounded-full bg-tertiary"></span>
+                En Stock
+              </span>
+</td>
+<td class="py-space-md px-space-md text-right">
+<div class="inline-flex items-center gap-1">
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container flex items-center justify-center text-outline hover:text-primary transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+<button class="w-8 h-8 rounded-lg hover:bg-surface-container flex items-center justify-center text-outline hover:text-primary transition-all" type="button">
+<span class="material-symbols-outlined text-[18px]">visibility</span>
+</button>
+</div>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Table Pagination / Footer Status -->
+<div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-space-sm pt-space-md mt-space-md text-body-sm font-body-sm text-outline">
+<span>Mostrando 4 de 124 registros filtrados</span>
+<div class="flex items-center gap-space-xs">
+<button class="px-space-sm py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm disabled:opacity-50" disabled="" type="button">« Anterior</button>
+<span class="px-space-sm py-1 rounded-lg bg-primary text-on-primary font-label-sm text-label-sm">1</span>
+<button class="px-space-sm py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm" type="button">2</button>
+<button class="px-space-sm py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm" type="button">3</button>
+<button class="px-space-sm py-1 rounded-lg bg-surface-container hover:bg-surface-container-high text-on-surface font-label-sm text-label-sm" type="button">Siguiente »</button>
+</div>
+</div>
+</div>
+</div>
+<script>
+  // Simple reactive logic for cart demonstration and pill switching
+  function recalculateTotals() {
+    let qCasco = parseInt(document.getElementById('qty-casco')?.innerText || '0');
+    let qCamisa = parseInt(document.getElementById('qty-camisa')?.innerText || '0');
+
+    let subtotal = (qCasco * 18.50) + (qCamisa * 22.00);
+    let tax = subtotal * 0.16;
+    let total = subtotal + tax;
+
+    let totalItems = qCasco + qCamisa;
+
+    const subEl = document.getElementById('cart-subtotal');
+    const taxEl = document.getElementById('cart-tax');
+    const totEl = document.getElementById('cart-total');
+    const countEl = document.getElementById('cart-item-count');
+
+    if (subEl) subEl.innerText = '$' + subtotal.toFixed(2);
+    if (taxEl) taxEl.innerText = '$' + tax.toFixed(2);
+    if (totEl) totEl.innerText = '$' + total.toFixed(2);
+    if (countEl) countEl.innerText = totalItems + ' ítems';
+  }
+
+  function updateQty(itemKey, delta, price) {
+    const qtyEl = document.getElementById('qty-' + itemKey);
+    const totEl = document.getElementById('total-' + itemKey);
+    if (!qtyEl || !totEl) return;
+
+    let current = parseInt(qtyEl.innerText) + delta;
+    if (current < 1) current = 1;
+    qtyEl.innerText = current;
+    totEl.innerText = '$' + (current * price).toFixed(2);
+
+    recalculateTotals();
+  }
+
+  function removeItem(rowId) {
+    const row = document.getElementById(rowId);
+    if (row) {
+      row.style.opacity = '0';
+      setTimeout(() => {
+        row.remove();
+        recalculateTotals();
+      }, 200);
+    }
+  }
+
+  function resetCart() {
+    const qCasco = document.getElementById('qty-casco');
+    const qCamisa = document.getElementById('qty-camisa');
+    if (qCasco) {
+      qCasco.innerText = '0';
+      document.getElementById('total-casco').innerText = '$0.00';
+    }
+    if (qCamisa) {
+      qCamisa.innerText = '0';
+      document.getElementById('total-camisa').innerText = '$0.00';
+    }
+    recalculateTotals();
+  }
+
+  function addItemToCart(name, price) {
+    if (name.includes('Casco')) {
+      updateQty('casco', 1, 18.50);
+    } else if (name.includes('Camisa')) {
+      updateQty('camisa', 1, 22.00);
+    } else {
+      alert(name + ' añadido al despacho.');
+    }
+  }
+
+  function triggerCheckout() {
+    alert('Orden ORD-2023-089 enviada al módulo de Facturación/Salida.');
+  }
+
+  // Filter pills highlight
+  document.querySelectorAll('.filter-pill').forEach(btn => {
+    btn.addEventListener('click', function() {
+      document.querySelectorAll('.filter-pill').forEach(b => {
+        b.className = 'filter-pill px-space-md py-1 rounded-full font-label-sm text-label-sm bg-surface-container text-on-surface-variant hover:bg-surface-container-high transition-all';
+      });
+      this.className = 'filter-pill px-space-md py-1 rounded-full font-label-sm text-label-sm bg-primary text-on-primary shadow-sm transition-all';
+    });
+  });
+</script></main></div></body></html>
