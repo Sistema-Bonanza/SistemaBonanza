@@ -146,14 +146,14 @@ $rutas = [
 
     'usuario' => [
         'archivo'  => 'usuarioController.php',
-        'clase'    => 'UsuarioController',
+        'clase'    => 'usuarioController',
         'acciones' => [
-            'formusuario'       => ruta('GET', ROLES_ADMIN),
-            'formusuariocrear'  => ruta('GET', ROLES_ADMIN),
-            'formusuarioeditar' => ruta('GET', ROLES_ADMIN),
-            'guardar'           => ruta('POST', ROLES_ADMIN, false),
-            'editar'            => ruta('POST', ROLES_ADMIN, false),
-            'eliminar'          => ruta('POST', ROLES_ADMIN, false),
+            'formusuario'       => ruta('GET',  ROLES_ADMIN),
+            'formusuariocrear'  => ruta('GET',  ROLES_ADMIN),
+            'formusuarioeditar' => ruta('GET',  ROLES_ADMIN),
+            'guardar'           => ruta('POST', ROLES_ADMIN, false),  // LEGADO: sin token
+            'editar'            => ruta('POST', ROLES_ADMIN, false),  // LEGADO: sin token
+            'eliminar'          => ruta('POST', ROLES_ADMIN),         // LEGADO: enlace GET (vulnerable a CSRF). Convertir a POST + token
         ],
     ],
 
@@ -185,17 +185,16 @@ $rutas = [
         ],
     ],
 
-        'proveedor' => [
+    'proveedor' => [
         'archivo'  => 'proveedorController.php',
         'clase'    => 'ProveedorController',
         'acciones' => [
-            'tablaproveedores'   => ruta('GET', ROLES_ADMIN),
-            'formcrearproveedor' => ruta('GET', ROLES_ADMIN),
-            'formedit'           => ruta('GET', ROLES_ADMIN),
-            'cambiarestado'      => ruta('GET', ROLES_ADMIN),
-            'cambiarEstado'      => ruta('GET', ROLES_ADMIN), // Compatibilidad si el router no usa strtolower
+            'tablaproveedores'   => ruta('GET',  ROLES_ADMIN),
+            'formcrearproveedor' => ruta('GET',  ROLES_ADMIN),
+            'formedit'           => ruta('GET',  ROLES_ADMIN),
             'guardar'            => ruta('POST', ROLES_ADMIN, false), // LEGADO: sin token
             'actualizar'         => ruta('POST', ROLES_ADMIN, false), // LEGADO: sin token
+            // La vista proveedor.php enlaza a 'eliminar', pero el controlador no tiene ese método.
         ],
     ],
 
@@ -265,239 +264,251 @@ $rutas = [
              'anularventa' => ruta('POST', ROLES_ADMIN),
          ],
      ],
+
+    'reporte' => [
+        'archivo'  => 'ReporteController.php',
+        'clase'    => 'ReporteController',
+        'acciones' => [
+            'index'      => ruta('GET', ROLES_AUTENTICADOS),   // menu: cada rol ve solo sus reportes
+            'cierrecaja' => ruta('GET', ROLES_TODOS),          // cierre de caja diario
+            'inventario' => ruta('GET', ROLES_TODOS),          // existencias (el costo solo lo ve el admin)
+            'ganancias'  => ruta('GET', ROLES_ADMIN),          // ganancia por producto
+            'variacion'  => ruta('GET', ROLES_ADMIN),          // aumento / disminucion de ventas
+        ],
+    ],
 ];
 
 
-    // ============================================================
-    // 7. FUNCIONES DEL ROUTER
-    // ============================================================
+// ============================================================
+// 7. FUNCIONES DEL ROUTER
+// ============================================================
 
-    /** Deja una línea JSON en el log del servidor (el JSON escapa saltos de línea: nadie falsea el log). */
-    function registrarEvento(string $tipo, string $detalle = ''): void
-    {
-        error_log(json_encode([
-            'evento'  => $tipo,
-            'usuario' => isset($_SESSION[SESION_ID]) ? (int) $_SESSION[SESION_ID] : 0,
-            'ip'      => $_SERVER['REMOTE_ADDR'] ?? '?',
-            'detalle' => substr($detalle, 0, 200),
-        ], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE));
-    }
+/** Deja una línea JSON en el log del servidor (el JSON escapa saltos de línea: nadie falsea el log). */
+function registrarEvento(string $tipo, string $detalle = ''): void
+{
+    error_log(json_encode([
+        'evento'  => $tipo,
+        'usuario' => isset($_SESSION[SESION_ID]) ? (int) $_SESSION[SESION_ID] : 0,
+        'ip'      => $_SERVER['REMOTE_ADDR'] ?? '?',
+        'detalle' => substr($detalle, 0, 200),
+    ], JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE));
+}
 
-    /**
-     * Responde un error y termina. Siempre un mensaje genérico: el detalle va al log.
-     * Con $json = true responde JSON (para las peticiones fetch).
-     */
-    function responderError(int $codigo, string $mensaje, bool $json = false): void
-    {
-        http_response_code($codigo);
-        if ($json) {
-            header('Content-Type: application/json; charset=UTF-8');
-            echo json_encode(['ok' => false, 'error' => $mensaje], JSON_UNESCAPED_UNICODE);
-            exit;
-        }
-        header('Content-Type: text/html; charset=UTF-8');
-        echo '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Error ' . $codigo . '</title></head>'
-        . '<body style="font-family:sans-serif;text-align:center;margin-top:12vh">'
-        . '<h1>' . $codigo . '</h1><p>' . esc($mensaje) . '</p>'
-        . '<p><a href="' . esc(URL_DASHBOARD) . '">Volver al inicio</a></p></body></html>';
+/**
+ * Responde un error y termina. Siempre un mensaje genérico: el detalle va al log.
+ * Con $json = true responde JSON (para las peticiones fetch).
+ */
+function responderError(int $codigo, string $mensaje, bool $json = false): void
+{
+    http_response_code($codigo);
+    if ($json) {
+        header('Content-Type: application/json; charset=UTF-8');
+        echo json_encode(['ok' => false, 'error' => $mensaje], JSON_UNESCAPED_UNICODE);
         exit;
     }
+    header('Content-Type: text/html; charset=UTF-8');
+    echo '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"><title>Error ' . $codigo . '</title></head>'
+       . '<body style="font-family:sans-serif;text-align:center;margin-top:12vh">'
+       . '<h1>' . $codigo . '</h1><p>' . esc($mensaje) . '</p>'
+       . '<p><a href="' . esc(URL_DASHBOARD) . '">Volver al inicio</a></p></body></html>';
+    exit;
+}
 
-    /**
-     * Unifica los nombres de rol. Tu BD guarda 'admin' (el usuario semilla) pero
-     * también 'Administrador' y 'Operador' (valores del formulario de usuarios);
-     * el código compara contra 'admin' y 'operador'.
-     */
-    function normalizarRol($rol): string
-    {
-        $rol = is_string($rol) ? strtolower(trim($rol)) : '';
-        return $rol === 'administrador' ? 'admin' : $rol;
+/**
+ * Unifica los nombres de rol. Tu BD guarda 'admin' (el usuario semilla) pero
+ * también 'Administrador' y 'Operador' (valores del formulario de usuarios);
+ * el código compara contra 'admin' y 'operador'.
+ */
+function normalizarRol($rol): string
+{
+    $rol = is_string($rol) ? strtolower(trim($rol)) : '';
+    return $rol === 'administrador' ? 'admin' : $rol;
+}
+
+/** Destruye la sesión por completo y manda al login con un aviso. */
+function cerrarSesionYRedirigir(string $mensaje, bool $json = false): void
+{
+    $p = session_get_cookie_params();
+    $_SESSION = [];
+    setcookie(session_name(), '', [
+        'expires'  => time() - 3600,
+        'path'     => $p['path'],
+        'domain'   => $p['domain'],
+        'secure'   => $p['secure'],
+        'httponly' => $p['httponly'],
+        'samesite' => $p['samesite'] ?: 'Strict',
+    ]);
+    session_destroy();
+    session_start();                 // sesión nueva, vacía, solo para llevar el aviso
+    session_regenerate_id(true);
+    if ($json) {
+        responderError(401, $mensaje, true);
+    }
+    setFlash('aviso', $mensaje);
+    redirigir(URL_LOGIN);
+}
+
+/** Cierra la sesión por inactividad o por superar su duración máxima. */
+function controlarTiempos(bool $json): void
+{
+    $ahora  = time();
+    $inicio = $_SESSION['inicio_sesion']     ?? $ahora;
+    $ultima = $_SESSION['ultima_actividad']  ?? $ahora;
+
+    if (($ahora - $ultima) > INACTIVIDAD_MAX) {
+        registrarEvento('sesion_expirada', 'inactividad');
+        cerrarSesionYRedirigir('Tu sesión expiró por inactividad. Inicia sesión de nuevo.', $json);
+    }
+    if (($ahora - $inicio) > SESION_MAX) {
+        registrarEvento('sesion_expirada', 'duracion maxima');
+        cerrarSesionYRedirigir('Tu sesión alcanzó su duración máxima. Inicia sesión de nuevo.', $json);
+    }
+    $_SESSION['inicio_sesion']    = $inicio;
+    $_SESSION['ultima_actividad'] = $ahora;
+}
+
+/**
+ * Consulta la BD para confirmar que el usuario SIGUE activo y cuál es su rol HOY.
+ * Sin esto, un usuario desactivado conservaría su acceso hasta cerrar el navegador,
+ * y un cambio de rol no tendría efecto hasta volver a iniciar sesión.
+ */
+function revalidarUsuario(bool $json): void
+{
+    $ahora = time();
+    if (isset($_SESSION['revalidado_en']) && ($ahora - $_SESSION['revalidado_en']) < REVALIDAR_CADA) {
+        return;
     }
 
-    /** Destruye la sesión por completo y manda al login con un aviso. */
-    function cerrarSesionYRedirigir(string $mensaje, bool $json = false): void
-    {
-        $p = session_get_cookie_params();
-        $_SESSION = [];
-        setcookie(session_name(), '', [
-            'expires'  => time() - 3600,
-            'path'     => $p['path'],
-            'domain'   => $p['domain'],
-            'secure'   => $p['secure'],
-            'httponly' => $p['httponly'],
-            'samesite' => $p['samesite'] ?: 'Strict',
-        ]);
-        session_destroy();
-        session_start();                 // sesión nueva, vacía, solo para llevar el aviso
-        session_regenerate_id(true);
-        if ($json) {
-            responderError(401, $mensaje, true);
+    require_once __DIR__ . '/../config/database.php';
+    $pdo  = (new Database())->getConnection();
+    $stmt = $pdo->prepare('SELECT rol, is_active FROM usuarios WHERE id = :id');
+    $stmt->execute([':id' => usuarioActualId()]);
+    $fila = $stmt->fetch();
+
+    if (!$fila || (int) $fila['is_active'] !== 1) {
+        registrarEvento('sesion_invalida', 'usuario inexistente o desactivado');
+        cerrarSesionYRedirigir('Tu cuenta no está disponible. Contacta al administrador.', $json);
+    }
+
+    $_SESSION[SESION_ROL]      = normalizarRol($fila['rol']);   // el rol de la BD manda
+    $_SESSION['revalidado_en'] = $ahora;
+}
+
+/**
+ * En POST: ¿la petición viene de nuestro propio sitio? Compara el host de las
+ * cabeceras Origin / Referer con el host al que se pidió. Es una defensa extra
+ * contra CSRF; la principal sigue siendo el token.
+ */
+function origenValido(): bool
+{
+    $hostPropio = strtolower($_SERVER['HTTP_HOST'] ?? '');
+    foreach (['HTTP_ORIGIN', 'HTTP_REFERER'] as $cabecera) {
+        if (!empty($_SERVER[$cabecera])) {
+            $partes = parse_url((string) $_SERVER[$cabecera]);
+            if ($partes === false || empty($partes['host'])) {
+                return false;
+            }
+            $hostOrigen = strtolower($partes['host'] . (isset($partes['port']) ? ':' . $partes['port'] : ''));
+            return hash_equals($hostPropio, $hostOrigen);
         }
-        setFlash('aviso', $mensaje);
+    }
+    return true;   // sin cabeceras (privacidad del navegador): decide el token CSRF
+}
+
+
+// ============================================================
+// 8. DESPACHO
+// ============================================================
+evitarCache();   // las páginas del sistema no se guardan en caché (botón "atrás" tras cerrar sesión)
+
+// --- Puerta 1: la ruta existe en la lista blanca -----------------------------
+$controlador = $_GET['controller'] ?? 'sistema';
+$accion      = $_GET['action']     ?? 'index';
+// Si llega un arreglo (?controller[]=x) se descarta; si es texto, a minúsculas.
+$controlador = is_string($controlador) ? strtolower($controlador) : '';
+$accion      = is_string($accion)      ? strtolower($accion)      : '';
+
+if (!preg_match('/^[a-z0-9]{1,40}\z/', $controlador)
+    || !preg_match('/^[a-z0-9]{1,40}\z/', $accion)
+    || !isset($rutas[$controlador]['acciones'][$accion])) {
+    registrarEvento('ruta_inexistente', $controlador . '/' . $accion);
+    responderError(404, 'La página que buscas no existe.');
+}
+
+$definicion = $rutas[$controlador];
+$ruta       = $definicion['acciones'][$accion];
+$json       = $ruta['json'];
+
+// --- Puerta 2: método HTTP permitido ------------------------------------------
+$metodo = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
+if ($metodo === 'HEAD') {
+    $metodo = 'GET';
+}
+if ($metodo !== $ruta['metodo']) {
+    header('Allow: ' . $ruta['metodo']);
+    registrarEvento('metodo_no_permitido', $controlador . '/' . $accion . ' ' . $metodo);
+    responderError(405, 'Método no permitido.', $json);
+}
+
+// --- Puerta 3: en POST, mismo origen --------------------------------------------
+if ($metodo === 'POST' && !origenValido()) {
+    registrarEvento('origen_invalido', $controlador . '/' . $accion);
+    responderError(403, 'Solicitud no válida.', $json);
+}
+
+// --- Puertas 4, 5 y 6: sesión, usuario vigente y rol --------------------------
+$esPublica   = ($ruta['roles'] === null);
+$autenticado = usuarioActualId() > 0;
+
+if (!$esPublica) {
+    if (!$autenticado) {
+        if ($json) {
+            responderError(401, 'Tu sesión expiró. Inicia sesión de nuevo.', true);
+        }
         redirigir(URL_LOGIN);
     }
+    controlarTiempos($json);      // Puerta 4: inactividad y duración máxima
+    revalidarUsuario($json);      // Puerta 5: ¿sigue activo? ¿qué rol tiene hoy?
 
-    /** Cierra la sesión por inactividad o por superar su duración máxima. */
-    function controlarTiempos(bool $json): void
-    {
-        $ahora  = time();
-        $inicio = $_SESSION['inicio_sesion']     ?? $ahora;
-        $ultima = $_SESSION['ultima_actividad']  ?? $ahora;
+    if (!tieneRol($ruta['roles'])) {   // Puerta 6: autorización por rol
+        registrarEvento('acceso_denegado', $controlador . '/' . $accion);
+        responderError(403, 'No tienes permiso para realizar esta acción.', $json);
+    }
+} elseif ($autenticado && $accion !== 'logout') {
+    // Ya hay sesión y pide una ruta pública (el login): al dashboard.
+    redirigir(URL_DASHBOARD);
+}
 
-        if (($ahora - $ultima) > INACTIVIDAD_MAX) {
-            registrarEvento('sesion_expirada', 'inactividad');
-            cerrarSesionYRedirigir('Tu sesión expiró por inactividad. Inicia sesión de nuevo.', $json);
-        }
-        if (($ahora - $inicio) > SESION_MAX) {
-            registrarEvento('sesion_expirada', 'duracion maxima');
-            cerrarSesionYRedirigir('Tu sesión alcanzó su duración máxima. Inicia sesión de nuevo.', $json);
-        }
-        $_SESSION['inicio_sesion']    = $inicio;
-        $_SESSION['ultima_actividad'] = $ahora;
+// --- Puerta 7: token CSRF en POST ---------------------------------------------
+if ($metodo === 'POST' && $ruta['csrf'] && !validarCsrf($_POST['csrf_token'] ?? null)) {
+    registrarEvento('csrf_invalido', $controlador . '/' . $accion);
+    responderError(403, 'El formulario expiró o no es válido. Recarga la página e inténtalo de nuevo.', $json);
+}
+
+// --- Puerta 8: ejecución ----------------------------------------------------------
+// El archivo y la clase salen de TU tabla, nunca de lo que escribió el usuario.
+try {
+    $archivo = __DIR__ . '/../app/controller/' . $definicion['archivo'];
+    if (!is_file($archivo)) {
+        throw new RuntimeException('No existe el archivo del controlador: ' . $definicion['archivo']);
+    }
+    require_once $archivo;
+
+    $clase = $definicion['clase'];
+    if (!class_exists($clase, false)) {
+        throw new RuntimeException('La clase ' . $clase . ' no está definida en su archivo.');
     }
 
-    /**
-     * Consulta la BD para confirmar que el usuario SIGUE activo y cuál es su rol HOY.
-     * Sin esto, un usuario desactivado conservaría su acceso hasta cerrar el navegador,
-     * y un cambio de rol no tendría efecto hasta volver a iniciar sesión.
-     */
-    function revalidarUsuario(bool $json): void
-    {
-        $ahora = time();
-        if (isset($_SESSION['revalidado_en']) && ($ahora - $_SESSION['revalidado_en']) < REVALIDAR_CADA) {
-            return;
-        }
-
-        require_once __DIR__ . '/../config/database.php';
-        $pdo  = (new Database())->getConnection();
-        $stmt = $pdo->prepare('SELECT rol, is_active FROM usuarios WHERE id = :id');
-        $stmt->execute([':id' => usuarioActualId()]);
-        $fila = $stmt->fetch();
-
-        if (!$fila || (int) $fila['is_active'] !== 1) {
-            registrarEvento('sesion_invalida', 'usuario inexistente o desactivado');
-            cerrarSesionYRedirigir('Tu cuenta no está disponible. Contacta al administrador.', $json);
-        }
-
-        $_SESSION[SESION_ROL]      = normalizarRol($fila['rol']);   // el rol de la BD manda
-        $_SESSION['revalidado_en'] = $ahora;
+    $instancia = new $clase();
+    if (!is_callable([$instancia, $accion])) {
+        throw new RuntimeException('El método ' . $accion . ' no es invocable en ' . $clase . '.');
     }
-
-    /**
-     * En POST: ¿la petición viene de nuestro propio sitio? Compara el host de las
-     * cabeceras Origin / Referer con el host al que se pidió. Es una defensa extra
-     * contra CSRF; la principal sigue siendo el token.
-     */
-    function origenValido(): bool
-    {
-        $hostPropio = strtolower($_SERVER['HTTP_HOST'] ?? '');
-        foreach (['HTTP_ORIGIN', 'HTTP_REFERER'] as $cabecera) {
-            if (!empty($_SERVER[$cabecera])) {
-                $partes = parse_url((string) $_SERVER[$cabecera]);
-                if ($partes === false || empty($partes['host'])) {
-                    return false;
-                }
-                $hostOrigen = strtolower($partes['host'] . (isset($partes['port']) ? ':' . $partes['port'] : ''));
-                return hash_equals($hostPropio, $hostOrigen);
-            }
-        }
-        return true;   // sin cabeceras (privacidad del navegador): decide el token CSRF
-    }
-
-
-    // ============================================================
-    // 8. DESPACHO
-    // ============================================================
-    evitarCache();   // las páginas del sistema no se guardan en caché (botón "atrás" tras cerrar sesión)
-
-    // --- Puerta 1: la ruta existe en la lista blanca -----------------------------
-    $controlador = $_GET['controller'] ?? 'sistema';
-    $accion      = $_GET['action']     ?? 'index';
-    // Si llega un arreglo (?controller[]=x) se descarta; si es texto, a minúsculas.
-    $controlador = is_string($controlador) ? strtolower($controlador) : '';
-    $accion      = is_string($accion)      ? strtolower($accion)      : '';
-
-    if (!preg_match('/^[a-z0-9]{1,40}\z/', $controlador)
-        || !preg_match('/^[a-z0-9]{1,40}\z/', $accion)
-        || !isset($rutas[$controlador]['acciones'][$accion])) {
-        registrarEvento('ruta_inexistente', $controlador . '/' . $accion);
-        responderError(404, 'La página que buscas no existe.');
-    }
-
-    $definicion = $rutas[$controlador];
-    $ruta       = $definicion['acciones'][$accion];
-    $json       = $ruta['json'];
-
-    // --- Puerta 2: método HTTP permitido ------------------------------------------
-    $metodo = strtoupper($_SERVER['REQUEST_METHOD'] ?? 'GET');
-    if ($metodo === 'HEAD') {
-        $metodo = 'GET';
-    }
-    if ($metodo !== $ruta['metodo']) {
-        header('Allow: ' . $ruta['metodo']);
-        registrarEvento('metodo_no_permitido', $controlador . '/' . $accion . ' ' . $metodo);
-        responderError(405, 'Método no permitido.', $json);
-    }
-
-    // --- Puerta 3: en POST, mismo origen --------------------------------------------
-    if ($metodo === 'POST' && !origenValido()) {
-        registrarEvento('origen_invalido', $controlador . '/' . $accion);
-        responderError(403, 'Solicitud no válida.', $json);
-    }
-
-    // --- Puertas 4, 5 y 6: sesión, usuario vigente y rol --------------------------
-    $esPublica   = ($ruta['roles'] === null);
-    $autenticado = usuarioActualId() > 0;
-
-    if (!$esPublica) {
-        if (!$autenticado) {
-            if ($json) {
-                responderError(401, 'Tu sesión expiró. Inicia sesión de nuevo.', true);
-            }
-            redirigir(URL_LOGIN);
-        }
-        controlarTiempos($json);      // Puerta 4: inactividad y duración máxima
-        revalidarUsuario($json);      // Puerta 5: ¿sigue activo? ¿qué rol tiene hoy?
-
-        if (!tieneRol($ruta['roles'])) {   // Puerta 6: autorización por rol
-            registrarEvento('acceso_denegado', $controlador . '/' . $accion);
-            responderError(403, 'No tienes permiso para realizar esta acción.', $json);
-        }
-    } elseif ($autenticado && $accion !== 'logout') {
-        // Ya hay sesión y pide una ruta pública (el login): al dashboard.
-        redirigir(URL_DASHBOARD);
-    }
-
-    // --- Puerta 7: token CSRF en POST ---------------------------------------------
-    if ($metodo === 'POST' && $ruta['csrf'] && !validarCsrf($_POST['csrf_token'] ?? null)) {
-        registrarEvento('csrf_invalido', $controlador . '/' . $accion);
-        responderError(403, 'El formulario expiró o no es válido. Recarga la página e inténtalo de nuevo.', $json);
-    }
-
-    // --- Puerta 8: ejecución ----------------------------------------------------------
-    // El archivo y la clase salen de TU tabla, nunca de lo que escribió el usuario.
-    try {
-        $archivo = __DIR__ . '/../app/controller/' . $definicion['archivo'];
-        if (!is_file($archivo)) {
-            throw new RuntimeException('No existe el archivo del controlador: ' . $definicion['archivo']);
-        }
-        require_once $archivo;
-
-        $clase = $definicion['clase'];
-        if (!class_exists($clase, false)) {
-            throw new RuntimeException('La clase ' . $clase . ' no está definida en su archivo.');
-        }
-
-        $instancia = new $clase();
-        if (!is_callable([$instancia, $accion])) {
-            throw new RuntimeException('El método ' . $accion . ' no es invocable en ' . $clase . '.');
-        }
-        $instancia->$accion();   // PHP no distingue mayúsculas en métodos: tablaproductos() = TablaProductos()
-    } catch (Throwable $e) {
-        registrarEvento('error_interno', $controlador . '/' . $accion . ': ' . $e->getMessage());
-        responderError(
-            500,
-            MODO_DESARROLLO ? $e->getMessage() : 'Ocurrió un error interno. Inténtalo de nuevo más tarde.',
-            $json
-        );
+    $instancia->$accion();   // PHP no distingue mayúsculas en métodos: tablaproductos() = TablaProductos()
+} catch (Throwable $e) {
+    registrarEvento('error_interno', $controlador . '/' . $accion . ': ' . $e->getMessage());
+    responderError(
+        500,
+        MODO_DESARROLLO ? $e->getMessage() : 'Ocurrió un error interno. Inténtalo de nuevo más tarde.',
+        $json
+    );
 }

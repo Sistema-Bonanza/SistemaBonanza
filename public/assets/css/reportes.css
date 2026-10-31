@@ -1,0 +1,223 @@
+/* ==========================================
+   MÓDULO DE REPORTES
+   Se carga DESPUÉS de sidebar.css y de Bulma.
+   Bulma pone casi todo el aspecto; aquí solo va lo que Bulma no trae:
+   tarjetas de indicadores, tablas de reporte y la hoja de IMPRESIÓN.
+   ========================================== */
+
+/* Contenedor principal (el mismo que usan Ventas y Compras). */
+.main-content {
+    width: 100%;
+    flex-grow: 1;
+    max-width: 100%;
+    overflow-x: hidden;
+    padding: 30px;
+}
+
+/* El encabezado del papel solo existe al imprimir. */
+.solo-impresion { display: none; }
+
+/* ---------- Tarjetas de indicadores ---------- */
+
+.kpi {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    height: 100%;
+    border-left: 4px solid #3298dc;
+}
+.kpi-success { border-left-color: #48c774; }
+.kpi-info    { border-left-color: #3298dc; }
+.kpi-warning { border-left-color: #f5b301; }
+.kpi-danger  { border-left-color: #f14668; }
+
+.kpi-texto { min-width: 0; }
+.kpi-valor {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.2;
+    color: #363636;
+    overflow-wrap: anywhere;
+}
+
+.kpi-icono {
+    flex: 0 0 48px;
+    width: 48px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 1.4rem;
+}
+.kpi-icono-success { background: #effaf3; color: #257942; }
+.kpi-icono-info    { background: #eef6fc; color: #1d72aa; }
+.kpi-icono-warning { background: #fffbeb; color: #946c00; }
+.kpi-icono-danger  { background: #feecf0; color: #cc0f35; }
+
+/* Tarjetas del menú de reportes (son enlaces). */
+.tarjeta-reporte {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.25rem;
+    height: 100%;
+    color: inherit;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.tarjeta-reporte:hover {
+    color: inherit;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(10, 10, 10, 0.12);
+}
+.tarjeta-reporte .kpi-icono { flex-basis: 56px; width: 56px; height: 56px; font-size: 1.6rem; }
+
+/* ---------- Tablas de reporte ---------- */
+
+.caja-tabla { overflow: hidden; margin-bottom: 1.5rem; }
+
+.titulo-tabla {
+    padding: 0.85rem 1.25rem;
+    font-size: 1rem;
+    font-weight: 700;
+    color: #363636;
+    border-bottom: 1px solid #ededed;
+}
+.titulo-tabla.sin-borde { border-bottom: none; padding-left: 0; padding-top: 0; }
+
+.tabla-reporte { font-size: 0.9rem; }
+.tabla-reporte th,
+.tabla-reporte td { vertical-align: middle; padding: 0.6rem 1rem; }
+.tabla-reporte thead th {
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #7a7a7a;
+    background: #fafafa;
+    white-space: nowrap;
+}
+.tabla-reporte .num {
+    text-align: right;
+    white-space: nowrap;
+    font-variant-numeric: tabular-nums;
+}
+.tabla-reporte .centro { text-align: center; }
+.tabla-reporte tfoot th {
+    background: #f5f5f5;
+    border-top: 2px solid #dbdbdb;
+    font-weight: 700;
+    color: #363636;
+}
+.tabla-reporte .fila-subtotal th,
+.tabla-reporte .fila-subtotal td { background: #fafafa; font-weight: 700; }
+.tabla-reporte .fila-vacia td { color: #b5b5b5; }
+
+/* Encabezado de dos niveles (Variación de ventas). */
+.tabla-reporte thead tr.grupo th {
+    text-align: center;
+    border-bottom: 1px solid #ededed;
+    color: #4a4a4a;
+}
+.tabla-reporte .borde-izq { border-left: 1px solid #ededed; }
+
+.nota-tabla { padding: 0.6rem 1.25rem; font-size: 0.8rem; color: #7a7a7a; border-top: 1px solid #f0f0f0; }
+
+.sub-linea { display: block; font-size: 0.78rem; color: #7a7a7a; font-weight: 400; }
+
+/* Venta anulada: apagada y con el total tachado, sin esconderla. */
+.fila-anulada td { opacity: 0.6; }
+.fila-anulada td.monto { text-decoration: line-through; }
+
+/* Situación de stock: una marca de color en el borde izquierdo de la fila. */
+.fila-agotado td:first-child { box-shadow: inset 4px 0 0 #f14668; }
+.fila-bajo    td:first-child { box-shadow: inset 4px 0 0 #f5b301; }
+
+/* Variación: verde sube, rojo baja, gris igual. */
+.var-sube  { color: #257942; font-weight: 600; }
+.var-baja  { color: #cc0f35; font-weight: 600; }
+.var-igual { color: #7a7a7a; }
+
+.tabla-reporte .tag { white-space: nowrap; }
+.tabla-reporte a.no-print-link { font-weight: 700; }
+
+/* ---------- Cierre de caja: conteo y firmas (para el papel) ---------- */
+
+.linea-llenar {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.6rem;
+    margin-bottom: 1.4rem;
+}
+.linea-llenar span { white-space: nowrap; font-size: 0.9rem; }
+.linea-llenar i { flex: 1; min-width: 60px; height: 1.3rem; border-bottom: 1px solid #8a8a8a; }
+
+.firmas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2.5rem;
+    margin-top: 2.6rem;
+}
+.firmas div { text-align: center; }
+.firmas i { display: block; height: 1px; background: #8a8a8a; margin-bottom: 0.4rem; }
+.firmas span { font-size: 0.85rem; color: #555; }
+
+/* ---------- Filtros rápidos de fecha ---------- */
+
+.rangos-rapidos { display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center; }
+.rangos-rapidos .tag { cursor: pointer; text-decoration: none; }
+.rangos-rapidos a.tag:hover { background: #e8e8e8; }
+
+/* ---------- Pantallas pequeñas ---------- */
+
+@media (max-width: 768px) {
+    .main-content { padding: 16px; }
+    .kpi-valor { font-size: 1.35rem; }
+    .firmas { grid-template-columns: 1fr; }
+}
+
+/* ---------- Impresión ---------- */
+
+@page { margin: 14mm; }
+
+@media print {
+    .sidebar,
+    .no-print { display: none !important; }
+
+    body { display: block; background: #fff; font-size: 11px; }
+    .main-content { padding: 0; overflow: visible; }
+
+    .solo-impresion { display: block; }
+    .encabezado-impresion {
+        text-align: center;
+        margin-bottom: 14px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #000;
+    }
+    .encabezado-impresion .empresa { font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; }
+    .encabezado-impresion h2 { font-size: 17px; font-weight: 700; margin: 4px 0; }
+    .encabezado-impresion p { margin: 0; }
+    .encabezado-impresion .generado { font-size: 10px; color: #555; margin-top: 4px; }
+
+    /* Cajas planas, sin sombras, y que no se partan por la mitad. */
+    .box { box-shadow: none !important; border: 1px solid #ccc; break-inside: avoid; }
+    .caja-tabla { break-inside: auto; }
+    .tabla-reporte { font-size: 10px; }
+    .tabla-reporte th,
+    .tabla-reporte td { padding: 3px 6px; }
+    .tabla-reporte tr { break-inside: avoid; }
+    .tabla-reporte thead { display: table-header-group; }   /* repite el encabezado en cada hoja */
+    .tabla-reporte tfoot { display: table-footer-group; }
+
+    .kpi { padding: 8px 10px; }
+    .kpi-valor { font-size: 14px; }
+    .arqueo, .firmas { break-inside: avoid; }
+
+    a, a.no-print-link { color: inherit !important; text-decoration: none !important; }
+
+    /* Que los colores (tags, variaciones, encabezados) no se pierdan al imprimir. */
+    .tag, .kpi, .tabla-reporte th, .tabla-reporte tfoot th,
+    .var-sube, .var-baja, .fila-agotado td, .fila-bajo td {
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+    }
+}

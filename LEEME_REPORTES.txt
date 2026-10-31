@@ -1,0 +1,60 @@
+MODULO DE REPORTES - Sistema Bonanza
+====================================
+
+REQUISITO PREVIO
+La base de datos debe tener aplicada migracion_pagos_factura.sql (tabla venta_pagos y las columnas
+ventas.tipo_pago / ventas.numero_factura). Es la misma migracion que necesita el modulo de Ventas.
+Si falta, el reporte avisa "No se pudo generar el reporte..." y deja el detalle en el log del servidor.
+
+INSTALACION
+1. Copia el contenido de esta carpeta sobre tu proyecto, respetando rutas.
+2. Entra por el menu lateral: Reportes.
+
+ARCHIVOS NUEVOS
+   app/controller/ReporteController.php
+   app/model/reporteModel.php                  (solo lee la BD: nunca inserta, actualiza ni borra)
+   app/helpers/reportes.php
+   app/views/reportes/_inicio.php, _fin.php    (cabecera y pie comunes)
+   app/views/reportes/index.php                (menu de reportes)
+   app/views/reportes/cierreCaja.php
+   app/views/reportes/inventario.php
+   app/views/reportes/ganancias.php
+   app/views/reportes/variacion.php
+   public/assets/css/reportes.css
+   public/assets/js/reportes.js
+
+ARCHIVOS MODIFICADOS (compara antes de reemplazar si los cambiaste)
+   public/index.php                    bloque 'reporte' en la tabla de rutas (justo despues de 'venta')
+   app/views/layouts/sidebar.php       el enlace "Reportes" apuntaba a '#'; ahora va al modulo
+
+QUE HACE CADA REPORTE Y QUIEN LO VE
+   Cierre de caja diario     admin y operador   Ventas del dia por forma de pago; cobrado vs. vendido a
+                                                credito (por cobrar); ventas anuladas; ventas por usuario;
+                                                espacio para el conteo de efectivo y las firmas.
+   Reporte de inventario     admin y operador   Existencias, minimo, situacion (agotado / stock bajo /
+                                                disponible) y valor. Los costos solo los ve el admin.
+   Ganancia por producto     solo admin         Ingresos, costo, ganancia y margen por producto en un rango.
+   Aumento y disminucion     solo admin         Compara dos periodos producto por producto (por unidades o
+   de ventas                                    por monto): aumento, disminucion, nuevo, dejo de venderse.
+
+   Todos se pueden imprimir (boton Imprimir) y exportar a Excel (boton Exportar CSV).
+   Para cambiar quien ve cada reporte hay que tocar DOS sitios: las constantes ROLES_* al inicio de
+   ReporteController.php y el bloque 'reporte' de public/index.php.
+
+REGLAS DE CALCULO
+   - Solo cuentan las ventas REGISTRADAS. Las anuladas se muestran aparte y nunca suman.
+   - Ingresos y ganancia van SIN IVA (el IVA es del fisco). El cierre de caja muestra tambien el total con IVA.
+   - El costo de cada linea es el que VentaModel guardo al vender (detalle_ventas.costo_unitario).
+     Si esa venta no tiene costo, NO se inventa uno: esa linea queda fuera de costo y ganancia y se avisa.
+   - Inventario: costo = precio de compra registrado; si es 0, el de la ultima compra no anulada (marcado con *).
+   - Las fechas se filtran igual que el listado de Ventas (desde el inicio del dia "desde" hasta el final de "hasta").
+   - Periodo base de la variacion: si no lo eliges, se usa el periodo inmediatamente anterior de igual duracion.
+
+PRUEBAS SUGERIDAS (en tu base real)
+ 1. Cierre de caja de un dia con ventas: "Total vendido" = suma de Ventas de ese dia sin las anuladas.
+ 2. Una venta con pago mixto que incluya Credito: el credito va a "Vendido a credito", no a "Total cobrado".
+ 3. Inventario: un producto sin precio de compra toma el costo de su ultima compra.
+ 4. Ganancias: una venta hecha antes de existir costo_unitario muestra "Sin costo registrado".
+ 5. Variacion: mes actual contra el anterior; revisa un producto nuevo y uno que dejo de venderse.
+ 6. Entra como operador: no ve Ganancias ni Variacion, ni columnas de costo en Inventario.
+ 7. Imprimir el cierre de caja: sale sin menu lateral y con las lineas de firma.
