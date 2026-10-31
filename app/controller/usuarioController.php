@@ -39,7 +39,7 @@ require_once __DIR__.'/../model/usuarioModel.php';
         //Este metodo solo sirve para mostrar la vista de crear usuario.
         exigirRol(self::ROLES_ADMIN);
         evitarCache();
-        require_once '../app/views/usuario/crear.php';
+        require_once '../app/views/usuario/crearUsuario.php';
     }
 
    public function formusuarioeditar(){
@@ -57,46 +57,61 @@ require_once __DIR__.'/../model/usuarioModel.php';
         redirigir(urlAccion('usuario', 'formusuario'));
     }
 
-    require_once '../app/views/usuario/editar.php';
+    require_once '../app/views/usuario/editarUsuario.php';
 }
 
     public function guardar(){
         exigirRol(self::ROLES_ADMIN);
+        
         $urlFormulario = urlAccion('usuario', 'formusuariocrear');
+        
+        // NOTA: Si ya habilitaste CSRF en tu form, puedes cambiar esto a exigirPostConCsrf($urlFormulario);
         exigirPost($urlFormulario);
 
         $errores = [];
 
-        //Recolección y validación de los datos de registro del usuario
-        // username: VARCHAR(100) NOT NULL UNIQUE
+        // Recolección y validación del username
         $username = validarUsername($_POST['username'] ?? null);
         if($username === null){
             $errores[] = 'El usuario debe tener de 3 a 30 caracteres: letras, números, punto, guion o guion bajo, sin espacios.';
         } elseif($this->model->existeUsername($username)){
-            $errores[] = 'El nombre de usuario «' . $username . '» ya está en uso.';
+            $errores[] = 'El nombre de usuario «' . htmlspecialchars($username) . '» ya está en uso.';
         }
 
-        // La contraseña es OBLIGATORIA al crear: antes se aceptaba vacía y se guardaba el hash de ''.
+        // Validación de la contraseña (OBLIGATORIA)
         $password = $_POST['password'] ?? null;
         $erroresPassword = erroresPassword($password);
         $errores = array_merge($errores, $erroresPassword);
 
-        // rol: solo los de la lista blanca (la columna es texto libre, aceptaría cualquier cosa).
-        $rol = validarClave($_POST['rol'] ?? null, array_flip(self::ROLES_ASIGNABLES));
+        // ==============================================================
+        // CORRECCIÓN: Validación de rol a prueba de fallos
+        // ==============================================================
+        $rolEnviado = trim($_POST['rol'] ?? '');
+        $rol = null;
+        
+        // Iteramos los roles permitidos y comparamos ignorando mayúsculas/minúsculas
+        foreach (self::ROLES_ASIGNABLES as $rolPermitido) {
+            if (strtolower($rolEnviado) === strtolower($rolPermitido)) {
+                $rol = $rolPermitido; // Tomamos el valor exacto tal cual lo exige el Backend
+                break;
+            }
+        }
+
         if($rol === null){
             $errores[] = 'Selecciona un rol válido.';
         }
+        // ==============================================================
 
         if(!empty($errores)){
             setFlash('error', $errores);
             redirigir($urlFormulario);
         }
 
-        //Encriptamiento de la clave de acceso (solo si pasó la política)
+        // Encriptamiento de la clave de acceso
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
 
         if($this->model->createUsuario($username, $password_hash, $rol)){
-            setFlash('exito', 'Usuario «' . $username . '» creado correctamente.');
+            setFlash('exito', 'Usuario «' . htmlspecialchars($username) . '» creado correctamente.');
             redirigir(urlAccion('usuario', 'formusuario'));
         }
 
@@ -178,43 +193,41 @@ require_once __DIR__.'/../model/usuarioModel.php';
         redirigir($urlFormulario);
     }
 
-    public function eliminar(){
-        exigirRol(self::ROLES_ADMIN);
+    public function eliminar() {
+        // Redirección correcta a la vista del listado de usuarios
         $urlLista = urlAccion('usuario', 'formusuario');
 
-        //Recolección del ID del usuario a eliminar
-        $id = validarEntero($_POST['id'] ?? null, 1);
+        // Validación CSRF y método POST
+        exigirPostConCsrf($urlLista);
+        exigirRol(self::ROLES_ADMIN);
+
+        $id = validarEntero($_POST['id'] ?? $_GET['id'] ?? null, 1);
         $usuario = ($id !== null) ? $this->model->getById($id) : false;
-        if(!$usuario){
-            setFlash('error', 'El usuario que intentas eliminar no existe.');
+
+        if (!$usuario) {
+            setFlash('error', 'El usuario que intentas modificar no existe.');
             redirigir($urlLista);
         }
 
-        // Nadie puede eliminar su propia cuenta (se quedaría sin acceso en plena sesión).
-        if($id === usuarioActualId()){
-            setFlash('error', 'No puedes eliminar tu propia cuenta.');
+        if ($id === usuarioActualId()) {
+            setFlash('error', 'No puedes desactivar tu propia cuenta.');
             redirigir($urlLista);
         }
 
-        // Tampoco al último administrador activo.
-        if($this->esAdministrador($usuario['rol'] ?? '') && $this->model->contarActivosPorRoles(self::ROLES_ADMIN, $id) < 1){
-            setFlash('error', 'No puedes eliminar al único administrador activo del sistema.');
-            redirigir($urlLista);
-        }
-
-        // Un usuario con compras, movimientos o cambios de precio registrados no se puede borrar:
-        // dejaría esos registros huérfanos (o la BD lo rechazaría con un error fatal).
-        if($this->model->tieneActividad($id)){
-            setFlash('error', 'El usuario «' . $usuario['username'] . '» tiene actividad registrada (compras, movimientos o cambios de precio) y no se puede eliminar sin romper esa información.');
+        if ($this->esAdministrador($usuario['rol'] ?? '') && $this->model->contarActivosPorRoles(self::ROLES_ADMIN, $id) < 1) {
+            setFlash('error', 'No puedes desactivar al único administrador activo del sistema.');
             redirigir($urlLista);
         }
 
         try {
-            $this->model->deleteUsuario($id);
-            setFlash('exito', 'Usuario «' . $usuario['username'] . '» eliminado.');
+            if ($this->model->deleteUsuario($id)) {
+                setFlash('exito', 'El estado del usuario "' . htmlspecialchars($usuario['username']) . '" fue actualizado exitosamente.');
+            } else {
+                setFlash('error', 'No se pudo actualizar el estado del usuario.');
+            }
         } catch (PDOException $e) {
             error_log('usuarioController::eliminar -> ' . $e->getMessage());
-            setFlash('error', 'No se pudo eliminar el usuario.');
+            setFlash('error', 'Ocurrió un error al procesar la solicitud.');
         }
 
         redirigir($urlLista);

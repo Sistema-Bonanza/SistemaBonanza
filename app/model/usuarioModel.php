@@ -60,10 +60,18 @@ class usuarioModel{
             ]);
     }
 
-    public function deleteUsuario($id){
-            $stmt = $this->pdo->prepare("UPDATE usuarios SET is_active = 0 WHERE id_usuario = :id");
-            $stmt->execute([':id' => $id]);
-            return true; //usuario eliminado exitosamente.
+   public function deleteUsuario($id) {
+        try {
+            $sql = "UPDATE usuarios 
+                    SET is_active = CASE WHEN is_active = 1 THEN 0 ELSE 1 END 
+                    WHERE id = :id";
+                    
+            $stmt = $this->pdo->prepare($sql);
+            return $stmt->execute([':id' => $id]);
+        } catch (PDOException $e) {
+            error_log("usuarioModel::deleteUsuario Error: " . $e->getMessage());
+            return false;
+        }
     }
 
     // ¿Ya existe ese nombre de usuario? (la columna tiene UNIQUE; la comparación ignora mayúsculas)
