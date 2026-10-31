@@ -185,16 +185,17 @@ $rutas = [
         ],
     ],
 
-    'proveedor' => [
+        'proveedor' => [
         'archivo'  => 'proveedorController.php',
         'clase'    => 'ProveedorController',
         'acciones' => [
-            'tablaproveedores'   => ruta('GET',  ROLES_ADMIN),
-            'formcrearproveedor' => ruta('GET',  ROLES_ADMIN),
-            'formedit'           => ruta('GET',  ROLES_ADMIN),
+            'tablaproveedores'   => ruta('GET', ROLES_ADMIN),
+            'formcrearproveedor' => ruta('GET', ROLES_ADMIN),
+            'formedit'           => ruta('GET', ROLES_ADMIN),
+            'cambiarestado'      => ruta('GET', ROLES_ADMIN),
+            'cambiarEstado'      => ruta('GET', ROLES_ADMIN), // Compatibilidad si el router no usa strtolower
             'guardar'            => ruta('POST', ROLES_ADMIN, false), // LEGADO: sin token
             'actualizar'         => ruta('POST', ROLES_ADMIN, false), // LEGADO: sin token
-            // La vista proveedor.php enlaza a 'eliminar', pero el controlador no tiene ese método.
         ],
     ],
 

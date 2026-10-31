@@ -30,32 +30,46 @@ class ProveedorController {
 
     // Acción para mostrar el formulario de creación
     public function formcrearproveedor() {
-        exigirSesion();
-        evitarCache();
+        $proveedores = $this->proveedorModel->getAll();
+
         // Aquí simplemente cargamos la vista del formulario HTML
         require_once __DIR__ . '/../views/proveedor/crearProveedor.php';
     }
 
-    public function formEdit(){
+    public function formedit(){
         exigirSesion();
         evitarCache();
 
-        //VERIFICAMOS QUE LLEGUE UN ID VÁLIDO POR URL (ej: index.php?controller=proveedor&action=formEdit&id=5)
         $id = validarEntero($_GET['id'] ?? null, 1);
 
-        //BUSCAMOS LOS DATOS ACTUALES DE ESE PROVEEDOR.
+        // CORRECCIÓN CLAVE: Debe llamar a obtenerPorId (SELECT), NO a cambiarEstado
         $proveedor = ($id !== null) ? $this->proveedorModel->obtenerPorId($id) : false;
 
-        //SI EL PROVEEDOR EXISTE, CARGAMOS LA VISTA DE EDITAR.
         if ($proveedor) {
             require_once __DIR__ . '/../views/proveedor/editarProveedor.php';
             return;
         }
 
-        //SI NO HAY ID O ES UN ID QUE NO EXISTE, LO DEVOLVEMOS A LA TABLA DE PROVEEDORES.
         setFlash('error', 'El proveedor no existe.');
-        redirigir(urlAccion('proveedor', 'tablaProveedores'));
+        redirigir(urlAccion('proveedor', 'tablaproveedores'));
     }
+
+
+    public function cambiarestado() {
+        exigirSesion();
+        evitarCache();
+
+        $id = validarEntero($_GET['id'] ?? null, 1);
+
+        if ($id && $this->proveedorModel->cambiarEstado($id)) {
+            setFlash('exito', 'El estado del proveedor fue actualizado correctamente.');
+        } else {
+            setFlash('error', 'No se pudo cambiar el estado del proveedor.');
+        }
+
+        redirigir(urlAccion('proveedor', 'tablaproveedores'));
+    }
+
 
     // Acción para recibir los datos del formulario por POST y guardarlos
     public function guardar() {
@@ -106,7 +120,7 @@ class ProveedorController {
         exigirPost(urlAccion('proveedor', 'tablaProveedores'));
 
         $id = validarEntero($_POST['id_proveedor'] ?? null, 1);
-        if ($id === null || !$this->proveedorModel->obtenerPorId($id)) {
+        if ($id === null || !$this->proveedorModel->cambiarEstado($id)) {
             setFlash('error', 'El proveedor que intentas editar no existe.');
             redirigir(urlAccion('proveedor', 'tablaProveedores'));
         }

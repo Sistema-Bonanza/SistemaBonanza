@@ -18,14 +18,22 @@
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
             }
 
-            //BUSCA UN PROVEEDOR POR SU ID Y RETORNA SUS DATOS
-            public function obtenerPorId($id){
+            // Cambia el estado del proveedor entre 1 (Activo) y 0 (Inactivo)
+            public function cambiarEstado($id) {
+                $sql = "UPDATE proveedores SET estado = CASE WHEN estado = 1 THEN 0 ELSE 1 END WHERE id_proveedor = :id";
+                $stmt = $this->pdo->prepare($sql);
+                $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+                return $stmt->execute();
+            }
+
+            // BUSCA UN PROVEEDOR POR SU ID Y RETORNA SUS DATOS
+            public function obtenerPorId($id) {
                 $sql = "SELECT * FROM proveedores WHERE id_proveedor = :id";
                 $stmt = $this->pdo->prepare($sql);
                 $stmt->bindParam(':id', $id, PDO::PARAM_INT);
                 $stmt->execute();
 
-                //RETORNAMOS EL RESULTADO COMO UN ARRAY ASOCIATIVO.
+                // RETORNAMOS EL RESULTADO COMO UN ARRAY ASOCIATIVO
                 return $stmt->fetch(PDO::FETCH_ASSOC);
             }
 
