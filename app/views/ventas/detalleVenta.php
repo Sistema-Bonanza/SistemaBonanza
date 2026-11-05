@@ -4,7 +4,7 @@
 
 $anulada = ((int) $venta['estado'] === 0);
 
-$nombreEmpresa = defined('NOMBRE_EMPRESA') ? NOMBRE_EMPRESA : 'Industrias Bonanza';
+$nombreEmpresa = defined('NOMBRE_EMPRESA') ? NOMBRE_EMPRESA : 'Distribuidora de Alimentos Bonanza';
 $rifEmpresa    = defined('RIF_EMPRESA') ? RIF_EMPRESA : '';
 
 // Unidades que volverían al inventario si se anula (se muestra en el aviso del modal).
@@ -18,7 +18,7 @@ foreach ($detalles as $linea) {
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Factura <?= esc($numeroFactura) ?> · Bonanza</title>
+    <title>Factura <?= esc($numeroFactura) ?> · Distribuidora de Alimentos Bonanza</title>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">

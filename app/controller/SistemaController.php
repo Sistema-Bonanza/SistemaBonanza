@@ -5,11 +5,13 @@ require_once __DIR__.'/../helpers/seguridad.php';
 require_once __DIR__.'/../model/sistemaModel.php';
 require_once __DIR__.'/../model/productoModel.php';
 require_once __DIR__.'/../model/proveedorModel.php';
+require_once __DIR__.'/../model/categoriaModel.php';
 
 class SistemaController{
     private $model;
     private $productoModel;
     private $proveedorModel;
+    private $categoriaModel;
 
     public function __construct(){
         // Crear conexión con la base de datos.
@@ -20,6 +22,7 @@ class SistemaController{
         $this->model = new SistemaModel($pdo);
         $this->productoModel = new ProductoModel($pdo);
         $this->proveedorModel = new proveedorModel($pdo);
+        $this->categoriaModel = new CategoriaModel($pdo);
     }
 
     public function index(){
@@ -61,19 +64,12 @@ class SistemaController{
             exit();
         }
 
-        // 1. Obtener existencias e ítems del catálogo rápido desde ProductoModel
         $inventario  = $this->productoModel->obtenerProductos();
-        $catalogo    = $this->productoModel->obtenerProductosActivos(6); // <-- Usa obtenerProductosActivos() en productoModel
+        $catalogo    = $this->productoModel->obtenerProductosActivos(12); // Productos para el catálogo rápido
+        $proveedores = $this->proveedorModel->getActivos();
+        $categorias  = $this->categoriaModel->getAll(); // Obtener categorías activas
 
-        // 2. Obtener proveedores activos desde ProveedorModel
-        $proveedores = $this->proveedorModel->getActivos(); // <-- Asegúrate de que use $this->proveedorModel y NO $this->productoModel
-
-        $metricas = $this->productoModel->obtenerMetricasStock();
-
-        $stats['stock_total'] = $metricas['stock_total'];
-        $stats['valor_inventario'] = $metricas['valor_inventario'];
-
-        // 3. Cálculo de métricas
+        // Cálculo de estadísticas...
         $totalProductos  = count($inventario);
         $disponibles     = 0;
         $stockTotal      = 0;
@@ -104,6 +100,7 @@ class SistemaController{
 
         require_once __DIR__ . '/../views/dashboard.php';
     }
+
 
     public function logout(){
         $_SESSION = array();

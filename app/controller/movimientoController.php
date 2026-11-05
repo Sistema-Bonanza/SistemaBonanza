@@ -29,16 +29,18 @@ class MovimientoController {
     // =======================================================
     // 1. MÉTODO PARA MOSTRAR LA VISTA DE LA TABLA PRINCIPAL
     // =======================================================
-    public function tablaMovimientos(){
+    public function tablaMovimientos() {
         exigirSesion();
         evitarCache();
-        
-        // Obtenemos todas las compras iniciales desde el modelo para la carga síncrona
-        // En un futuro, podrías cargar la vista vacía y dejar que JS haga la primera petición, 
-        // pero lo mantenemos así si tu diseño actual lo requiere.
+
+        // 1. Obtener la lista de movimientos para la tabla
         $compras = $this->movimientoModel->obtenerMovimientosPaginados('', 'todas', 0, 10);
 
-        require_once __DIR__ . '/../views/movimientos/movimientos.php'; // Asegúrate que la ruta coincida ('movimientos' vs 'movimiento')
+        // 2. Obtener las métricas reales para las tarjetas KPI
+        $metricas = $this->movimientoModel->obtenerMetricasMovimientos();
+
+        // 3. Cargar la vista (ahora recibirá $compras y $metricas)
+        require_once __DIR__ . '/../views/movimientos/movimientos.php';
     }
 
     // =======================================================

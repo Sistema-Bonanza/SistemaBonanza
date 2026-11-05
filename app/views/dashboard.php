@@ -31,7 +31,7 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panel de Control General · Industrias Bonanza</title>
+    <title>Panel de Control General · Distribuidora de Alimentos Bonanza</title>
 
     <!-- Librerías CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -167,42 +167,58 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
             <!-- ÁREA INTERMEDIA: CATÁLOGO RÁPIDO + CARRITO -->
             <!-- ========================================== -->
             <div class="columns is-variable is-4 mb-5">
-                
+    
                 <!-- Columna Izquierda: Catálogo Rápido (8 cols) -->
                 <div class="column is-8">
                     <div class="box is-shadowless p-5 h-100" style="border: 1px solid #cbd5e1; border-radius: 12px; background: white;">
+                        
+                        <!-- Cabecera del Catálogo -->
                         <div class="is-flex is-justify-content-space-between is-align-items-center mb-4 pb-3" style="border-bottom: 2px solid #f1f5f9;">
                             <div>
                                 <h3 class="title is-6 mb-1 has-text-dark has-text-weight-bold">Catálogo Rápido de Productos</h3>
-                                <p class="is-size-7 has-text-grey">Haz clic en <strong class="has-text-link">+</strong> para agregar ítems al carrito de despacho</p>
+                                <p class="is-size-7 has-text-grey">Selecciona una categoría o haz clic en <strong class="has-text-link">+</strong> para simular un presupuesto</p>
                             </div>
-                            <div class="buttons are-small mb-0">
-                                <button class="button is-link is-rounded is-small font-weight-bold">Todos</button>
-                                <button class="button is-light is-rounded is-small">Seguridad</button>
-                                <button class="button is-light is-rounded is-small">Calzado</button>
+                            
+                            <!-- Botones de Categorías Dinámicas -->
+                            <div class="buttonsAreSmall mb-0" id="category-filters">
+                                <button type="button" class="button is-link is-rounded is-small filter-btn active" data-categoria="todas">Todas</button>
+                                <?php if (!empty($categorias)): ?>
+                                    <?php foreach ($categorias as $cat): ?>
+                                        <button type="button" class="button is-light is-rounded is-small filter-btn" data-categoria="<?= esc($cat['nombre']) ?>">
+                                            <?= esc($cat['nombre']) ?>
+                                        </button>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
                             </div>
                         </div>
 
                         <!-- Grilla Dinámica del Catálogo -->
-                        <div class="columns is-multiline">
-                            <?php if (!empty($productosCatalogo)): ?>
-                                <?php foreach ($productosCatalogo as $prod): ?>
-                                    <div class="column is-6">
+                        <div class="columns is-multiline" id="grid-catalogo">
+                            <?php if (!empty($catalogo)): ?>
+                                <?php foreach ($catalogo as $prod): ?>
+                                    <?php $nombreCat = $prod['nombre_categoria'] ?? 'General'; ?>
+                                    <div class="column is-6 tarjeta-producto-item" data-categoria="<?= esc($nombreCat) ?>">
                                         <div class="box is-shadowless p-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
                                             <div class="is-flex is-justify-content-space-between mb-2">
                                                 <span class="tag is-dark is-rounded is-small font-mono"><?= esc($prod['codigo']) ?></span>
-                                                <span class="tag is-success is-light is-rounded is-small">Stock: <?= (int) $prod['stock'] ?></span>
+                                                <span class="tag is-success is-light is-rounded is-small">Stock: <?= (int) ($prod['stock_actual'] ?? $prod['stock'] ?? 0) ?></span>
                                             </div>
                                             <p class="is-size-7 has-text-weight-bold has-text-dark mb-1"><?= esc($prod['nombre']) ?></p>
-                                            <p class="is-size-7 has-text-grey mb-3">Cat: <strong><?= esc($prod['nombre_categoria'] ?? 'General') ?></strong></p>
+                                            <p class="is-size-7 has-text-grey mb-3">Cat: <strong><?= esc($nombreCat) ?></strong></p>
                                             
                                             <div class="is-flex is-justify-content-space-between is-align-items-flex-end pt-2" style="border-top: 1px solid #e2e8f0;">
                                                 <div>
                                                     <span class="is-size-7 has-text-grey is-uppercase has-text-weight-bold">Precio Unit.</span>
-                                                    <?= function_exists('dinero') ? esc(dinero($prod['precio_venta'])) : '$' . number_format($prod['precio_venta'], 2, ',', '.') ?>
+                                                    <p class="is-size-5 has-text-weight-bold has-text-link mb-0">
+                                                        <?= function_exists('dinero') ? esc(dinero($prod['precio_venta'])) : '$' . number_format($prod['precio_venta'], 2, ',', '.') ?>
+                                                    </p>
                                                 </div>
-                                                <button type="button" class="button is-link is-small has-text-weight-bold" 
-                                                        onclick="addItemToCart('<?= esc($prod['nombre']) ?>', <?= (float) $prod['precio_venta'] ?>)">
+                                                <!-- Botón de Agregar al Presupuesto -->
+                                                <button type="button" 
+                                                        class="button is-link is-small has-text-weight-bold btn-add-cart"
+                                                        data-id="<?= (int) $prod['id_producto'] ?>"
+                                                        data-nombre="<?= esc($prod['nombre']) ?>"
+                                                        data-precio="<?= (float) $prod['precio_venta'] ?>">
                                                     <span class="icon"><span class="material-symbols-outlined">add</span></span>
                                                 </button>
                                             </div>
@@ -210,53 +226,21 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
                                     </div>
                                 <?php endforeach; ?>
                             <?php else: ?>
-                                <!-- Datos de ejemplo por defecto si el array está vacío -->
-                                <div class="column is-6">
-                                    <div class="box is-shadowless p-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
-                                        <div class="is-flex is-justify-content-space-between mb-2">
-                                            <span class="tag is-dark is-rounded is-small font-mono">SKU-BON-0101</span>
-                                            <span class="tag is-success is-light is-rounded is-small">Stock: 48 unids</span>
-                                        </div>
-                                        <p class="is-size-7 has-text-weight-bold has-text-dark mb-1">Casco Dieléctrico Tipo I Clase E</p>
-                                        <p class="is-size-7 has-text-grey mb-3">Talla: <strong>Ajustable</strong> • Prov: <strong>Segurind</strong></p>
-                                        <div class="is-flex is-justify-content-space-between is-align-items-flex-end pt-2" style="border-top: 1px solid #e2e8f0;">
-                                            <div>
-                                                <span class="is-size-7 has-text-grey is-uppercase has-text-weight-bold">Precio Unit.</span>
-                                                <p class="is-size-5 has-text-weight-bold has-text-link mb-0">$18.50</p>
-                                            </div>
-                                            <button type="button" class="button is-link is-small has-text-weight-bold" onclick="addItemToCart('Casco Dieléctrico', 18.50)">
-                                                <span class="icon"><span class="material-symbols-outlined">add</span></span>
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="column is-6">
-                                    <div class="box is-shadowless p-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;">
-                                        <div class="is-flex is-justify-content-space-between mb-2">
-                                            <span class="tag is-dark is-rounded is-small font-mono">SKU-BON-0340</span>
-                                            <span class="tag is-success is-light is-rounded is-small">Stock: 65 piezas</span>
-                                        </div>
-                                        <p class="is-size-7 has-text-weight-bold has-text-dark mb-1">Camisa Drill Reforzada Manga Larga</p>
-                                        <p class="is-size-7 has-text-grey mb-3">Talla: <strong>L (40-42)</strong> • Prov: <strong>Textil Ind.</strong></p>
-                                        <div class="is-flex is-justify-content-space-between is-align-items-flex-end pt-2" style="border-top: 1px solid #e2e8f0;">
-                                            <div>
-                                                <span class="is-size-7 has-text-grey is-uppercase has-text-weight-bold">Precio Unit.</span>
-                                                <p class="is-size-5 has-text-weight-bold has-text-link mb-0">$22.00</p>
-                                            </div>
-                                            <button type="button" class="button is-link is-small has-text-weight-bold" onclick="addItemToCart('Camisa Drill (L)', 22.00)">
-                                                <span class="icon"><span class="material-symbols-outlined">add</span></span>
-                                            </button>
-                                        </div>
+                                <div class="column is-12">
+                                    <div class="notification is-light has-text-centered py-4">
+                                        <p class="is-size-7 has-text-grey">No hay productos activos registrados en el catálogo.</p>
                                     </div>
                                 </div>
                             <?php endif; ?>
                         </div>
+
                     </div>
                 </div>
 
                 <!-- Columna Derecha: Carrito de Despacho (4 cols) -->
                 <div class="column is-4">
                     <div class="box is-shadowless p-5 h-100 is-flex is-flex-direction-column" style="border: 1px solid #cbd5e1; border-radius: 12px; background: white;">
+                        
                         <div class="is-flex is-justify-content-space-between is-align-items-center mb-4 pb-3" style="border-bottom: 2px solid #f1f5f9;">
                             <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
                                 <div class="is-flex is-align-items-center is-justify-content-center has-background-link-light has-text-link" style="width: 36px; height: 36px; border-radius: 8px;">
@@ -264,44 +248,17 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
                                 </div>
                                 <div>
                                     <h3 class="title is-6 mb-0 has-text-dark has-text-weight-bold">Carrito Despacho</h3>
-                                    <p class="is-size-7 has-text-grey font-mono">ORD-2026-089</p>
+                                    <p class="is-size-7 has-text-grey font-mono">Simulación de Presupuesto</p>
                                 </div>
                             </div>
-                            <span class="tag is-link is-light is-rounded has-text-weight-bold" id="cart-item-count">2 ítems</span>
+                            <span class="tag is-link is-light is-rounded has-text-weight-bold" id="cart-item-count">0 ítems</span>
                         </div>
 
-                        <!-- Lista de Ítems -->
+                        <!-- Lista de Ítems (Renderizada dinámicamente por JS) -->
                         <div class="mb-4" style="max-height: 220px; overflow-y: auto; flex-grow: 1;" id="cart-items-container">
-                            <div class="is-flex is-justify-content-space-between is-align-items-center mb-3 pb-2" style="border-bottom: 1px solid #f1f5f9;" id="row-casco">
-                                <div style="flex: 1; min-width: 0;">
-                                    <p class="is-size-7 has-text-weight-bold has-text-dark">Casco Dieléctrico</p>
-                                    <p class="is-size-7 has-text-grey">$18.50 c/u</p>
-                                </div>
-                                <div class="is-flex is-align-items-center has-background-light rounded border mx-2 px-1">
-                                    <button type="button" class="button is-small is-ghost has-text-grey px-1" onclick="updateQty('casco', -1, 18.50)">-</button>
-                                    <span class="is-size-7 has-text-weight-bold px-2" id="qty-casco">2</span>
-                                    <button type="button" class="button is-small is-ghost has-text-grey px-1" onclick="updateQty('casco', 1, 18.50)">+</button>
-                                </div>
-                                <div class="has-text-right">
-                                    <p class="is-size-7 has-text-weight-bold font-mono has-text-dark" id="total-casco">$37.00</p>
-                                    <a href="#" class="has-text-danger is-size-7" onclick="removeItem('row-casco'); return false;">Quitar</a>
-                                </div>
-                            </div>
-
-                            <div class="is-flex is-justify-content-space-between is-align-items-center mb-3 pb-2" style="border-bottom: 1px solid #f1f5f9;" id="row-camisa">
-                                <div style="flex: 1; min-width: 0;">
-                                    <p class="is-size-7 has-text-weight-bold has-text-dark">Camisa Drill (L)</p>
-                                    <p class="is-size-7 has-text-grey">$22.00 c/u</p>
-                                </div>
-                                <div class="is-flex is-align-items-center has-background-light rounded border mx-2 px-1">
-                                    <button type="button" class="button is-small is-ghost has-text-grey px-1" onclick="updateQty('camisa', -1, 22.00)">-</button>
-                                    <span class="is-size-7 has-text-weight-bold px-2" id="qty-camisa">1</span>
-                                    <button type="button" class="button is-small is-ghost has-text-grey px-1" onclick="updateQty('camisa', 1, 22.00)">+</button>
-                                </div>
-                                <div class="has-text-right">
-                                    <p class="is-size-7 has-text-weight-bold font-mono has-text-dark" id="total-camisa">$22.00</p>
-                                    <a href="#" class="has-text-danger is-size-7" onclick="removeItem('row-camisa'); return false;">Quitar</a>
-                                </div>
+                            <div class="has-text-centered py-5 has-text-grey">
+                                <span class="material-symbols-outlined is-size-3">shopping_basket</span>
+                                <p class="is-size-7 mt-1 font-weight-semibold">El carrito de cotización está vacío.</p>
                             </div>
                         </div>
 
@@ -309,20 +266,20 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
                         <div class="pt-3" style="border-top: 2px solid #e2e8f0;">
                             <div class="is-flex is-justify-content-space-between mb-1">
                                 <span class="is-size-7 has-text-grey">Subtotal</span>
-                                <span class="is-size-7 has-text-weight-bold font-mono" id="cart-subtotal">$59.00</span>
+                                <span class="is-size-7 has-text-weight-bold font-mono" id="cart-subtotal">$0.00</span>
                             </div>
                             <div class="is-flex is-justify-content-space-between mb-3">
                                 <span class="is-size-7 has-text-grey">IVA (16%)</span>
-                                <span class="is-size-7 has-text-weight-bold font-mono" id="cart-tax">$9.44</span>
+                                <span class="is-size-7 has-text-weight-bold font-mono" id="cart-tax">$0.00</span>
                             </div>
                             <div class="is-flex is-justify-content-space-between is-align-items-baseline mb-4 pt-2" style="border-top: 1px solid #cbd5e1;">
                                 <span class="has-text-weight-bold has-text-dark">Total Liquidado</span>
-                                <span class="title is-4 has-text-link mb-0 font-mono" id="cart-total">$68.44</span>
+                                <span class="title is-4 has-text-link mb-0 font-mono" id="cart-total">$0.00</span>
                             </div>
                             
                             <div class="is-flex" style="gap: 10px;">
                                 <button type="button" class="button is-light is-small has-text-weight-bold is-fullwidth" onclick="resetCart()">Reset</button>
-                                <button type="button" class="button is-link is-small has-text-weight-bold is-fullwidth" onclick="triggerCheckout()">Cobrar</button>
+                                <button type="button" class="button is-link is-small has-text-weight-bold is-fullwidth" onclick="triggerCheckout()">Generar Cotización</button>
                             </div>
                         </div>
 

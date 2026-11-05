@@ -264,4 +264,54 @@ Class movimientoModel {
             return 0;
         }
     }
-}   
+
+    public function obtenerMetricasMovimientos() {
+        try {
+            // 1. Entradas del mes actual (Hacemos JOIN con productos para obtener el precio)
+            $sqlEntradas = "SELECT 
+                                COALESCE(SUM(m.cantidad), 0) AS total_unds,
+                                COALESCE(SUM(m.cantidad * p.precio_venta), 0.00) AS total_valor
+                            FROM movimientos m
+                            INNER JOIN productos p ON m.id_producto = p.id_producto
+                            WHERE m.tipo = 'entrada' 
+                            AND MONTH(m.fecha) = MONTH(CURRENT_DATE()) 
+                            AND YEAR(m.fecha) = YEAR(CURRENT_DATE())";
+            $stmtE = $this->pdo->query($sqlEntradas);
+            $entradas = $stmtE->fetch(PDO::FETCH_ASSOC);
+
+            // 2. Salidas del mes actual
+            $sqlSalidas = "SELECT 
+                            COALESCE(SUM(cantidad), 0) AS total_unds
+                        FROM movimientos 
+                        WHERE tipo = 'salida' 
+                            AND MONTH(fecha) = MONTH(CURRENT_DATE()) 
+                            AND YEAR(fecha) = YEAR(CURRENT_DATE())";
+            $stmtS = $this->pdo->query($sqlSalidas);
+            $salidas = $stmtS->fetch(PDO::FETCH_ASSOC);
+
+            // 3. Stock Crítico (Productos activos cuyo stock está en o por debajo del mínimo)
+            $sqlCriticos = "SELECT COUNT(*) AS total_criticos 
+                            FROM productos 
+                            WHERE stock_actual <= stock_minimo 
+                            AND estado = 1";
+            $stmtC = $this->pdo->query($sqlCriticos);
+            $criticos = $stmtC->fetch(PDO::FETCH_ASSOC);
+
+            return [
+                'entradas_unds'  => (int) ($entradas['total_unds'] ?? 0),
+                'entradas_valor' => (float) ($entradas['total_valor'] ?? 0.00),
+                'salidas_unds'   => (int) ($salidas['total_unds'] ?? 0),
+                'stock_critico'  => (int) ($criticos['total_criticos'] ?? 0)
+            ];
+
+        } catch (PDOException $e) {
+            error_log("Error al obtener métricas de movimientos: " . $e->getMessage());
+            return [
+                'entradas_unds'  => 0,
+                'entradas_valor' => 0.00,
+                'salidas_unds'   => 0,
+                'stock_critico'  => 0
+            ];
+        }
+    }
+}
