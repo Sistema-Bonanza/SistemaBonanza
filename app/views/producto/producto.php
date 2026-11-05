@@ -60,10 +60,10 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                 <div>
                     <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
                         <h1 class="title is-4 has-text-white mb-0">Gestión de Inventario</h1>
-                        <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">Matriz Bonanza</span>
+                        <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">Matriz Distribuidora de Alimentos Bonanza</span>
                     </div>
                     <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
-                        Administra los productos de Distribuidora Bonanza C.A. Controla costos, precios y niveles de stock con trazabilidad total.
+                        Administra los productos de Distribuidora de Alimentos Bonanza C.A. Controla costos, precios y niveles de stock con trazabilidad total.
                     </p>
                 </div>
             </div>

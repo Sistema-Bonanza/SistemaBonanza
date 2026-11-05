@@ -38,7 +38,7 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Venta · Industrias Bonanza</title>
+    <title>Registrar Venta · Distribuidora de Alimentos Bonanza</title>
     
     <!-- Fuentes y Bulma CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">

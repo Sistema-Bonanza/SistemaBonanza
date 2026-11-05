@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historial de Operaciones · Bonanza</title>
+    <title>Historial de Operaciones · Distribuidora de Alimentos Bonanza</title>
     
     <!-- Fuentes y Recursos de Iconos -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -72,95 +72,106 @@
             <!-- 2. TARJETAS DE MÉTRICAS (KPIs) -->
             <!-- ========================================== -->
             <div class="columns is-multiline mb-4">
-                
-                <!-- KPI 1: Entradas -->
-                <div class="column is-12-mobile is-6-tablet is-3-desktop">
-                    <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #3e8ed0;">
-                        <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-                            <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Entradas (Mes) <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span></span>
-                            <span class="tag is-info is-light is-rounded" style="font-size: 0.6rem;">Período Actual</span>
-                        </div>
-                        <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
-                            <div>
-                                <h2 class="title is-3 mb-1">1,250 <span class="is-size-6 has-text-grey has-text-weight-normal">unds.</span></h2>
-                                <p class="is-size-7 has-text-info has-text-weight-bold is-flex is-align-items-center">
-                                    <span class="material-symbols-outlined is-size-6 mr-1">trending_up</span> +$4,820.50 val.
-                                </p>
-                            </div>
-                            <div class="has-background-info-light has-text-info is-flex is-align-items-center is-justify-content-center p-2" style="border-radius: 10px;">
-                                <span class="material-symbols-outlined is-size-4">inventory_2</span>
-                            </div>
-                        </div>
-                        <progress class="progress is-info is-small mb-0" value="74" max="100">74%</progress>
+    
+            <!-- KPI 1: Entradas del Mes -->
+            <div class="column is-12-mobile is-6-tablet is-3-desktop">
+                <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #3e8ed0;">
+                    <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
+                        <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Entradas (Mes)</span>
+                        <span class="tag is-info is-light is-rounded" style="font-size: 0.6rem;">Período Actual</span>
                     </div>
-                </div>
-
-                <!-- KPI 2: Salidas -->
-                <div class="column is-12-mobile is-6-tablet is-3-desktop">
-                    <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #48c774;">
-                        <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-                            <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Salidas (Mes) <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span></span>
-                            <span class="tag is-success is-light is-rounded" style="font-size: 0.6rem;">Despachos</span>
+                    <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
+                        <div>
+                            <h2 class="title is-3 mb-1">
+                                <?= number_format($metricas['entradas_unds'] ?? 0, 0, ',', '.') ?> 
+                                <span class="is-size-6 has-text-grey has-text-weight-normal">unds.</span>
+                            </h2>
+                            <p class="is-size-7 has-text-info has-text-weight-bold is-flex is-align-items-center">
+                                <span class="material-symbols-outlined is-size-6 mr-1">trending_up</span> 
+                                +<?= function_exists('dinero') ? esc(dinero($metricas['entradas_valor'] ?? 0)) : '$' . number_format($metricas['entradas_valor'] ?? 0, 2, ',', '.') ?> val.
+                            </p>
                         </div>
-                        <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
-                            <div>
-                                <h2 class="title is-3 mb-1">840 <span class="is-size-6 has-text-grey has-text-weight-normal">unds.</span></h2>
-                                <p class="is-size-7 has-text-success has-text-weight-bold is-flex is-align-items-center">
-                                    <span class="material-symbols-outlined is-size-6 mr-1">local_shipping</span> 67.2% rotación
-                                </p>
-                            </div>
-                            <div class="has-background-success-light has-text-success is-flex is-align-items-center is-justify-content-center p-2" style="border-radius: 10px;">
-                                <span class="material-symbols-outlined is-size-4">airport_shuttle</span>
-                            </div>
+                        <div class="has-background-info-light has-text-info is-flex is-align-items-center is-justify-content-center p-2" style="border-radius: 10px;">
+                            <span class="material-symbols-outlined is-size-4">inventory_2</span>
                         </div>
-                        <progress class="progress is-success is-small mb-0" value="58" max="100">58%</progress>
                     </div>
-                </div>
-
-                <!-- KPI 3: Stock Crítico -->
-                <div class="column is-12-mobile is-6-tablet is-3-desktop">
-                    <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #f14668;">
-                        <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-                            <span class="is-size-7 has-text-danger has-text-weight-bold is-uppercase">Stock Crítico <span class="tag is-warning is-light is-rounded" style="font-size: 0.6rem;">DEMO</span></span>
-                            <span class="tag is-danger is-light is-rounded" style="font-size: 0.6rem;">Urgente</span>
-                        </div>
-                        <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
-                            <div>
-                                <h2 class="title is-3 mb-1 has-text-danger">8 <span class="is-size-6 has-text-danger has-text-weight-normal">SKUs</span></h2>
-                                <p class="is-size-7 has-text-danger has-text-weight-bold is-flex is-align-items-center">
-                                    <span class="material-symbols-outlined is-size-6 mr-1">warning</span> Requieren compra
-                                </p>
-                            </div>
-                            <div class="has-background-danger-light has-text-danger is-flex is-align-items-center is-justify-content-center p-2" style="border-radius: 10px;">
-                                <span class="material-symbols-outlined is-size-4">battery_alert</span>
-                            </div>
-                        </div>
-                        <progress class="progress is-danger is-small mb-0" value="25" max="100">25%</progress>
-                    </div>
-                </div>
-
-                <!-- KPI 4: Total Kardex -->
-                <div class="column is-12-mobile is-6-tablet is-3-desktop">
-                    <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #4a4a4a;">
-                        <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
-                            <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Auditoría</span>
-                            <span class="tag is-dark is-light">Total Kardex</span>
-                        </div>
-                        <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
-                            <div>
-                                <h2 class="title is-3 mb-1" id="total-registros-label"><?= !empty($compras) ? count($compras) : 0 ?></h2>
-                                <p class="is-size-7 has-text-link has-text-weight-bold is-flex is-align-items-center">
-                                    <span class="material-symbols-outlined is-size-6 mr-1">verified</span> 100% conciliado
-                                </p>
-                            </div>
-                            <div class="has-background-link-light has-text-link is-flex is-align-items-center is-justify-content-center p-2" style="border-radius: 10px;">
-                                <span class="material-symbols-outlined is-size-4">receipt_long</span>
-                            </div>
-                        </div>
-                        <progress class="progress is-link is-small mb-0" value="100" max="100">100%</progress>
-                    </div>
+                    <progress class="progress is-info is-small mb-0" value="100" max="100">100%</progress>
                 </div>
             </div>
+
+            <!-- KPI 2: Salidas del Mes -->
+            <div class="column is-12-mobile is-6-tablet is-3-desktop">
+                <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #48c774;">
+                    <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
+                        <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Salidas (Mes)</span>
+                        <span class="tag is-success is-light is-rounded" style="font-size: 0.6rem;">Despachos</span>
+                    </div>
+                    <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
+                        <div>
+                            <h2 class="title is-3 mb-1">
+                                <?= number_format($metricas['salidas_unds'] ?? 0, 0, ',', '.') ?> 
+                                <span class="is-size-6 has-text-grey has-text-weight-normal">unds.</span>
+                            </h2>
+                            <p class="is-size-7 has-text-success has-text-weight-bold is-flex is-align-items-center">
+                                <span class="material-symbols-outlined is-size-6 mr-1">local_shipping</span> Salidas registradas
+                            </p>
+                        </div>
+                        <div class="has-background-success-light has-text-success is-flex is-align-items-center is-justify-content-center p-2" style="border-radius: 10px;">
+                            <span class="material-symbols-outlined is-size-4">airport_shuttle</span>
+                        </div>
+                    </div>
+                    <progress class="progress is-success is-small mb-0" value="100" max="100">100%</progress>
+                </div>
+            </div>
+
+            <!-- KPI 3: Stock Crítico -->
+            <div class="column is-12-mobile is-6-tablet is-3-desktop">
+                <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #f14668;">
+                    <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
+                        <span class="is-size-7 has-text-danger has-text-weight-bold is-uppercase">Stock Crítico</span>
+                        <span class="tag is-danger is-light is-rounded" style="font-size: 0.6rem;">Urgente</span>
+                    </div>
+                    <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
+                        <div>
+                            <h2 class="title is-3 mb-1 has-text-danger">
+                                <?= (int) ($metricas['stock_critico'] ?? 0) ?> 
+                                <span class="is-size-6 has-text-danger has-text-weight-normal">SKUs</span>
+                            </h2>
+                            <p class="is-size-7 has-text-danger has-text-weight-bold is-flex is-align-items-center">
+                                <span class="material-symbols-outlined is-size-6 mr-1">warning</span> Requieren compra
+                            </p>
+                        </div>
+                        <div class="has-background-danger-light has-text-danger is-flex is-align-items-center is-justify-content-center p-2" style="border-radius: 10px;">
+                            <span class="material-symbols-outlined is-size-4">battery_alert</span>
+                        </div>
+                    </div>
+                    <progress class="progress is-danger is-small mb-0" value="<?= ($metricas['stock_critico'] ?? 0) > 0 ? 100 : 0 ?>" max="100">100%</progress>
+                </div>
+            </div>
+
+            <!-- KPI 4: Total Kardex / Historial -->
+            <div class="column is-12-mobile is-6-tablet is-3-desktop">
+                <div class="box is-shadowless h-100 is-flex is-flex-direction-column" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #4a4a4a;">
+                    <div class="is-flex is-justify-content-space-between is-align-items-center mb-4">
+                        <span class="is-size-7 has-text-grey has-text-weight-bold is-uppercase">Auditoría</span>
+                        <span class="tag is-dark is-light">Total Kardex</span>
+                    </div>
+                    <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
+                        <div>
+                            <h2 class="title is-3 mb-1" id="total-registros-label"><?= count($compras ?? []) ?></h2>
+                            <p class="is-size-7 has-text-link has-text-weight-bold is-flex is-align-items-center">
+                                <span class="material-symbols-outlined is-size-6 mr-1">verified</span> 100% conciliado
+                            </p>
+                        </div>
+                        <div class="has-background-link-light has-text-link is-flex is-align-items-center is-justify-content-center p-2" style="border-radius: 10px;">
+                            <span class="material-symbols-outlined is-size-4">receipt_long</span>
+                        </div>
+                    </div>
+                    <progress class="progress is-link is-small mb-0" value="100" max="100">100%</progress>
+                </div>
+            </div>
+
+</div>
 
             <!-- ========================================== -->
             <!-- 3. BARRA DE FILTROS Y BÚSQUEDA -->
