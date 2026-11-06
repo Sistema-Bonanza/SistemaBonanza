@@ -10,7 +10,7 @@
                 </svg>
             </div>
             <div class="sidebar-logo-text">
-                <h1>Industrias Bonanza</h1>
+                <h1>Distribuidora de Alimentos Bonanza</h1>
                 <p>Control de Almacén</p>
             </div>
         </div>

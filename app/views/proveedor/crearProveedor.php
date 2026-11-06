@@ -7,7 +7,7 @@ $proveedores = $proveedores ?? [];
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registrar Nuevo Proveedor · Industrias Bonanza</title>
+    <title>Registrar Nuevo Proveedor · Distribuidora de Alimentos Bonanza</title>
     
     <!-- Librerías CSS -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
@@ -107,7 +107,7 @@ $proveedores = $proveedores ?? [];
                                 Razón Social / Nombre Comercial <span class="has-text-danger">*</span>
                             </label>
                             <div class="control has-icons-left">
-                                <input class="input" type="text" id="razon_social" name="razon_social" placeholder="Ej: Distribuidora Bonanza C.A." required style="border-radius: 8px; border-color: #cbd5e1;">
+                                <input class="input" type="text" id="razon_social" name="razon_social" placeholder="Ej: Distribuidora de Alimentos Bonanza C.A." required style="border-radius: 8px; border-color: #cbd5e1;">
                                 <span class="icon is-small is-left has-text-grey">
                                     <span class="material-symbols-outlined">corporate_fare</span>
                                 </span>

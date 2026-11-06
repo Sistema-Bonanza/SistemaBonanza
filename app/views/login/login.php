@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Acceso al Sistema - Industrias Bonanza</title>
+    <title>Acceso al Sistema - Distribuidora de Alimentos Bonanza</title>
     
     <!-- BULMA CSS CDN -->
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css">
@@ -33,7 +33,7 @@
                         </div>
                         <div>
                             <span class="is-block is-size-7 has-text-weight-bold is-uppercase mb-1" style="letter-spacing: 2px; color: #bfdbfe;">Plataforma Logística</span>
-                            <span class="is-size-5 has-text-weight-bold font-display has-text-white">Industrias Bonanza</span>
+                            <span class="is-size-5 has-text-weight-bold font-display has-text-white">Distribuidora de Alimentos Bonanza</span>
                         </div>
                     </div>
 
@@ -126,7 +126,7 @@
 
                 <footer class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap pt-4 mt-6" style="border-top: 1px solid #e2e8f0;">
                      <p class="is-size-7 has-text-grey m-0">
-                            © <?php echo date('Y'); ?> <strong class="has-text-dark">Industrias Bonanza</strong> 
+                            © <?php echo date('Y'); ?> <strong class="has-text-dark">Distribuidora de Alimentos Bonanza</strong> 
                         </p>
                         <div class="is-flex is-align-items-center is-size-7" style="gap: 12px;">
                             <a href="javascript:void(0)" class="has-text-grey hover-link" style="text-decoration: none;">Soporte Técnico</a>

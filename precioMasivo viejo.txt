@@ -1,0 +1,169 @@
+<?php
+// Variables que entrega PrecioController::mostrarMasivo():
+//   $entrada (id_categoria, tipo, porcentaje), $preview (null o ['cambios'=>[], 'omitidos'=>n]), $categorias
+
+$hayPreview = ($preview !== null);
+$etiquetaTipo = ($entrada['tipo'] === 'descuento') ? 'descuento' : 'aumento';
+?>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ajuste por Porcentaje · Bonanza</title>
+
+    <link rel="stylesheet" href="assets/css/sidebar.css" />
+    <link rel="stylesheet" href="assets/css/precios.css" />
+</head>
+<body>
+
+    <?php require_once __DIR__ . '/../layouts/sidebar.php'; ?>
+
+    <main class="main">
+
+        <div class="welcome-card">
+            <h1>📈 Ajuste de Precios por Porcentaje</h1>
+            <p>Sube o baja el precio de venta de varios productos a la vez. Primero verás el resultado; nada se guarda hasta que confirmes.</p>
+        </div>
+
+        <?= mostrarFlash() ?>
+
+        <!-- PASO 1: PARÁMETROS -->
+        <div class="form-wrapper">
+            <div class="form-header">Paso 1 · Define el ajuste</div>
+
+            <form action="<?= esc(urlAccion('precio', 'previsualizarMasivo')) ?>" method="POST" class="form-body">
+                <?= campoCsrf() ?>
+
+                <div class="grid-3-cols">
+                    <div class="form-group">
+                        <label for="id_categoria">Categoría</label>
+                        <select id="id_categoria" name="id_categoria" class="form-control">
+                            <option value="">Todas las categorías</option>
+                            <?php foreach ($categorias as $cat): ?>
+                                <option value="<?= (int) $cat['id_categoria'] ?>"
+                                    <?= ((string) ($entrada['id_categoria'] ?? '') === (string) $cat['id_categoria']) ? 'selected' : '' ?>>
+                                    <?= esc($cat['nombre']) ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tipo">Tipo de ajuste <span class="required">*</span></label>
+                        <select id="tipo" name="tipo" class="form-control" required>
+                            <option value="aumento"   <?= $etiquetaTipo === 'aumento'   ? 'selected' : '' ?>>Aumento (+)</option>
+                            <option value="descuento" <?= $etiquetaTipo === 'descuento' ? 'selected' : '' ?>>Descuento (−)</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="porcentaje">Porcentaje (%) <span class="required">*</span></label>
+                        <input type="number" id="porcentaje" name="porcentaje" class="form-control"
+                               step="0.01" min="0.01" max="100" required placeholder="Ej. 5"
+                               value="<?= esc($entrada['porcentaje'] ?? '') ?>">
+                    </div>
+                </div>
+
+                <p class="field-hint">
+                    Solo cambia el <strong>precio de venta</strong>; el costo no se toca. Los productos sin precio de venta se omiten
+                    (no hay base para aplicar un porcentaje). Los precios se redondean a 2 decimales.
+                </p>
+
+                <div class="form-footer">
+                    <a href="<?= esc(urlAccion('precio', 'tablaPrecios')) ?>" class="btn-form btn-cancel">Volver Atrás</a>
+                    <button type="submit" class="btn-form btn-submit">Previsualizar</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- PASO 2: VISTA PREVIA Y CONFIRMACIÓN -->
+        <?php if ($hayPreview): ?>
+            <?php $cambios = $preview['cambios']; ?>
+            <div class="panel panel-recent">
+                <h3>
+                    👁️ Paso 2 · Vista previa
+                    <span class="price-counter" style="float:right;"><?= count($cambios) ?> producto(s)</span>
+                </h3>
+
+                <?php if (!empty($cambios)): ?>
+                    <div class="table-container">
+                        <table class="prices-table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Categoría</th>
+                                    <th class="num">Precio actual</th>
+                                    <th class="num">Precio nuevo</th>
+                                    <th class="center">Variación</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <?php foreach ($cambios as $c): ?>
+                                    <?php $variacion = variacionPorcentual($c['precio_venta'], $c['nuevo']); ?>
+                                    <tr>
+                                        <td>
+                                            <strong><?= esc($c['nombre']) ?></strong><br>
+                                            <span class="badge badge-code"><?= esc($c['codigo']) ?></span>
+                                        </td>
+                                        <td><?= esc($c['nombre_categoria']) ?></td>
+                                        <td class="num"><?= esc(dinero($c['precio_venta'])) ?></td>
+                                        <td class="num"><strong><?= esc(dinero($c['nuevo'])) ?></strong></td>
+                                        <td class="center">
+                                            <?php if ($variacion !== null): ?>
+                                                <span class="<?= $variacion >= 0 ? 'var-up' : 'var-down' ?>">
+                                                    <?= $variacion >= 0 ? '▲ +' : '▼ ' ?><?= esc(number_format($variacion, 2, ',', '.')) ?> %
+                                                </span>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
+                            </tbody>
+                        </table>
+                    </div>
+                <?php else: ?>
+                    <div class="empty-state">
+                        <i>🤷</i>
+                        <h4>Ningún producto cambiaría de precio</h4>
+                        <p>Todos los productos de esta selección están sin precio de venta o quedarían igual.</p>
+                    </div>
+                <?php endif; ?>
+
+                <?php if ($preview['omitidos'] > 0): ?>
+                    <p class="table-legend">
+                        <?= (int) $preview['omitidos'] ?> producto(s) se omiten (sin precio de venta o sin variación al redondear).
+                    </p>
+                <?php endif; ?>
+
+                <?php if (!empty($cambios)): ?>
+                    <!-- Confirmación: reenvía los mismos parámetros. El servidor los vuelve a validar
+                         y recalcula con los precios vigentes en ese momento. -->
+                    <form action="<?= esc(urlAccion('precio', 'aplicarMasivo')) ?>" method="POST" id="form-aplicar">
+                        <?= campoCsrf() ?>
+                        <input type="hidden" name="id_categoria" value="<?= esc($entrada['id_categoria'] ?? '') ?>">
+                        <input type="hidden" name="tipo" value="<?= esc($entrada['tipo']) ?>">
+                        <input type="hidden" name="porcentaje" value="<?= esc($entrada['porcentaje']) ?>">
+
+                        <div class="form-footer">
+                            <button type="submit" class="btn-form btn-submit">
+                                Confirmar y aplicar <?= esc($etiquetaTipo) ?> de <?= esc(number_format((float) $entrada['porcentaje'], 2, ',', '.')) ?> %
+                            </button>
+                        </div>
+                    </form>
+
+                    <script>
+                    document.getElementById('form-aplicar').addEventListener('submit', function (e) {
+                        if (!confirm('Se modificará el precio de <?= count($cambios) ?> producto(s). ¿Continuar?')) {
+                            e.preventDefault();
+                            return;
+                        }
+                        this.querySelector('button[type="submit"]').disabled = true;
+                    });
+                    </script>
+                <?php endif; ?>
+            </div>
+        <?php endif; ?>
+
+    </main>
+</body>
+</html>
