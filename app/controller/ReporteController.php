@@ -7,6 +7,7 @@
  *
  * Acciones públicas (las que el router puede llamar):
  *   index        menú con los reportes disponibles para el rol       (cualquier usuario con sesión)
+ *   historialCierres  listado de cierres de caja anteriores, con buscador (admin y operador)
  *   cierreCaja   cierre de caja de un día                            (admin y operador)
  *   inventario   existencias y valor del inventario                  (admin y operador; costos: solo admin)
  *   ganancias    ganancia por producto en un rango de fechas         (solo admin)
@@ -66,7 +67,7 @@ class ReporteController
 
         $catalogo = [
             [
-                'accion'      => 'cierreCaja',
+                'accion'      => 'historialCierres',   // primero el historial; desde ahí se abre o se hace un cierre
                 'titulo'      => 'Cierre de caja diario',
                 'descripcion' => 'Ventas del día por forma de pago, lo cobrado, lo vendido a crédito y las anulaciones. Con espacio para el conteo y las firmas.',
                 'icono'       => 'fa-cash-register',
@@ -105,6 +106,50 @@ class ReporteController
         }));
 
         require __DIR__ . '/../views/reportes/index.php';
+    }
+
+    // =====================================================================
+    // 0. HISTORIAL DE CIERRES DE CAJA (vista previa del cierre diario)
+    // =====================================================================
+
+    private const CIERRES_POR_PAGINA = 15;
+
+    public function historialCierres(): void
+    {
+        exigirRol(self::ROLES_CAJA);
+        evitarCache();
+
+        $hoy = date('Y-m-d');
+        $q   = validarTexto($_GET['q'] ?? null, 1, 60) ?? '';
+
+        $desde = $this->leerFecha('desde', null);
+        $hasta = $this->leerFecha('hasta', null);
+        if ($desde !== null && $hasta !== null && $desde > $hasta) {
+            [$desde, $hasta] = [$hasta, $desde];
+        }
+
+        $pagina = validarEntero($_GET['pagina'] ?? null, 1, 100000) ?? 1;
+
+        $datos = $this->generar(function () use ($desde, $hasta, $q, $pagina) {
+            $total        = $this->modelo->contarCierres($desde, $hasta, $q);
+            $totalPaginas = max(1, (int) ceil($total / self::CIERRES_POR_PAGINA));
+            $pagina       = min($pagina, $totalPaginas);
+            $filas        = $this->modelo->historialCierres(
+                $desde, $hasta, $q, self::CIERRES_POR_PAGINA, ($pagina - 1) * self::CIERRES_POR_PAGINA
+            );
+            return ['total' => $total, 'totalPaginas' => $totalPaginas, 'pagina' => $pagina, 'filas' => $filas];
+        });
+
+        $totalCierres = $datos['total'];
+        $totalPaginas = $datos['totalPaginas'];
+        $pagina       = $datos['pagina'];
+        $cierres      = $datos['filas'];
+        $hayFiltros   = ($q !== '' || $desde !== null || $hasta !== null);
+
+        // Filtros que se arrastran al paginar.
+        $filtrosUrl = $this->parametrosUrl(['q' => $q, 'desde' => $desde, 'hasta' => $hasta]);
+
+        require __DIR__ . '/../views/reportes/historialCierres.php';
     }
 
     // =====================================================================

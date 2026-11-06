@@ -158,7 +158,7 @@
                     </div>
                     <div class="is-flex is-justify-content-space-between is-align-items-flex-end mb-4">
                         <div>
-                            <h2 class="title is-3 mb-1" id="total-registros-label"><?= count($compras ?? []) ?></h2>
+                            <h2 class="title is-3 mb-1" id="total-registros-label"><?= (int) ($totalMovimientos ?? count($movimientos ?? [])) ?></h2>
                             <p class="is-size-7 has-text-link has-text-weight-bold is-flex is-align-items-center">
                                 <span class="material-symbols-outlined is-size-6 mr-1">verified</span> 100% conciliado
                             </p>
@@ -180,7 +180,7 @@
                 <div class="is-flex is-flex-wrap-wrap is-align-items-center is-justify-content-space-between" style="gap: 1rem;">
                     
                     <div class="control has-icons-left" style="flex-grow: 1; max-width: 400px;">
-                        <input class="input" type="text" id="input-busqueda" placeholder="Buscar documento, entidad o usuario..." style="border-radius: 8px; background-color: #f8fafc;">
+                        <input class="input" type="text" id="input-busqueda" placeholder="Buscar factura, cliente, proveedor o usuario..." style="border-radius: 8px; background-color: #f8fafc;">
                         <span class="icon is-left has-text-grey-light"><span class="material-symbols-outlined">search</span></span>
                     </div>
                     
@@ -238,8 +238,8 @@
                             </tr>
                         </thead>
                         <tbody class="is-size-6" id="tbody-movimientos">
-                            <?php if(!empty($compras)): ?>
-                                <?php foreach ($compras as $compra): ?>
+                            <?php if(!empty($movimientos)): ?>
+                                <?php foreach ($movimientos as $mov): ?>
                                     <?php require __DIR__ . '/filas_ajax.php'; ?>
                                 <?php endforeach; ?>
                             <?php else: ?>
@@ -248,7 +248,7 @@
                                         <div class="is-flex is-flex-direction-column is-align-items-center">
                                             <span class="material-symbols-outlined has-text-grey-light mb-3" style="font-size: 3rem;">inventory_2</span>
                                             <p class="has-text-grey has-text-weight-bold is-size-5">No hay operaciones registradas.</p>
-                                            <p class="has-text-grey-light is-size-7 mt-1">Haz clic en "Registrar Compra" para comenzar a poblar el Kardex.</p>
+                                            <p class="has-text-grey-light is-size-7 mt-1">Registra una compra o una venta para comenzar a poblar el Kardex.</p>
                                         </div>
                                     </td>
                                 </tr>

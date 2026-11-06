@@ -6,6 +6,7 @@
  *
  * Reportes que arma:
  *   1. cierreDeCaja()          cierre de caja de UN día (ventas, formas de pago, anulaciones)
+ *      historialCierres()      listado de los cierres de días anteriores (con buscador y paginación)
  *   2. inventario()            existencias valoradas, con situación de stock
  *   3. gananciaPorProducto()   ingresos - costo por producto, en un rango de fechas
  *   4. variacionDeVentas()     compara las ventas de dos períodos, producto por producto
@@ -262,6 +263,196 @@ class ReporteModel
             'por_usuario'         => $porUsuario,
             'ventas'              => $ventas,
         ];
+    }
+
+    // =====================================================================
+    // 1b. HISTORIAL DE CIERRES DE CAJA
+    // =====================================================================
+
+    /**
+     * Arma el WHERE del historial: rango de fechas y buscador. Llena $params.
+     * Cada "cierre" es un día con ventas. El buscador encuentra por:
+     *   - fecha: 15/10/2026, 15-10-2026, 2026-10-15 (un día) o 10/2026 (un mes completo)
+     *   - texto: número de factura (FAC-000015 o 15), cliente, documento del cliente o usuario
+     *     que vendió. En ese caso salen los días en los que existe al menos una venta que coincide.
+     * Los parámetros no se repiten (consultas preparadas reales): por eso :h_1, :h_2...
+     */
+    private function condicionesHistorial(?string $desde, ?string $hasta, string $q, array &$params): string
+    {
+        $where = ['1=1'];
+
+        if ($desde !== null && $desde !== '') {
+            $where[] = 'v.fecha_venta >= :h_desde';
+            $params[':h_desde'] = $desde;
+        }
+        if ($hasta !== null && $hasta !== '') {
+            $where[] = 'v.fecha_venta < :h_hasta';
+            $params[':h_hasta'] = $this->siguienteDia($hasta);
+        }
+
+        $q = trim($q);
+        if ($q === '') {
+            return implode(' AND ', $where);
+        }
+
+        // 1) Un día exacto (dd/mm/aaaa, dd-mm-aaaa o aaaa-mm-dd)
+        if (preg_match('/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})\z/', $q, $m)
+            && checkdate((int) $m[2], (int) $m[1], (int) $m[3])) {
+            $dia = sprintf('%04d-%02d-%02d', $m[3], $m[2], $m[1]);
+            $where[] = 'v.fecha_venta >= :h_dia_ini AND v.fecha_venta < :h_dia_fin';
+            $params[':h_dia_ini'] = $dia;
+            $params[':h_dia_fin'] = $this->siguienteDia($dia);
+            return implode(' AND ', $where);
+        }
+        if (preg_match('/^(\d{4})-(\d{1,2})-(\d{1,2})\z/', $q, $m)
+            && checkdate((int) $m[2], (int) $m[3], (int) $m[1])) {
+            $dia = sprintf('%04d-%02d-%02d', $m[1], $m[2], $m[3]);
+            $where[] = 'v.fecha_venta >= :h_dia_ini AND v.fecha_venta < :h_dia_fin';
+            $params[':h_dia_ini'] = $dia;
+            $params[':h_dia_fin'] = $this->siguienteDia($dia);
+            return implode(' AND ', $where);
+        }
+
+        // 2) Un mes completo (mm/aaaa o aaaa-mm)
+        $anio = $mes = null;
+        if (preg_match('/^(\d{1,2})[\/-](\d{4})\z/', $q, $m)) {
+            [$mes, $anio] = [(int) $m[1], (int) $m[2]];
+        } elseif (preg_match('/^(\d{4})-(\d{1,2})\z/', $q, $m)) {
+            [$anio, $mes] = [(int) $m[1], (int) $m[2]];
+        }
+        if ($mes !== null && $mes >= 1 && $mes <= 12) {
+            $ini = sprintf('%04d-%02d-01', $anio, $mes);
+            $where[] = 'v.fecha_venta >= :h_mes_ini AND v.fecha_venta < :h_mes_fin';
+            $params[':h_mes_ini'] = $ini;
+            $params[':h_mes_fin'] = (new DateTime($ini))->modify('+1 month')->format('Y-m-d');
+            return implode(' AND ', $where);
+        }
+
+        // 3) Texto: días en los que existe una venta que coincide (el total del día sigue siendo el del día completo)
+        $like = '%' . addcslashes($q, '%_\\') . '%';
+        $cond = '(c2.nombre_razon_social LIKE :h_1 OR c2.num_documento LIKE :h_2'
+              . ' OR u2.username LIKE :h_3 OR v2.numero_factura LIKE :h_4';
+        $params[':h_1'] = $like;
+        $params[':h_2'] = $like;
+        $params[':h_3'] = $like;
+        $params[':h_4'] = $like;
+        if (preg_match('/^(?:VEN|FAC)?-?0*(\d{1,10})\z/i', $q, $m)) {
+            $cond .= ' OR v2.id_venta = :h_5';
+            $params[':h_5'] = (int) $m[1];
+        }
+        $cond .= ')';
+
+        $where[] = "DATE(v.fecha_venta) IN (
+                        SELECT DATE(v2.fecha_venta)
+                          FROM ventas v2
+                         INNER JOIN clientes c2 ON c2.id_cliente = v2.id_cliente
+                         INNER JOIN usuarios u2 ON u2.id = v2.id_usuario
+                         WHERE $cond)";
+
+        return implode(' AND ', $where);
+    }
+
+    /** Enlaza parámetros (enteros como INT, el resto como texto). */
+    private function enlazarHistorial(PDOStatement $stmt, array $params): void
+    {
+        foreach ($params as $nombre => $valor) {
+            $stmt->bindValue($nombre, $valor, is_int($valor) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+    }
+
+    /** Cuántos cierres (días con ventas) hay con esos filtros: sirve para paginar. */
+    public function contarCierres(?string $desde, ?string $hasta, string $q): int
+    {
+        $params = [];
+        $where  = $this->condicionesHistorial($desde, $hasta, $q, $params);
+
+        $stmt = $this->pdo->prepare(
+            "SELECT COUNT(*) FROM (
+                SELECT DATE(v.fecha_venta) AS dia
+                  FROM ventas v
+                 WHERE $where
+                 GROUP BY DATE(v.fecha_venta)
+             ) AS dias"
+        );
+        $this->enlazarHistorial($stmt, $params);
+        $stmt->execute();
+
+        return (int) $stmt->fetchColumn();
+    }
+
+    /**
+     * Una página del historial de cierres, del más reciente al más antiguo.
+     * Cada fila: dia, facturas, total, cobrado, credito, anuladas (cantidad), usuarios.
+     * Mismas reglas del cierre diario: solo las ventas REGISTRADAS suman; el crédito no es "cobrado".
+     */
+    public function historialCierres(?string $desde, ?string $hasta, string $q, int $limite, int $desplazamiento): array
+    {
+        $params = [];
+        $where  = $this->condicionesHistorial($desde, $hasta, $q, $params);
+
+        $stmt = $this->pdo->prepare(
+            "SELECT DATE(v.fecha_venta)                                           AS dia,
+                    SUM(CASE WHEN v.estado = 1 THEN 1 ELSE 0 END)                  AS facturas,
+                    COALESCE(SUM(CASE WHEN v.estado = 1 THEN v.total END), 0)      AS total,
+                    SUM(CASE WHEN v.estado = 0 THEN 1 ELSE 0 END)                  AS anuladas,
+                    COALESCE(SUM(CASE WHEN v.estado = 0 THEN v.total END), 0)      AS total_anulado,
+                    COUNT(DISTINCT v.id_usuario)                                   AS usuarios
+               FROM ventas v
+              WHERE $where
+              GROUP BY DATE(v.fecha_venta)
+              ORDER BY dia DESC
+              LIMIT :limite OFFSET :desplazamiento"
+        );
+        $this->enlazarHistorial($stmt, $params);
+        $stmt->bindValue(':limite', $limite, PDO::PARAM_INT);
+        $stmt->bindValue(':desplazamiento', $desplazamiento, PDO::PARAM_INT);
+        $stmt->execute();
+        $dias = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        if (!$dias) {
+            return [];
+        }
+
+        // Cobrado y crédito de esos días (una sola consulta para toda la página).
+        $primero = end($dias)['dia'];     // el más antiguo de la página
+        $ultimo  = reset($dias)['dia'];   // el más reciente de la página
+        $pagos = $this->consultar(
+            "SELECT DATE(v.fecha_venta) AS dia,
+                    COALESCE(SUM(CASE WHEN pg.metodo = :credito THEN pg.monto ELSE 0 END), 0)  AS credito,
+                    COALESCE(SUM(CASE WHEN pg.metodo <> :no_credito THEN pg.monto ELSE 0 END), 0) AS cobrado
+               FROM venta_pagos pg
+              INNER JOIN ventas v ON v.id_venta = pg.id_venta
+              WHERE v.estado = 1
+                AND v.fecha_venta >= :ini AND v.fecha_venta < :fin
+              GROUP BY DATE(v.fecha_venta)",
+            [
+                ':credito'    => self::METODO_CREDITO,
+                ':no_credito' => self::METODO_CREDITO,
+                ':ini'        => $primero,
+                ':fin'        => $this->siguienteDia($ultimo),
+            ]
+        );
+        $porDia = [];
+        foreach ($pagos as $pg) {
+            $porDia[$pg['dia']] = $pg;
+        }
+
+        $filas = [];
+        foreach ($dias as $d) {
+            $pg = $porDia[$d['dia']] ?? ['credito' => 0, 'cobrado' => 0];
+            $filas[] = [
+                'dia'           => $d['dia'],
+                'facturas'      => (int) $d['facturas'],
+                'total'         => $this->dec(aCentavos($d['total'])),
+                'cobrado'       => $this->dec(aCentavos($pg['cobrado'])),
+                'credito'       => $this->dec(aCentavos($pg['credito'])),
+                'anuladas'      => (int) $d['anuladas'],
+                'total_anulado' => $this->dec(aCentavos($d['total_anulado'])),
+                'usuarios'      => (int) $d['usuarios'],
+            ];
+        }
+
+        return $filas;
     }
 
     // =====================================================================

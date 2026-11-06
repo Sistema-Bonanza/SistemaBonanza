@@ -158,58 +158,133 @@ Class movimientoModel {
 
     // ==========================================================
     // FUNCIONES PARA LA BÚSQUEDA Y PAGINACIÓN AJAX
+    // ----------------------------------------------------------
+    // El listado principal junta DOS orígenes en una sola lista:
+    //   - COMPRAS (entradas al inventario)  -> tipo 'compra'
+    //   - VENTAS  (salidas del inventario)  -> tipo 'venta'
+    // Cada fila trae las mismas columnas sin importar el origen:
+    //   tipo, id, documento, fecha, total, estado, entidad, identificacion, nombre_usuario
+    // Nota: la conexión usa consultas preparadas reales (sin emulación), por eso un mismo
+    // parámetro con nombre NO se repite: cada rama del UNION tiene los suyos (:c_..., :v_...).
     // ==========================================================
+
+    /**
+     * Arma el UNION (compras + ventas) según búsqueda y filtro.
+     * Devuelve [sql_union, parametros]. El filtro 'entradas' deja solo compras y 'salidas' solo ventas.
+     */
+    private function sqlUnionMovimientos($busqueda, $filtro) {
+        $params = [];
+        $ramas  = [];
+
+        $busqueda = trim((string) $busqueda);
+        $like = '%' . addcslashes($busqueda, '%_\\') . '%';
+
+        // Un texto como "VEN-000015", "FAC-15", "COMP-3" o "15" también encuentra por id.
+        $idBuscado = null;
+        if ($busqueda !== '' && preg_match('/^(?:VEN|FAC|COMP)?-?0*(\d{1,10})\z/i', $busqueda, $m)) {
+            $idBuscado = (int) $m[1];
+        }
+
+        // ---------------- RAMA 1: COMPRAS (entradas) ----------------
+        if ($filtro !== 'salidas') {
+            $where = '1=1';
+            if ($busqueda !== '') {
+                $where .= " AND (c.numero_factura LIKE :c_q1
+                             OR p.razon_social LIKE :c_q2
+                             OR p.rif LIKE :c_q3
+                             OR u.username LIKE :c_q4";
+                $params[':c_q1'] = $like;
+                $params[':c_q2'] = $like;
+                $params[':c_q3'] = $like;
+                $params[':c_q4'] = $like;
+                if ($idBuscado !== null) {
+                    $where .= " OR c.id_compra = :c_id";
+                    $params[':c_id'] = $idBuscado;
+                }
+                $where .= ")";
+            }
+
+            $ramas[] = "SELECT 'compra' AS tipo,
+                               c.id_compra AS id,
+                               CONVERT(c.numero_factura USING utf8mb4) COLLATE utf8mb4_general_ci AS documento,
+                               c.fecha_registro AS fecha,
+                               c.total AS total,
+                               c.estado AS estado,
+                               CONVERT(p.razon_social USING utf8mb4) COLLATE utf8mb4_general_ci AS entidad,
+                               CONVERT(p.rif USING utf8mb4) COLLATE utf8mb4_general_ci AS identificacion,
+                               CONVERT(u.username USING utf8mb4) COLLATE utf8mb4_general_ci AS nombre_usuario
+                          FROM compras c
+                         INNER JOIN proveedores p ON c.id_proveedor = p.id_proveedor
+                         INNER JOIN usuarios u ON c.id_usuario = u.id
+                         WHERE $where";
+        }
+
+        // ---------------- RAMA 2: VENTAS (salidas) ----------------
+        if ($filtro !== 'entradas') {
+            $where = '1=1';
+            if ($busqueda !== '') {
+                $where .= " AND (v.numero_factura LIKE :v_q1
+                             OR cl.nombre_razon_social LIKE :v_q2
+                             OR cl.num_documento LIKE :v_q3
+                             OR u2.username LIKE :v_q4";
+                $params[':v_q1'] = $like;
+                $params[':v_q2'] = $like;
+                $params[':v_q3'] = $like;
+                $params[':v_q4'] = $like;
+                if ($idBuscado !== null) {
+                    $where .= " OR v.id_venta = :v_id";
+                    $params[':v_id'] = $idBuscado;
+                }
+                $where .= ")";
+            }
+
+            // Ventas viejas pudieron no guardar numero_factura: se deriva FAC-000015 igual que en Ventas.
+            $ramas[] = "SELECT 'venta' AS tipo,
+                               v.id_venta AS id,
+                               CONVERT(COALESCE(v.numero_factura, CONCAT('FAC-', LPAD(v.id_venta, 6, '0'))) USING utf8mb4) COLLATE utf8mb4_general_ci AS documento,
+                               v.fecha_venta AS fecha,
+                               v.total AS total,
+                               v.estado AS estado,
+                               CONVERT(cl.nombre_razon_social USING utf8mb4) COLLATE utf8mb4_general_ci AS entidad,
+                               CONVERT(CONCAT(cl.tipo_documento, '-', cl.num_documento) USING utf8mb4) COLLATE utf8mb4_general_ci AS identificacion,
+                               CONVERT(u2.username USING utf8mb4) COLLATE utf8mb4_general_ci AS nombre_usuario
+                          FROM ventas v
+                         INNER JOIN clientes cl ON v.id_cliente = cl.id_cliente
+                         INNER JOIN usuarios u2 ON v.id_usuario = u2.id
+                         WHERE $where";
+        }
+
+        if (empty($ramas)) {
+            // Filtro desconocido: no se muestra nada.
+            $ramas[] = "SELECT 'compra' AS tipo, 0 AS id, '' AS documento, NOW() AS fecha, 0 AS total,
+                               1 AS estado, '' AS entidad, '' AS identificacion, '' AS nombre_usuario
+                         FROM DUAL WHERE 1=0";
+        }
+
+        return [implode("\n UNION ALL \n", $ramas), $params];
+    }
+
+    /** Enlaza parámetros: enteros como INT, el resto como texto. */
+    private function enlazarParametros(PDOStatement $stmt, array $params) {
+        foreach ($params as $key => $value) {
+            $stmt->bindValue($key, $value, is_int($value) ? PDO::PARAM_INT : PDO::PARAM_STR);
+        }
+    }
+
     public function obtenerMovimientosPaginados($busqueda, $filtro, $offset, $limite) {
         try {
-            $whereClause = "WHERE 1=1";
-            $params = [];
+            [$union, $params] = $this->sqlUnionMovimientos($busqueda, $filtro);
 
-            // Si el usuario escribió algo en el buscador
-            if (!empty($busqueda)) {
-                $busquedaLimpia = preg_replace('/[^0-9]/', '', $busqueda); 
-                $busquedaId = empty($busquedaLimpia) ? -1 : (int)$busquedaLimpia;
-
-                $whereClause .= " AND (c.numero_factura LIKE :busqueda 
-                                   OR p.razon_social LIKE :busqueda 
-                                   OR p.rif LIKE :busqueda 
-                                   OR u.username LIKE :busqueda
-                                   OR c.id_compra = :busquedaId)";
-                
-                $params[':busqueda'] = "%{$busqueda}%";
-                $params[':busquedaId'] = $busquedaId;
-            }
-
-            // Si filtran por "salidas" (que aún no existen) no mostramos nada
-            if ($filtro === 'salidas') {
-                $whereClause .= " AND 1=0";
-            }
-
-            $sql = "SELECT 
-                        c.id_compra, c.numero_factura, c.fecha_factura, 
-                        c.fecha_registro, c.total, c.estado,
-                        p.razon_social AS nombre_proveedor, p.rif AS rif_proveedor, 
-                        u.username AS nombre_usuario
-                    FROM compras c
-                    INNER JOIN proveedores p ON c.id_proveedor = p.id_proveedor
-                    INNER JOIN usuarios u ON c.id_usuario = u.id
-                    $whereClause
-                    ORDER BY c.fecha_registro DESC
+            $sql = "SELECT * FROM ( $union ) AS mov
+                    ORDER BY mov.fecha DESC, mov.id DESC
                     LIMIT :limite OFFSET :offset";
 
             $stmt = $this->pdo->prepare($sql);
-
-            foreach ($params as $key => $value) {
-                if ($key === ':busquedaId') {
-                    $stmt->bindValue($key, $value, PDO::PARAM_INT);
-                } else {
-                    $stmt->bindValue($key, $value, PDO::PARAM_STR);
-                }
-            }
-
+            $this->enlazarParametros($stmt, $params);
             $stmt->bindValue(':limite', (int)$limite, PDO::PARAM_INT);
             $stmt->bindValue(':offset', (int)$offset, PDO::PARAM_INT);
             $stmt->execute();
-            
+
             return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
         } catch(PDOException $e) {
@@ -220,50 +295,19 @@ Class movimientoModel {
 
     public function contarMovimientosPaginados($busqueda, $filtro) {
         try {
-            $whereClause = "WHERE 1=1";
-            $params = [];
+            [$union, $params] = $this->sqlUnionMovimientos($busqueda, $filtro);
 
-            if (!empty($busqueda)) {
-                $busquedaLimpia = preg_replace('/[^0-9]/', '', $busqueda); 
-                $busquedaId = empty($busquedaLimpia) ? -1 : (int)$busquedaLimpia;
-
-                $whereClause .= " AND (c.numero_factura LIKE :busqueda 
-                                   OR p.razon_social LIKE :busqueda 
-                                   OR p.rif LIKE :busqueda 
-                                   OR u.username LIKE :busqueda
-                                   OR c.id_compra = :busquedaId)";
-                
-                $params[':busqueda'] = "%{$busqueda}%";
-                $params[':busquedaId'] = $busquedaId;
-            }
-
-            if ($filtro === 'salidas') {
-                $whereClause .= " AND 1=0";
-            }
-
-            $sql = "SELECT COUNT(*) 
-                    FROM compras c
-                    INNER JOIN proveedores p ON c.id_proveedor = p.id_proveedor
-                    INNER JOIN usuarios u ON c.id_usuario = u.id
-                    $whereClause";
-
-            $stmt = $this->pdo->prepare($sql);
-            
-            foreach ($params as $key => $value) {
-                if ($key === ':busquedaId') {
-                    $stmt->bindValue($key, $value, PDO::PARAM_INT);
-                } else {
-                    $stmt->bindValue($key, $value, PDO::PARAM_STR);
-                }
-            }
-            
+            $stmt = $this->pdo->prepare("SELECT COUNT(*) FROM ( $union ) AS mov");
+            $this->enlazarParametros($stmt, $params);
             $stmt->execute();
             return (int) $stmt->fetchColumn();
 
         } catch(PDOException $e) {
+            error_log("Error BD Conteo movimientos: " . $e->getMessage());
             return 0;
         }
     }
+
 
     public function obtenerMetricasMovimientos() {
         try {

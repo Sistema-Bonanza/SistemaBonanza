@@ -2,6 +2,7 @@
 // 1. CARGA OBLIGATORIA DE HELPERS Y CONFIGURACIÓN
 require_once __DIR__ . '/../helpers/seguridad.php';
 require_once __DIR__ . '/../helpers/validaciones.php';
+require_once __DIR__ . '/../helpers/formato.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../config/constantes.php';
 
@@ -34,12 +35,14 @@ class MovimientoController {
         evitarCache();
 
         // 1. Obtener la lista de movimientos para la tabla
-        $compras = $this->movimientoModel->obtenerMovimientosPaginados('', 'todas', 0, 10);
+        //    (compras + ventas juntas, ordenadas por fecha)
+        $movimientos      = $this->movimientoModel->obtenerMovimientosPaginados('', 'todas', 0, 10);
+        $totalMovimientos = $this->movimientoModel->contarMovimientosPaginados('', 'todas');
 
         // 2. Obtener las métricas reales para las tarjetas KPI
         $metricas = $this->movimientoModel->obtenerMetricasMovimientos();
 
-        // 3. Cargar la vista (ahora recibirá $compras y $metricas)
+        // 3. Cargar la vista (recibe $movimientos, $totalMovimientos y $metricas)
         require_once __DIR__ . '/../views/movimientos/movimientos.php';
     }
 
@@ -69,7 +72,7 @@ class MovimientoController {
 
             $filasHTML = '';
             if (!empty($resultados)) {
-                foreach ($resultados as $compra) {
+                foreach ($resultados as $mov) {
                     ob_start();
                     require __DIR__ . '/../views/movimientos/filas_ajax.php'; 
                     $filasHTML .= ob_get_clean(); 

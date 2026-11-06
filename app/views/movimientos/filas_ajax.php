@@ -1,21 +1,44 @@
 <?php 
-/** @var array $compra */
+/**
+ * Una fila del listado de Movimientos. Sirve para los dos orígenes:
+ *   $mov['tipo'] = 'compra'  -> entrada al inventario (módulo de Compras)
+ *   $mov['tipo'] = 'venta'   -> salida del inventario  (módulo de Ventas)
+ * Columnas que entrega movimientoModel: tipo, id, documento, fecha, total, estado,
+ * entidad, identificacion, nombre_usuario.
+ *
+ * @var array $mov
+ */
 
 $meses_es = ['Jan'=>'Ene', 'Feb'=>'Feb', 'Mar'=>'Mar', 'Apr'=>'Abr', 'May'=>'May', 'Jun'=>'Jun', 'Jul'=>'Jul', 'Aug'=>'Ago', 'Sep'=>'Sep', 'Oct'=>'Oct', 'Nov'=>'Nov', 'Dec'=>'Dic'];
 
+$esVenta = (($mov['tipo'] ?? 'compra') === 'venta');
+$anulado = (isset($mov['estado']) && (int) $mov['estado'] === 0);
+
 // Formateo de Fechas en Español
-$fecha = new DateTime($compra['fecha_registro'] ?? 'now');
+$fecha = new DateTime($mov['fecha'] ?? 'now');
 $mesIngles = $fecha->format('M');
 $fechaFormat = $fecha->format('d ') . ($meses_es[$mesIngles] ?? $mesIngles) . $fecha->format(' Y');
 $horaFormat = $fecha->format('h:i A');
 
 // Generador de Iniciales (Avatar)
-$nombreProv = $compra['nombre_proveedor'] ?? 'Proveedor';
-$iniciales = strtoupper(substr(esc($nombreProv), 0, 2));
+$nombreEntidad = $mov['entidad'] ?? ($esVenta ? 'Cliente' : 'Proveedor');
+$iniciales = strtoupper(substr($nombreEntidad, 0, 2));
 
-// Código de Operación Basado en ID
-$idCompra = $compra['id_compra'] ?? 0;
-$codigoOperacion = 'COMP-' . str_pad($idCompra, 6, '0', STR_PAD_LEFT);
+// Código de la operación y enlace al detalle según el origen
+$idOperacion = (int) ($mov['id'] ?? 0);
+if ($esVenta) {
+    $codigoOperacion = $mov['documento'] ?? numeroOperacion('FAC', $idOperacion);
+    $refOperacion    = 'Venta ' . numeroOperacion('VEN', $idOperacion);
+    $urlDetalle      = urlAccion('venta', 'verDetalleVenta', ['id' => $idOperacion]);
+    $colorDoc        = 'has-text-link';
+    $colorAvatar     = 'has-background-success-light has-text-success';
+} else {
+    $codigoOperacion = numeroOperacion('COMP', $idOperacion);
+    $refOperacion    = 'Ref: Factura ' . ($mov['documento'] ?? 'S/N');
+    $urlDetalle      = urlAccion('movimiento', 'verDetalleCompra', ['id' => $idOperacion]);
+    $colorDoc        = 'has-text-success';
+    $colorAvatar     = 'has-background-link-light has-text-link';
+}
 ?>
 <tr>
     <!-- Col 1: Fecha / Hora -->
@@ -28,36 +51,42 @@ $codigoOperacion = 'COMP-' . str_pad($idCompra, 6, '0', STR_PAD_LEFT);
 
     <!-- Col 2: Operación -->
     <td class="is-vcentered px-4">
-        <span class="tag is-info is-light has-text-weight-bold">
-            <span class="material-symbols-outlined is-size-6 mr-1">south_east</span> COMPRA
-        </span>
-        <?php if(isset($compra['estado']) && (int)$compra['estado'] === 0): ?>
+        <?php if ($esVenta): ?>
+            <span class="tag is-success is-light has-text-weight-bold">
+                <span class="material-symbols-outlined is-size-6 mr-1">north_east</span> VENTA
+            </span>
+        <?php else: ?>
+            <span class="tag is-info is-light has-text-weight-bold">
+                <span class="material-symbols-outlined is-size-6 mr-1">south_east</span> COMPRA
+            </span>
+        <?php endif; ?>
+        <?php if ($anulado): ?>
             <br><span class="tag is-danger is-light is-small mt-1" style="font-size: 0.65rem;">ANULADA</span>
         <?php endif; ?>
     </td>
 
     <!-- Col 3: Documento / Ref -->
     <td class="is-vcentered px-4">
-        <a href="<?= esc(urlAccion('movimiento', 'verDetalleCompra', ['id' => $idCompra])) ?>" class="has-text-weight-bold has-text-success mb-0 is-block" style="font-family: monospace;">
+        <a href="<?= esc($urlDetalle) ?>" class="has-text-weight-bold <?= $colorDoc ?> mb-0 is-block" style="font-family: monospace;">
             <?= esc($codigoOperacion) ?>
         </a>
-        <p class="is-size-7 has-text-grey mt-1">Ref: Factura <?= esc($compra['numero_factura'] ?? 'S/N') ?></p>
+        <p class="is-size-7 has-text-grey mt-1"><?= esc($refOperacion) ?></p>
     </td>
 
     <!-- Col 4: Entidad / Usuario -->
     <td class="is-vcentered px-4">
         <div class="is-flex is-align-items-center" style="gap: 0.75rem;">
-            <div class="has-background-link-light has-text-link has-text-weight-bold is-flex is-align-items-center is-justify-content-center" style="width: 32px; height: 32px; border-radius: 50%;">
-                <?= $iniciales ?>
+            <div class="<?= $colorAvatar ?> has-text-weight-bold is-flex is-align-items-center is-justify-content-center" style="width: 32px; height: 32px; border-radius: 50%;">
+                <?= esc($iniciales) ?>
             </div>
             <div>
-                <p class="has-text-weight-bold has-text-dark mb-0"><?= esc($nombreProv) ?></p>
+                <p class="has-text-weight-bold has-text-dark mb-0"><?= esc($nombreEntidad) ?></p>
                 <p class="is-size-7 has-text-grey is-flex is-align-items-center mt-1">
-                    <?= esc($compra['rif_proveedor'] ?? 'SIN RIF') ?> 
+                    <?= esc($mov['identificacion'] ?? ($esVenta ? 'SIN DOCUMENTO' : 'SIN RIF')) ?> 
                     <span class="mx-1">•</span> 
                     <span class="has-text-link is-flex is-align-items-center">
                         <span class="material-symbols-outlined is-size-7 mr-1">person</span> 
-                        <?= esc($compra['nombre_usuario'] ?? 'Sistema') ?>
+                        <?= esc($mov['nombre_usuario'] ?? 'Sistema') ?>
                     </span>
                 </p>
             </div>
@@ -66,13 +95,13 @@ $codigoOperacion = 'COMP-' . str_pad($idCompra, 6, '0', STR_PAD_LEFT);
 
     <!-- Col 5: Monto Total -->
     <td class="is-vcentered px-4 has-text-right">
-        <p class="has-text-weight-bold has-text-dark mb-0 is-size-5">$<?= number_format((float)($compra['total'] ?? 0), 2, ',', '.') ?></p>
-        <p class="is-size-7 has-text-grey mt-1">USD Base</p>
+        <p class="has-text-weight-bold mb-0 is-size-5 <?= $anulado ? 'has-text-grey-light' : 'has-text-dark' ?>" <?= $anulado ? 'style="text-decoration: line-through;"' : '' ?>>$<?= number_format((float)($mov['total'] ?? 0), 2, ',', '.') ?></p>
+        <p class="is-size-7 has-text-grey mt-1"><?= $esVenta ? 'USD · con IVA' : 'USD Base' ?></p>
     </td>
 
     <!-- Col 6: Estado Kardex -->
     <td class="is-vcentered px-4 has-text-centered">
-        <?php if(isset($compra['estado']) && (int)$compra['estado'] === 0): ?>
+        <?php if ($anulado): ?>
             <span class="tag is-rounded is-danger is-light">
                 <span style="width: 6px; height: 6px; border-radius: 50%; background: #f14668; margin-right: 6px;"></span> Revertido
             </span>
@@ -86,7 +115,7 @@ $codigoOperacion = 'COMP-' . str_pad($idCompra, 6, '0', STR_PAD_LEFT);
     <!-- Col 7: Acciones -->
     <td class="is-vcentered px-4 has-text-right">
         <div class="buttons is-right mb-0">
-            <a href="<?= esc(urlAccion('movimiento', 'verDetalleCompra', ['id' => $idCompra])) ?>" class="button is-small is-light" title="Ver Detalle">
+            <a href="<?= esc($urlDetalle) ?>" class="button is-small is-light" title="Ver Detalle">
                 <span class="icon has-text-grey"><span class="material-symbols-outlined">visibility</span></span>
             </a>
             <button class="button is-small is-light" title="Descargar Comprobante" disabled>

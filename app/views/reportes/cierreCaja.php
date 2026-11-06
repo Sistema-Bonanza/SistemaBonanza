@@ -68,6 +68,10 @@ $urlCsv = $linkCsv;
 
         <!-- Botones de Acción Superiores (Único bloque visible) -->
         <div class="buttons mb-0">
+            <a href="<?= esc(urlAccion('reporte', 'historialCierres')) ?>" class="button is-white is-outlined font-semibold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4); color: #ffffff;">
+                <span class="icon"><i class="fas fa-clock-rotate-left"></i></span>
+                <span>Historial de cierres</span>
+            </a>
             <a href="<?= esc(urlAccion('reporte', 'index')) ?>" class="button is-white is-outlined font-semibold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4); color: #ffffff;">
                 <span class="icon"><i class="fas fa-arrow-left"></i></span>
                 <span>Todos los reportes</span>
