@@ -272,6 +272,7 @@ $rutas = [
             'index'      => ruta('GET', ROLES_AUTENTICADOS),   // menu: cada rol ve solo sus reportes
             'historialcierres' => ruta('GET', ROLES_TODOS),    // listado de cierres anteriores (vista previa del cierre)
             'cierrecaja' => ruta('GET', ROLES_TODOS),          // cierre de caja diario
+            'registrarcierre' => ruta('POST', ROLES_TODOS),    // efectúa el cierre (guarda, cierra sesión)
             'inventario' => ruta('GET', ROLES_TODOS),          // existencias (el costo solo lo ve el admin)
             'ganancias'  => ruta('GET', ROLES_ADMIN),          // ganancia por producto
             'variacion'  => ruta('GET', ROLES_ADMIN),          // aumento / disminucion de ventas

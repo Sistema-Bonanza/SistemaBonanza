@@ -124,6 +124,7 @@ require __DIR__ . '/_inicio.php';
                     <th class="is-size-7 font-weight-bold is-uppercase has-text-right">Total cobrado</th>
                     <th class="is-size-7 font-weight-bold is-uppercase has-text-right">A crédito</th>
                     <th class="is-size-7 font-weight-bold is-uppercase has-text-centered">Anuladas</th>
+                    <th class="is-size-7 font-weight-bold is-uppercase has-text-centered">Estado</th>
                     <th class="is-size-7 font-weight-bold is-uppercase has-text-right no-print">Acciones</th>
                 </tr>
             </thead>
@@ -161,22 +162,34 @@ require __DIR__ . '/_inicio.php';
                                     <span class="has-text-grey-light">0</span>
                                 <?php endif; ?>
                             </td>
+                            <td class="has-text-centered">
+                                <?php if (!empty($c['cierre'])): ?>
+                                    <span class="tag is-dark is-light has-text-weight-bold" title="Cerrado el <?= esc(formatoFecha($c['cierre']['creado_en'], true)) ?> por <?= esc($c['cierre']['username']) ?>">
+                                        <i class="fas fa-lock mr-1"></i> Cerrado
+                                    </span>
+                                    <p class="is-size-7 has-text-grey mt-1 mb-0">por <?= esc($c['cierre']['username']) ?></p>
+                                <?php else: ?>
+                                    <span class="tag is-warning is-light has-text-weight-bold">Sin cerrar</span>
+                                <?php endif; ?>
+                            </td>
                             <td class="has-text-right no-print">
                                 <div class="buttons is-right mb-0">
                                     <a href="<?= esc($urlCierre) ?>" class="button is-small is-link is-light has-text-weight-bold" title="Ver el cierre de este día">
                                         <span class="icon"><i class="fas fa-eye"></i></span>
-                                        <span>Ver cierre</span>
+                                        <span><?= empty($c['cierre']) ? 'Ver cierre' : 'Ver / imprimir' ?></span>
                                     </a>
-                                    <a href="<?= esc(urlAccion('reporte', 'cierreCaja', ['fecha' => $c['dia'], 'exportar' => 'csv'])) ?>" class="button is-small is-light" title="Descargar CSV (Excel)">
-                                        <span class="icon"><i class="fas fa-file-csv"></i></span>
-                                    </a>
+                                    <?php if (empty($c['cierre'])): ?>
+                                        <a href="<?= esc(urlAccion('reporte', 'cierreCaja', ['fecha' => $c['dia'], 'exportar' => 'csv'])) ?>" class="button is-small is-light" title="Descargar CSV (Excel)">
+                                            <span class="icon"><i class="fas fa-file-csv"></i></span>
+                                        </a>
+                                    <?php endif; ?>
                                 </div>
                             </td>
                         </tr>
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="7" class="has-text-centered has-text-grey py-6">
+                        <td colspan="8" class="has-text-centered has-text-grey py-6">
                             <span class="icon is-large has-text-grey-light"><i class="fas fa-folder-open fa-2x"></i></span>
                             <p class="has-text-weight-bold mt-2">
                                 <?= $hayFiltros ? 'No se encontraron cierres con esa búsqueda.' : 'Todavía no hay ventas registradas, así que no hay cierres.' ?>
@@ -192,7 +205,7 @@ require __DIR__ . '/_inicio.php';
     </div>
 
     <div class="p-3 is-size-7 has-text-grey" style="background: #f8fafc; border-top: 1px solid #e2e8f0;">
-        Solo suman las ventas registradas; las anuladas se cuentan aparte. «Total cobrado» es lo que entró a caja (sin crédito).
+        Solo suman las ventas registradas; las anuladas se cuentan aparte. «Total cobrado» es lo que entró a caja (sin crédito). Los cierres «Cerrados» son de solo lectura: únicamente se pueden imprimir.
     </div>
 
     <!-- PAGINACIÓN -->

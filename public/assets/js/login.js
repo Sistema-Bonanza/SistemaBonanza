@@ -4,6 +4,22 @@ document.addEventListener('DOMContentLoaded', () => {
         window.history.replaceState(null, null, window.location.href);
     }
 
+    // 1b. Aviso de éxito que llega por flash (por ejemplo "Cierre exitoso" al terminar un cierre de caja).
+    // mostrarFlash() imprime <div class="mensaje mensaje-exito">; se muestra como alerta y se oculta el div.
+    var avisoExito = document.querySelector('.mensaje.mensaje-exito');
+    if (avisoExito && typeof Swal !== 'undefined') {
+        var textoExito = avisoExito.textContent.trim();
+        avisoExito.style.display = 'none';
+        Swal.fire({
+            icon: 'success',
+            title: 'Cierre Exitoso',
+            text: textoExito,
+            confirmButtonColor: '#2563eb',
+            confirmButtonText: 'Entendido',
+            customClass: { popup: 'rounded-xl shadow-lg' }
+        });
+    }
+
     // 2. Mostrar la alerta de SweetAlert2 si existe un mensaje de error global
     if (typeof errorMessage !== 'undefined' && errorMessage.trim() !== '') {
         Swal.fire({

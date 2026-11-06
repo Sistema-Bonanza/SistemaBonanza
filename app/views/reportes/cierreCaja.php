@@ -1,15 +1,17 @@
 <?php
 // Variables que entrega ReporteController::cierreCaja():
-// $cierre, $dia, $hoy, $esHoy, $diaAnterior, $diaSiguiente, $urlCsv
+// $cierre, $dia, $hoy, $esHoy, $diaAnterior, $diaSiguiente, $urlCsv,
+// $cerrado (¿ya se efectuó el cierre de ese día?), $guardado (el cierre guardado, o []),
+// $hayVentas (¿hubo ventas? sin ventas no hay nada que cerrar), $efectivoSistema
 
 // 1. Respaldamos las variables que usaremos en nuestro banner
 $linkCsv = $urlCsv ?? null;
 $textoFecha = 'Fecha: ' . formatoFecha($dia) . ($esHoy ? ' (hoy)' : '');
-$hayVentas = ($cierre['facturas'] > 0);
 
 // 2. Apagamos los "gatillos" para que _inicio.php NO genere su barra de botones
 $urlCsv             = null;  // Oculta el botón "Exportar CSV" de arriba
-$subtituloImpresion = '';    // Oculta el botón "Imprimir" de arriba
+$subtituloImpresion = 'Cierre de caja del ' . formatoFecha($dia)
+    . ($cerrado ? ' · Cierre efectuado el ' . formatoFecha($guardado['creado_en'], true) . ' por ' . $guardado['username'] : '');  // texto del papel al imprimir
 $esMenu             = true;  // Oculta el botón "<- Todos los reportes" de arriba
 $tituloPagina       = '';
 $descripcionPagina  = '';
@@ -59,6 +61,11 @@ $urlCsv = $linkCsv;
                         <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span>
                         <?= esc($textoFecha) ?>
                     </span>
+                    <?php if ($cerrado): ?>
+                        <span class="tag is-dark is-rounded has-text-weight-bold is-small">
+                            <i class="fas fa-lock mr-1"></i> Cierre efectuado
+                        </span>
+                    <?php endif; ?>
                 </div>
                 <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 750px;">
                     Resumen integral de lo facturado, cobrado y liquidado durante la jornada por forma de pago, desglose tributario de IVA y conciliación en gaveta.
@@ -94,6 +101,7 @@ $urlCsv = $linkCsv;
 <!-- ========================================== -->
 <!-- 2. BARRA DE FILTRADO DE FECHA -->
 <!-- ========================================== -->
+<?php if (!$cerrado): ?>
 <div class="box is-shadowless p-4 mb-5 no-print" style="background: white; border: 1px solid #cbd5e1; border-radius: 12px;">
     <form method="get" action="index.php" class="is-flex is-justify-content-space-between is-align-items-center is-flex-wrap-wrap" style="gap: 1rem;">
         <input type="hidden" name="controller" value="reporte">
@@ -127,10 +135,27 @@ $urlCsv = $linkCsv;
         </div>
     </form>
 </div>
+<?php endif; ?>
 
 <!-- ========================================== -->
 <!-- 3. NOTIFICACIONES Y ADVERTENCIAS AUDITORÍA -->
 <!-- ========================================== -->
+<?php if ($cerrado): ?>
+    <div class="notification is-dark is-light mb-5 no-print" style="border: 1px solid #cbd5e1; border-radius: 10px;">
+        <span class="icon mr-1"><i class="fas fa-lock"></i></span>
+        <strong>Cierre efectuado</strong> el <?= esc(formatoFecha($guardado['creado_en'], true)) ?> por <strong><?= esc($guardado['username']) ?></strong>.
+        Este documento es de solo lectura: únicamente se puede imprimir.
+    </div>
+    <?php if (abs($cierre['total'] - (float) $guardado['total_vendido']) >= 0.005): ?>
+        <div class="notification is-warning is-light mb-5" style="border: 1px solid #fde68a; border-radius: 10px;">
+            <span class="icon mr-1"><i class="fas fa-exclamation-triangle"></i></span>
+            <strong>Atención:</strong> al efectuarse el cierre el total vendido era <?= esc(dinero($guardado['total_vendido'])) ?>,
+            pero las ventas actuales de ese día suman <?= esc(dinero($cierre['total'])) ?> (hubo cambios, por ejemplo anulaciones, después del cierre).
+            El arqueo de abajo conserva los valores del momento del cierre.
+        </div>
+    <?php endif; ?>
+<?php endif; ?>
+
 <?php if (abs($cierre['diferencia_pagos']) >= 0.005): ?>
     <div class="notification is-warning is-light mb-5" style="border: 1px solid #fde68a; border-radius: 10px;">
         <span class="icon mr-1"><i class="fas fa-exclamation-triangle"></i></span>
@@ -432,31 +457,63 @@ $urlCsv = $linkCsv;
 <!-- ========================================== -->
 <!-- 7. CONTEO DE CAJA Y FIRMAS (AUDITORÍA FÍSICA) -->
 <!-- ========================================== -->
+<?php
+    // Valores del arqueo: los guardados si el día ya se cerró; si no, los del sistema en vivo.
+    $sistemaArqueo = $cerrado ? (float) $guardado['efectivo_sistema'] : $efectivoSistema;
+    $contadoGuard  = $cerrado ? (float) $guardado['efectivo_contado'] : null;
+    $difGuardada   = $cerrado ? (float) $guardado['diferencia'] : null;
+    $claseDif = 'has-text-grey-dark';
+    $textoDif = '';
+    if ($cerrado) {
+        if (abs($difGuardada) < 0.005)  { $claseDif = 'has-text-success';        $textoDif = 'La caja cuadra'; }
+        elseif ($difGuardada > 0)       { $claseDif = 'has-text-warning-dark';   $textoDif = 'Sobrante'; }
+        else                            { $claseDif = 'has-text-danger';         $textoDif = 'Faltante'; }
+    }
+?>
 <div class="box is-shadowless p-5 mb-5" style="border: 1px solid #cbd5e1; border-radius: 12px; background: white;">
     <h3 class="title is-5 mb-1 font-weight-bold has-text-dark">Arqueo Físico de Caja y Firmas de Auditoría</h3>
     <p class="is-size-7 has-text-grey mb-4">Verificación cruzada entre el dinero físico auditado en gaveta y el total reportado en el sistema.</p>
 
-    <!-- Formulario / Campos de Arqueo -->
+    <?php if (!$cerrado && $hayVentas): ?>
+    <form method="post" action="index.php?controller=reporte&amp;action=registrarCierre" id="formCierre">
+        <?= campoCsrf() ?>
+        <input type="hidden" name="fecha" value="<?= esc($dia) ?>">
+    <?php endif; ?>
+
+    <!-- Campos de Arqueo -->
     <div class="columns is-multiline mb-4">
         <div class="column is-4">
             <div class="p-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
                 <label for="efectivoContado" class="is-size-7 font-weight-bold is-uppercase has-text-grey-dark block mb-1">1. Efectivo Contado (Gaveta):</label>
-                <div class="control has-icons-left">
-                    <input class="input font-mono font-weight-bold" type="number" step="0.01" id="efectivoContado" placeholder="0.00" style="border-color: #cbd5e1;">
-                    <span class="icon is-small is-left"><i class="fas fa-dollar-sign"></i></span>
-                </div>
+                <?php if ($cerrado): ?>
+                    <p class="title is-4 font-mono font-weight-bold has-text-dark mb-0"><?= esc(dinero($contadoGuard)) ?></p>
+                <?php else: ?>
+                    <div class="control has-icons-left">
+                        <input class="input font-mono font-weight-bold" type="number" step="0.01" min="0" max="99999999.99" inputmode="decimal"
+                               id="efectivoContado" name="efectivo_contado" placeholder="0.00" style="border-color: #cbd5e1;"
+                               <?= $hayVentas ? 'required' : 'disabled' ?>>
+                        <span class="icon is-small is-left"><i class="fas fa-dollar-sign"></i></span>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
         <div class="column is-4">
             <div class="p-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
                 <span class="is-size-7 font-weight-bold is-uppercase has-text-grey-dark block mb-1">2. Cobrado en Efectivo (Sistema):</span>
-                <p class="title is-4 font-mono font-weight-bold has-text-dark mb-0"><?= esc(dinero($cierre['cobrado'])) ?></p>
+                <p class="title is-4 font-mono font-weight-bold has-text-dark mb-0" id="efectivoSistemaTexto" data-centavos="<?= (int) round($sistemaArqueo * 100) ?>"><?= esc(dinero($sistemaArqueo)) ?></p>
+                <p class="is-size-7 has-text-grey mt-1 mb-0">Solo pagos en efectivo (no incluye tarjeta, transferencia, divisa ni crédito).</p>
             </div>
         </div>
         <div class="column is-4">
             <div class="p-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
                 <span class="is-size-7 font-weight-bold is-uppercase has-text-grey-dark block mb-1">3. Diferencia (Contado - Sistema):</span>
-                <p class="title is-4 font-mono font-weight-bold has-text-grey-dark mb-0">$0.00</p>
+                <?php if ($cerrado): ?>
+                    <p class="title is-4 font-mono font-weight-bold <?= $claseDif ?> mb-0"><?= ($difGuardada > 0 ? '+' : ($difGuardada < 0 ? '-' : '')) . esc(dinero(abs($difGuardada))) ?></p>
+                    <p class="is-size-7 has-text-weight-bold <?= $claseDif ?> mt-1 mb-0"><?= esc($textoDif) ?></p>
+                <?php else: ?>
+                    <p class="title is-4 font-mono font-weight-bold has-text-grey-dark mb-0" id="diferenciaCaja" aria-live="polite">$0,00</p>
+                    <p class="is-size-7 has-text-grey mt-1 mb-0" id="diferenciaEstado">Escribe el efectivo contado para calcularla.</p>
+                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -464,10 +521,31 @@ $urlCsv = $linkCsv;
     <!-- Observaciones -->
     <div class="field mb-5">
         <label for="observaciones" class="label is-size-7 is-uppercase">Observaciones del Cierre:</label>
-        <div class="control">
-            <textarea class="textarea is-small" id="observaciones" rows="2" placeholder="Escriba aquí si existió algún inconveniente con el punto de venta, notas de crédito o ajustes de cambio..." style="border-color: #cbd5e1;"></textarea>
-        </div>
+        <?php if ($cerrado): ?>
+            <p class="p-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; white-space: pre-wrap; min-height: 3rem;"><?= ($guardado['observaciones'] ?? '') !== '' ? esc($guardado['observaciones']) : '—' ?></p>
+        <?php else: ?>
+            <div class="control">
+                <textarea class="textarea is-small" id="observaciones" name="observaciones" rows="2" maxlength="500" placeholder="Escriba aquí si existió algún inconveniente con el punto de venta, notas de crédito o ajustes de cambio..." style="border-color: #cbd5e1;" <?= $hayVentas ? '' : 'disabled' ?>></textarea>
+            </div>
+        <?php endif; ?>
     </div>
+
+    <?php if (!$cerrado): ?>
+        <!-- Botón de cierre (no se imprime) -->
+        <div class="no-print mb-5">
+            <?php if ($hayVentas): ?>
+                <button type="submit" class="button is-link has-text-weight-bold" id="btnRealizarCierre" style="border-radius: 8px;">
+                    <span class="icon"><i class="fas fa-lock"></i></span>
+                    <span>Realizar cierre de caja</span>
+                </button>
+                <p class="is-size-7 has-text-grey mt-2 mb-0">
+                    Al realizar el cierre se guarda el arqueo, ya no podrá modificarse y se cerrará tu sesión.
+                </p>
+            <?php else: ?>
+                <p class="is-size-7 has-text-grey mb-0"><i class="fas fa-info-circle mr-1"></i> No hubo ventas en esta fecha: no hay nada que cerrar.</p>
+            <?php endif; ?>
+        </div>
+    <?php endif; ?>
 
     <!-- Bloque de Firmas -->
     <div class="pt-5 mt-5" style="border-top: 2px dashed #cbd5e1;">
@@ -484,6 +562,71 @@ $urlCsv = $linkCsv;
             </div>
         </div>
     </div>
+
+    <?php if (!$cerrado && $hayVentas): ?>
+    </form>
+    <?php endif; ?>
 </div>
+
+<?php if (!$cerrado && $hayVentas): ?>
+<script>
+// Ecuación automática: Diferencia = Efectivo contado - Efectivo cobrado según el sistema.
+// Se calcula en centavos enteros (evita errores de decimales como 0.1 + 0.2) y se actualiza al escribir.
+(function () {
+    var entrada  = document.getElementById('efectivoContado');
+    var sistema  = document.getElementById('efectivoSistemaTexto');
+    var salida   = document.getElementById('diferenciaCaja');
+    var estado   = document.getElementById('diferenciaEstado');
+    var formCierre = document.getElementById('formCierre');
+    if (!entrada || !sistema || !salida) { return; }
+
+    var centavosSistema = parseInt(sistema.getAttribute('data-centavos'), 10) || 0;
+    var formato = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    var clases = ['has-text-grey-dark', 'has-text-success', 'has-text-warning-dark', 'has-text-danger'];
+
+    function dinero(centavos) {
+        return (centavos < 0 ? '-' : '') + '$' + formato.format(Math.abs(centavos) / 100);
+    }
+    function pintar(clase, texto, nota) {
+        clases.forEach(function (c) { salida.classList.remove(c); });
+        salida.classList.add(clase);
+        salida.textContent = texto;
+        if (estado) { estado.textContent = nota; estado.className = 'is-size-7 mt-1 mb-0 ' + (clase === 'has-text-grey-dark' ? 'has-text-grey' : clase + ' has-text-weight-bold'); }
+    }
+    function calcular() {
+        var texto = entrada.value.trim().replace(',', '.');
+        if (texto === '' || isNaN(Number(texto))) {
+            pintar('has-text-grey-dark', '$0,00', 'Escribe el efectivo contado para calcularla.');
+            return null;
+        }
+        var diferencia = Math.round(Number(texto) * 100) - centavosSistema;
+        if (diferencia === 0)      { pintar('has-text-success', dinero(0), 'La caja cuadra'); }
+        else if (diferencia > 0)   { pintar('has-text-warning-dark', '+' + dinero(diferencia), 'Sobrante: hay más efectivo del que registra el sistema'); }
+        else                       { pintar('has-text-danger', dinero(diferencia), 'Faltante: hay menos efectivo del que registra el sistema'); }
+        return diferencia;
+    }
+
+    entrada.addEventListener('input', calcular);
+    entrada.addEventListener('change', calcular);
+    calcular();   // por si el navegador conserva el valor al recargar
+
+    // Confirmación antes de cerrar (el cierre no se puede deshacer y termina la sesión).
+    if (formCierre) {
+        var enviando = false;
+        formCierre.addEventListener('submit', function (e) {
+            if (enviando) { e.preventDefault(); return; }
+            var dif = calcular();
+            var aviso = 'Vas a realizar el cierre de caja de este día.\n\n';
+            if (dif !== null && dif !== 0) { aviso += 'La caja NO cuadra (' + (dif > 0 ? '+' : '') + dinero(dif) + ').\n\n'; }
+            aviso += 'El cierre no se podrá modificar y tu sesión se cerrará. ¿Continuar?';
+            if (!window.confirm(aviso)) { e.preventDefault(); return; }
+            enviando = true;   // evita el doble envío (doble clic)
+            var boton = document.getElementById('btnRealizarCierre');
+            if (boton) { boton.classList.add('is-loading'); }
+        });
+    }
+})();
+</script>
+<?php endif; ?>
 
 <?php require __DIR__ . '/_fin.php'; ?>

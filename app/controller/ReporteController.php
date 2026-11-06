@@ -8,7 +8,8 @@
  * Acciones públicas (las que el router puede llamar):
  *   index        menú con los reportes disponibles para el rol       (cualquier usuario con sesión)
  *   historialCierres  listado de cierres de caja anteriores, con buscador (admin y operador)
- *   cierreCaja   cierre de caja de un día                            (admin y operador)
+ *   cierreCaja   cierre de caja de un día (abierto: se puede cerrar; cerrado: solo lectura e impresión)
+ *   registrarCierre  (POST) guarda el cierre, cierra la sesión y vuelve al login   (admin y operador)
  *   inventario   existencias y valor del inventario                  (admin y operador; costos: solo admin)
  *   ganancias    ganancia por producto en un rango de fechas         (solo admin)
  *   variacion    aumento / disminución de las ventas por producto    (solo admin)
@@ -33,6 +34,7 @@ require_once __DIR__ . '/../helpers/reportes.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../../config/constantes.php';
 require_once __DIR__ . '/../model/reporteModel.php';
+require_once __DIR__ . '/../model/cierreCajaModel.php';
 
 class ReporteController
 {
@@ -49,11 +51,14 @@ class ReporteController
     private const ROLES_COSTOS     = ['admin'];
 
     private $modelo;
+    private $cierres;   // cierres de caja guardados (único modelo de Reportes que escribe)
 
     public function __construct()
     {
         $database = new Database();
-        $this->modelo = new ReporteModel($database->getConnection());
+        $pdo = $database->getConnection();
+        $this->modelo  = new ReporteModel($pdo);
+        $this->cierres = new CierreCajaModel($pdo);
     }
 
     // =====================================================================
@@ -144,6 +149,17 @@ class ReporteController
         $totalPaginas = $datos['totalPaginas'];
         $pagina       = $datos['pagina'];
         $cierres      = $datos['filas'];
+
+        // Marca cuáles de esos días ya tienen su cierre efectuado (para mostrarlos como "Cerrado").
+        if ($cierres) {
+            $efectuados = $this->generar(function () use ($cierres) {
+                return $this->cierres->porRango(end($cierres)['dia'], reset($cierres)['dia']);
+            });
+            foreach ($cierres as &$fila) {
+                $fila['cierre'] = $efectuados[$fila['dia']] ?? null;
+            }
+            unset($fila);
+        }
         $hayFiltros   = ($q !== '' || $desde !== null || $hasta !== null);
 
         // Filtros que se arrastran al paginar.
@@ -168,16 +184,105 @@ class ReporteController
             return $this->modelo->cierreDeCaja($dia);
         });
 
+        // ¿Ese día ya se cerró? Entonces solo se muestra (sin editar) y solo se imprime.
+        $guardado = $this->generar(function () use ($dia) {
+            return $this->cierres->obtener($dia);
+        });
+        $cerrado   = !empty($guardado);
+        $hayVentas = !empty($cierre['ventas']);   // sin ventas no hay nada que cerrar
+
         if ($this->pideCsv()) {
+            if ($cerrado) {
+                setFlash('aviso', 'Un cierre ya efectuado solo se puede imprimir.');
+                redirigir(urlAccion('reporte', 'cierreCaja', ['fecha' => $dia]));
+            }
             $this->csvCierreCaja($cierre);
         }
+
+        // Efectivo que el sistema espera en gaveta: solo lo cobrado en EFECTIVO (no tarjeta, transferencia...).
+        $efectivoSistema = (float) ($cierre['pagos']['efectivo']['monto'] ?? 0);
 
         $diaAnterior  = (new DateTime($dia))->modify('-1 day')->format('Y-m-d');
         $diaSiguiente = ($dia < $hoy) ? (new DateTime($dia))->modify('+1 day')->format('Y-m-d') : null;
         $esHoy        = ($dia === $hoy);
-        $urlCsv       = urlAccion('reporte', 'cierreCaja', ['fecha' => $dia, 'exportar' => 'csv']);
+        $urlCsv       = $cerrado ? null : urlAccion('reporte', 'cierreCaja', ['fecha' => $dia, 'exportar' => 'csv']);
 
         require __DIR__ . '/../views/reportes/cierreCaja.php';
+    }
+
+    /**
+     * Efectúa el cierre de caja de un día: guarda el arqueo, CIERRA LA SESIÓN y vuelve al login
+     * con el aviso "Cierre exitoso". Todo se recalcula en el servidor; del formulario solo se
+     * toman el día, el efectivo contado y las observaciones (nunca los totales).
+     */
+    public function registrarCierre(): void
+    {
+        exigirRol(self::ROLES_CAJA);
+        $volver = urlAccion('reporte', 'historialCierres');
+        exigirPostConCsrf($volver);
+
+        $dia = validarFecha($_POST['fecha'] ?? null, false, 50);
+        if ($dia === null) {
+            setFlash('error', 'La fecha del cierre no es válida.');
+            redirigir($volver);
+        }
+        $urlCierre = urlAccion('reporte', 'cierreCaja', ['fecha' => $dia]);
+
+        $contado = validarDecimal($_POST['efectivo_contado'] ?? null, 8, 2, true);
+        if ($contado === null) {
+            setFlash('error', 'Indica el efectivo contado en gaveta (un monto válido, con máximo 2 decimales).');
+            redirigir($urlCierre);
+        }
+
+        $obsCruda = trim((string) ($_POST['observaciones'] ?? ''));
+        $observaciones = null;
+        if ($obsCruda !== '') {
+            $observaciones = validarTexto($obsCruda, 1, 500);
+            if ($observaciones === null) {
+                setFlash('error', 'Las observaciones no pueden pasar de 500 caracteres.');
+                redirigir($urlCierre);
+            }
+        }
+
+        $c = $this->generar(function () use ($dia) {
+            return $this->modelo->cierreDeCaja($dia);
+        });
+        if (empty($c['ventas'])) {
+            setFlash('aviso', 'No hubo ventas en esa fecha: no hay nada que cerrar.');
+            redirigir($urlCierre);
+        }
+
+        $efectivoSistema = $c['pagos']['efectivo']['monto'] ?? 0.0;
+        $diferencia      = aCentavos($contado) - aCentavos($efectivoSistema);
+
+        $resultado = $this->cierres->registrar([
+            'dia'              => $dia,
+            'facturas'         => $c['facturas'],
+            'total'            => deCentavos(aCentavos($c['total'])),
+            'cobrado'          => deCentavos(aCentavos($c['cobrado'])),
+            'credito'          => deCentavos(aCentavos($c['credito'])),
+            'efectivo_sistema' => deCentavos(aCentavos($efectivoSistema)),
+            'efectivo_contado' => $contado,
+            'diferencia'       => deCentavos($diferencia),
+            'observaciones'    => $observaciones,
+            'id_usuario'       => usuarioActualId(),
+        ]);
+
+        if (!$resultado['ok']) {
+            if ($resultado['motivo'] === 'duplicado') {
+                setFlash('aviso', 'Ese día ya tenía su cierre efectuado.');
+            } else {
+                setFlash('error', 'No se pudo guardar el cierre. Verifica que la base de datos tenga aplicada la migración migracion_cierres_caja.sql.');
+            }
+            redirigir($urlCierre);
+        }
+
+        // Cierre guardado: se termina la sesión (fin de turno) y se vuelve al login con el aviso.
+        // No se usa session_destroy() porque el aviso (flash) vive en la sesión.
+        $_SESSION = [];
+        session_regenerate_id(true);
+        setFlash('exito', 'Cierre exitoso: el cierre de caja del ' . formatoFecha($dia) . ' quedó registrado y la sesión se cerró.');
+        redirigir(URL_LOGIN);
     }
 
     // =====================================================================
@@ -424,7 +529,7 @@ class ReporteController
             return $consulta();
         } catch (PDOException $e) {
             error_log('ReporteController -> ' . $e->getMessage());
-            setFlash('error', 'No se pudo generar el reporte. Verifica que la base de datos tenga aplicada la migración migracion_pagos_factura.sql.');
+            setFlash('error', 'No se pudo generar el reporte. Verifica que la base de datos tenga aplicadas las migraciones migracion_pagos_factura.sql y migracion_cierres_caja.sql.');
             redirigir(urlAccion('reporte', 'index'));
         }
     }
