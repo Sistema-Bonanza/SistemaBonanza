@@ -200,6 +200,7 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                         $stock = (int)($p['stock_actual'] ?? 0);
                                         $stockMinimo = (int)($p['stock_minimo'] ?? 0);
                                         $esActivo = (($p['estado'] ?? 'activo') === 'activo');
+                                        $nombreCategoria = esc($p['nombre_categoria'] ?? $p['categoria'] ?? 'Sin categoría');
                                         
                                         // Inicial del Avatar
                                         $inicial = strtoupper(substr($p['nombre_producto'] ?? $nombre, 0, 1));
@@ -214,8 +215,8 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                                 </div>
                                                 <div>
                                                     <p class="has-text-weight-bold has-text-dark is-size-6 mb-0" style="line-height: 1.2;"><?= $nombre ?></p>
-                                                    <p class="is-size-7 has-text-grey">Categoría General</p>
-                                                </div>
+                                                    <p class="is-size-7 has-text-grey"><?= $nombreCategoria ?></p>
+                                                </div> 
                                             </div>
                                         </td>
                                         
