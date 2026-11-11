@@ -199,7 +199,7 @@
                                 </div>
                                 <div class="is-flex is-justify-content-space-between py-1 px-2 has-background-white-ter rounded">
                                     <span class="has-text-grey">Unidad de Manejo:</span>
-                                    <strong>Caja x 24 Unidades</strong>
+                                    <strong>Paquete  12 Unidades</strong>
                                 </div>
                             </div>
 

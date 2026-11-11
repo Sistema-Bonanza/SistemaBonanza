@@ -191,7 +191,7 @@ $proveedores = $proveedores ?? [];
                         <div class="is-flex is-align-items-center is-justify-content-space-between mb-4" style="border-bottom: 1px solid #f1f5f9; padding-bottom: 0.75rem;">
                             <div class="is-flex is-align-items-center" style="gap: 8px;">
                                 <span class="material-symbols-outlined has-text-link is-size-5">inventory_2</span>
-                                <h3 class="title is-6 mb-0 has-text-dark">Padrón Actual</h3>
+                                <h3 class="title is-6 mb-0 has-text-dark">Proveedores Actuales</h3>
                             </div>
                             <span class="tag is-success is-light is-rounded has-text-weight-bold" style="font-size: 0.65rem;">
                                 <?= count($proveedores) ?> Activos

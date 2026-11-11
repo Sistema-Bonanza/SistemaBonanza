@@ -244,7 +244,7 @@ $usuarios = $usuarios ?? [];
                                 <span>Control de Privilegios</span>
                             </div>
                             <p class="mb-0">
-                                Cuentas con rol <strong>Operador</strong> requieren autorización para movimientos especiales de stock; el rol <strong>Administrador</strong> tiene acceso irrestricto.
+                                Cuentas con rol <strong>Operador</strong> requieren autorización para movimientos especiales de stock; el rol <strong>Administrador</strong> tiene acceso total a las funcionalidades del sistema.
                             </p>
                         </div>
                     </div>
@@ -265,7 +265,7 @@ $usuarios = $usuarios ?? [];
                             </li>
                             <li class="is-flex" style="gap: 10px;">
                                 <span class="tag is-link is-light is-rounded has-text-weight-bold" style="height: 1.5em;">2</span>
-                                <span><strong class="has-text-dark">Cuenta Maestra Protegida:</strong> El usuario superadministrador no puede ser bloqueado ni auto-eliminado.</span>
+                                <span><strong class="has-text-dark">Cuenta Maestra Protegida:</strong> El usuario administrador no puede ser bloqueado ni auto-eliminado.</span>
                             </li>
                             <li class="is-flex" style="gap: 10px;">
                                 <span class="tag is-link is-light is-rounded has-text-weight-bold" style="height: 1.5em;">3</span>
