@@ -32,9 +32,8 @@
             <!-- ========================================== -->
             <!-- 1. BANNER PRINCIPAL (ESTANDARIZADO BULMA) -->
             <!-- ========================================== -->
-            <div class="box mb-5" style="background: linear-gradient(90deg, #003899 0%, #004ac6 50%, #2563eb 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
                 <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-                    
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
                         <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
                             <span class="material-symbols-outlined is-size-3 has-text-white">input</span>
@@ -51,21 +50,24 @@
                             </p>
                         </div>
                     </div>
-
                     <!-- Botón de Retorno -->
                     <div class="buttons mb-0">
-                        <a href="<?= esc(urlAccion('movimiento', 'tablaMovimientos')) ?>" class="button is-white is-outlined has-text-white style-round" style="border-radius: 8px;">
+                        <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc(urlAccion('movimiento', 'tablaMovimientos')) ?>">
                             <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                             <span>Volver al listado</span>
                         </a>
                     </div>
+                
                 </div>
             </div>
+
+            <!-- TASA BCV DEL DÍA (Bs por USD) -->
+            <?php require __DIR__ . '/../layouts/tasaBcv.php'; ?>
 
             <!-- ========================================== -->
             <!-- FORMULARIO DE RECEPCIÓN (KARDEX) -->
             <!-- ========================================== -->
-            <form id="formCrearCompra" action="<?= esc(urlAccion('movimiento', 'guardarCompra')) ?>" method="POST">
+            <form id="formCrearCompra" action="<?= esc(urlAccion('movimiento', 'guardarCompra')) ?>" method="POST" data-ajax>
                 <?= campoCsrf(); ?>
 
                 <!-- SECCIÓN 1: CABECERA Y PROVEEDOR -->
@@ -147,8 +149,13 @@
                     <p class="is-size-7 has-text-grey">Capture cada ítem recibido para calcular inventario físico y costos ponderados</p>
                 </div>
             </div>
-            <!-- Actualizamos la etiqueta -->
-            <span class="tag is-success is-light has-text-weight-bold">Líneas dinámicas</span>
+            <div class="buttons mb-0">
+                <button type="button" class="button is-small is-link has-text-weight-bold" id="btnNuevoProducto" onclick="abrirModalProducto()">
+                    <span class="icon"><span class="material-symbols-outlined">add_box</span></span>
+                    <span>Crear producto nuevo</span>
+                </button>
+                <span class="tag is-success is-light has-text-weight-bold">Líneas dinámicas</span>
+            </div>
         </div>
 
         <div class="table-container mb-0">
@@ -240,6 +247,7 @@
                             <!-- Subtotal por Línea -->
                             <td class="has-text-right">
                                 <span class="has-text-weight-bold text-subtotal" style="font-family: monospace;">$ 0,00</span>
+                                <span class="text-subtotal-bs is-block is-size-7 has-text-grey" style="font-family: monospace;"></span>
                             </td>
 
                             <!-- Botón Eliminar Fila Mejorado -->
@@ -321,12 +329,12 @@
 
                             <div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
                                 <span class="is-size-7 has-text-grey">Subtotal Neto:</span>
-                                <span class="has-text-weight-bold" id="subtotalLabel">$ 0,00</span>
+                                <span class="has-text-right"><span class="has-text-weight-bold" id="subtotalLabel">$ 0,00</span><span class="is-block is-size-7 has-text-grey" id="subtotalLabelBs"></span></span>
                             </div>
 
                             <div class="is-flex is-justify-content-space-between is-align-items-center mb-3">
                                 <span class="is-size-7 has-text-grey">Impuesto IVA (<?= defined('TASA_IVA') ? TASA_IVA : 16 ?>%):</span>
-                                <span class="has-text-weight-bold" id="ivaLabel">$ 0,00</span>
+                                <span class="has-text-right"><span class="has-text-weight-bold" id="ivaLabel">$ 0,00</span><span class="is-block is-size-7 has-text-grey" id="ivaLabelBs"></span></span>
                             </div>
 
                             <div class="p-3 has-background-link-light" style="border-radius: 10px;">
@@ -337,6 +345,7 @@
                                     </div>
                                     <div class="has-text-right">
                                         <p class="title is-4 has-text-link mb-0" id="grandTotalLabel">$ 0,00</p>
+                                        <p class="has-text-weight-bold has-text-grey-dark mb-0" id="grandTotalLabelBs" style="font-family: monospace;">—</p>
                                     </div>
                                 </div>
                             </div>
@@ -425,14 +434,101 @@
         </div>
     </div>
 
+    <!-- ======================================================= -->
+    <!-- MODAL AJAX PARA CREAR UN PRODUCTO NUEVO (sin salir de la compra) -->
+    <!-- ======================================================= -->
+    <div class="modal" id="modalProducto">
+        <div class="modal-background" onclick="cerrarModalProducto()"></div>
+        <div class="modal-card">
+            <header class="modal-card-head">
+                <p class="modal-card-title is-size-5 has-text-weight-bold">Crear producto nuevo</p>
+                <button class="delete" aria-label="close" type="button" onclick="cerrarModalProducto()"></button>
+            </header>
+            <section class="modal-card-body">
+                <form id="formNuevoProducto" autocomplete="off">
+                    <input type="hidden" name="csrf_token" value="<?= esc(tokenCsrf()) ?>">
+
+                    <div class="columns is-multiline is-mobile mb-0">
+                        <div class="column is-12-mobile is-5-tablet">
+                            <div class="field">
+                                <label class="label is-size-7">Código <span class="has-text-danger">*</span></label>
+                                <div class="control">
+                                    <input class="input" type="text" name="codigo" id="np_codigo" maxlength="50" required placeholder="Ej. BNZ-101">
+                                </div>
+                                <p class="help">Letras, números, punto, guion (sin espacios).</p>
+                            </div>
+                        </div>
+                        <div class="column is-12-mobile is-7-tablet">
+                            <div class="field">
+                                <label class="label is-size-7">Nombre <span class="has-text-danger">*</span></label>
+                                <div class="control">
+                                    <input class="input" type="text" name="nombre" id="np_nombre" maxlength="150" required placeholder="Nombre comercial del producto">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-12">
+                            <div class="field">
+                                <label class="label is-size-7">Categoría <span class="has-text-danger">*</span></label>
+                                <div class="control">
+                                    <div class="select is-fullwidth">
+                                        <select name="id_categoria" id="np_categoria" required>
+                                            <option value="">-- Seleccionar --</option>
+                                            <?php foreach ($categorias as $cat): ?>
+                                                <option value="<?= esc($cat['id_categoria']) ?>"><?= esc($cat['nombre']) ?></option>
+                                            <?php endforeach; ?>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column is-12-mobile is-4-tablet">
+                            <div class="field">
+                                <label class="label is-size-7">Stock mínimo</label>
+                                <div class="control"><input class="input" type="number" name="stock_minimo" min="0" max="1000000" step="1" value="0"></div>
+                            </div>
+                        </div>
+                        <div class="column is-12-mobile is-4-tablet">
+                            <div class="field">
+                                <label class="label is-size-7">Unidad de manejo</label>
+                                <div class="control"><input class="input" type="text" name="unidad_manejo" maxlength="30" value="UNIDAD"></div>
+                            </div>
+                        </div>
+                        <div class="column is-12-mobile is-4-tablet">
+                            <div class="field">
+                                <label class="label is-size-7">Unid. por empaque</label>
+                                <div class="control"><input class="input" type="number" name="unidades_por_empaque" min="1" max="100000" step="1" value="1"></div>
+                            </div>
+                        </div>
+                        <div class="column is-12">
+                            <label class="checkbox">
+                                <input type="checkbox" name="aplica_iva" value="1" checked>
+                                <span class="ml-1 is-size-7">Aplica IVA (<?= defined('TASA_IVA') ? TASA_IVA : 16 ?>%)</span>
+                            </label>
+                            <p class="help">El precio de venta se define después en el módulo de Precios.</p>
+                        </div>
+                    </div>
+
+                    <div id="mensajeErrorProducto" class="notification is-danger is-hidden is-light is-small mt-3"></div>
+                </form>
+            </section>
+            <footer class="modal-card-foot is-justify-content-flex-end">
+                <button class="button is-light" type="button" onclick="cerrarModalProducto()">Cancelar</button>
+                <button class="button is-link has-text-weight-bold" type="button" onclick="guardarProductoAjax()" id="btnGuardarProducto">Crear y usar en la compra</button>
+            </footer>
+        </div>
+    </div>
+
     <!-- Inyectar Configuración Global de PHP a JavaScript -->
     <script>
         window.tasaIva = <?= defined('TASA_IVA') ? (float)TASA_IVA : 16.0 ?>;
         window.urlGuardarPresentacion = "<?= urlAccion('movimiento', 'guardarPresentacionAjax') ?>";
+        window.urlCrearProducto = "<?= urlAccion('producto', 'crearAjax') ?>";
     </script>
 
     <!-- Librería SweetAlert2 y Script de Lógica Interactivas -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/tasaBcv.js?v=<?= time() ?>"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
     <script src="assets/js/crearCompra.js?v=<?= time() ?>"></script>
 </body>
 </html>

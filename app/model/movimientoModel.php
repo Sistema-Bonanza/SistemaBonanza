@@ -44,8 +44,8 @@ Class movimientoModel {
 
             // 1. Insertar Cabecera
             $sqlCompra = "INSERT INTO compras 
-                (id_proveedor, numero_factura, fecha_factura, subtotal, tasa_iva, monto_iva, total, id_usuario, estado) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)";
+                (id_proveedor, numero_factura, fecha_factura, subtotal, tasa_iva, monto_iva, total, id_usuario, tasa_cambio, estado) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)";
             $stmtCompra = $this->pdo->prepare($sqlCompra);
             $stmtCompra->execute([
                 $cabecera['id_proveedor'],
@@ -55,7 +55,8 @@ Class movimientoModel {
                 $cabecera['tasa_iva'],
                 $cabecera['monto_iva'],
                 $cabecera['total'],
-                $cabecera['id_usuario']
+                $cabecera['id_usuario'],
+                $cabecera['tasa_cambio'] ?? null
             ]);
             
             $id_compra = $this->pdo->lastInsertId();
@@ -157,6 +158,55 @@ Class movimientoModel {
     }
 
     // ==========================================================
+    // DETALLE DE UNA COMPRA (nota de recepción)
+    // ==========================================================
+
+    /** Cabecera de una compra con proveedor y usuario, o null si no existe. */
+    public function obtenerCompra($idCompra) {
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT c.id_compra, c.numero_factura, c.fecha_factura, c.fecha_registro,
+                        c.subtotal, c.tasa_iva, c.monto_iva, c.total, c.tasa_cambio,
+                        c.observaciones, c.estado, c.fecha_anulacion, c.motivo_anulacion,
+                        p.razon_social, p.rif, p.telefono AS telefono_proveedor, p.direccion AS direccion_proveedor,
+                        u.username AS nombre_usuario
+                   FROM compras c
+                  INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
+                  INNER JOIN usuarios u ON u.id = c.id_usuario
+                  WHERE c.id_compra = :id"
+            );
+            $stmt->bindValue(':id', (int) $idCompra, PDO::PARAM_INT);
+            $stmt->execute();
+            $fila = $stmt->fetch(PDO::FETCH_ASSOC);
+            return $fila ? $fila : null;
+        } catch (PDOException $e) {
+            error_log('MovimientoModel::obtenerCompra -> ' . $e->getMessage());
+            return null;
+        }
+    }
+
+    /** Líneas de una compra en el orden en que se registraron. */
+    public function obtenerDetalleCompra($idCompra) {
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT d.id_detalle, d.tipo_empaque, d.cantidad_empaques, d.unidades_por_empaque,
+                        d.cantidad_unidades, d.costo_por_empaque, d.costo_unitario, d.aplica_iva, d.subtotal_linea,
+                        p.codigo, p.nombre
+                   FROM detalle_compras d
+                  INNER JOIN productos p ON p.id_producto = d.id_producto
+                  WHERE d.id_compra = :id
+                  ORDER BY d.id_detalle ASC"
+            );
+            $stmt->bindValue(':id', (int) $idCompra, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('MovimientoModel::obtenerDetalleCompra -> ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    // ==========================================================
     // FUNCIONES PARA LA BÚSQUEDA Y PAGINACIÓN AJAX
     // ----------------------------------------------------------
     // El listado principal junta DOS orígenes en una sola lista:
@@ -210,6 +260,7 @@ Class movimientoModel {
                                c.fecha_registro AS fecha,
                                c.total AS total,
                                c.estado AS estado,
+                               c.tasa_cambio AS tasa_cambio,
                                CONVERT(p.razon_social USING utf8mb4) COLLATE utf8mb4_general_ci AS entidad,
                                CONVERT(p.rif USING utf8mb4) COLLATE utf8mb4_general_ci AS identificacion,
                                CONVERT(u.username USING utf8mb4) COLLATE utf8mb4_general_ci AS nombre_usuario
@@ -245,6 +296,7 @@ Class movimientoModel {
                                v.fecha_venta AS fecha,
                                v.total AS total,
                                v.estado AS estado,
+                               v.tasa_cambio AS tasa_cambio,
                                CONVERT(cl.nombre_razon_social USING utf8mb4) COLLATE utf8mb4_general_ci AS entidad,
                                CONVERT(CONCAT(cl.tipo_documento, '-', cl.num_documento) USING utf8mb4) COLLATE utf8mb4_general_ci AS identificacion,
                                CONVERT(u2.username USING utf8mb4) COLLATE utf8mb4_general_ci AS nombre_usuario
@@ -257,7 +309,7 @@ Class movimientoModel {
         if (empty($ramas)) {
             // Filtro desconocido: no se muestra nada.
             $ramas[] = "SELECT 'compra' AS tipo, 0 AS id, '' AS documento, NOW() AS fecha, 0 AS total,
-                               1 AS estado, '' AS entidad, '' AS identificacion, '' AS nombre_usuario
+                               1 AS estado, NULL AS tasa_cambio, '' AS entidad, '' AS identificacion, '' AS nombre_usuario
                          FROM DUAL WHERE 1=0";
         }
 
@@ -311,32 +363,38 @@ Class movimientoModel {
 
     public function obtenerMetricasMovimientos() {
         try {
-            // 1. Entradas del mes actual (Hacemos JOIN con productos para obtener el precio)
-            $sqlEntradas = "SELECT 
-                                COALESCE(SUM(m.cantidad), 0) AS total_unds,
-                                COALESCE(SUM(m.cantidad * p.precio_venta), 0.00) AS total_valor
+            // 1. Entradas del mes: unidades que ingresaron por COMPRAS (las reversiones por anulación de
+            //    ventas también son 'entrada' en el kardex, pero no son compras: se excluyen con id_compra).
+            //    El valor es lo que costó la mercancía (subtotal de las compras vigentes), no el precio de venta.
+            $sqlEntradas = "SELECT COALESCE(SUM(m.cantidad), 0) AS total_unds
                             FROM movimientos m
-                            INNER JOIN productos p ON m.id_producto = p.id_producto
-                            WHERE m.tipo = 'entrada' 
-                            AND MONTH(m.fecha) = MONTH(CURRENT_DATE()) 
+                            INNER JOIN compras c ON c.id_compra = m.id_compra AND c.estado = 1
+                            WHERE m.tipo = 'entrada'
+                            AND MONTH(m.fecha) = MONTH(CURRENT_DATE())
                             AND YEAR(m.fecha) = YEAR(CURRENT_DATE())";
-            $stmtE = $this->pdo->query($sqlEntradas);
-            $entradas = $stmtE->fetch(PDO::FETCH_ASSOC);
+            $entradas = $this->pdo->query($sqlEntradas)->fetch(PDO::FETCH_ASSOC);
+            $sqlValor = "SELECT COALESCE(SUM(subtotal), 0.00) AS total_valor
+                         FROM compras
+                         WHERE estado = 1
+                         AND MONTH(fecha_registro) = MONTH(CURRENT_DATE())
+                         AND YEAR(fecha_registro) = YEAR(CURRENT_DATE())";
+            $entradas['total_valor'] = $this->pdo->query($sqlValor)->fetchColumn();
 
-            // 2. Salidas del mes actual
-            $sqlSalidas = "SELECT 
-                            COALESCE(SUM(cantidad), 0) AS total_unds
-                        FROM movimientos 
-                        WHERE tipo = 'salida' 
-                            AND MONTH(fecha) = MONTH(CURRENT_DATE()) 
-                            AND YEAR(fecha) = YEAR(CURRENT_DATE())";
-            $stmtS = $this->pdo->query($sqlSalidas);
-            $salidas = $stmtS->fetch(PDO::FETCH_ASSOC);
+            // 2. Salidas del mes: unidades vendidas en facturas vigentes (las anuladas ya volvieron al inventario).
+            $sqlSalidas = "SELECT COALESCE(SUM(m.cantidad), 0) AS total_unds
+                           FROM movimientos m
+                           INNER JOIN ventas v ON v.id_venta = m.id_venta AND v.estado = 1
+                           WHERE m.tipo = 'salida'
+                           AND MONTH(m.fecha) = MONTH(CURRENT_DATE())
+                           AND YEAR(m.fecha) = YEAR(CURRENT_DATE())";
+            $salidas = $this->pdo->query($sqlSalidas)->fetch(PDO::FETCH_ASSOC);
 
-            // 3. Stock Crítico (Productos activos cuyo stock está en o por debajo del mínimo)
+            // 3. Stock crítico: productos activos por debajo del mínimo que fijó el administrador
+            //    (mínimo 0 = sin alerta; antes contaba como crítico todo producto con stock 0).
             $sqlCriticos = "SELECT COUNT(*) AS total_criticos 
                             FROM productos 
-                            WHERE stock_actual <= stock_minimo 
+                            WHERE stock_minimo > 0
+                            AND stock_actual < stock_minimo 
                             AND estado = 1";
             $stmtC = $this->pdo->query($sqlCriticos);
             $criticos = $stmtC->fetch(PDO::FETCH_ASSOC);

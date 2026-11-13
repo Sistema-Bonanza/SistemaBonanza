@@ -20,6 +20,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     };
 
+    // Dólares -> "Bs 1.234,56" con la tasa BCV del día (o "—" si todavía no hay tasa).
+    const formatearBs = (usd) => {
+        return (window.BonanzaTasa && window.BonanzaTasa.tasa !== null) ? window.BonanzaTasa.formatoBs(usd) : '—';
+    };
+
     // ==========================================
     // CÁLCULO EN TIEMPO REAL DE SUBTOTALES
     // ==========================================
@@ -39,6 +44,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const subtotalLinea = cant * costo;
             
+            const subtotalBs = fila.querySelector('.text-subtotal-bs');
+            if (subtotalBs) { subtotalBs.textContent = subtotalLinea > 0 ? formatearBs(subtotalLinea) : ''; }
+
             if (subtotalText) {
                 subtotalText.textContent = formatearMoneda(subtotalLinea);
                 if (subtotalLinea > 0) {
@@ -59,7 +67,18 @@ document.addEventListener('DOMContentLoaded', () => {
         if (subtotalLabel) subtotalLabel.textContent = formatearMoneda(subtotalAcumulado);
         if (ivaLabel) ivaLabel.textContent = formatearMoneda(montoIva);
         if (grandTotalLabel) grandTotalLabel.textContent = formatearMoneda(grandTotal);
+
+        // Montos en bolívares (tasa BCV del día)
+        const bsSub = document.getElementById('subtotalLabelBs');
+        const bsIva = document.getElementById('ivaLabelBs');
+        const bsTot = document.getElementById('grandTotalLabelBs');
+        if (bsSub) bsSub.textContent = formatearBs(subtotalAcumulado);
+        if (bsIva) bsIva.textContent = formatearBs(montoIva);
+        if (bsTot) bsTot.textContent = formatearBs(grandTotal);
     };
+
+    // Cuando llega o cambia la tasa BCV se vuelven a pintar los montos en Bs.
+    document.addEventListener('tasa:cambio', calcularTotales);
 
     // ==========================================
     // ESCUCHADORES DE LA TABLA (ELIMINAR Y CALCULAR)
@@ -146,6 +165,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const subtotalText = nuevaFila.querySelector('.text-subtotal');
             subtotalText.textContent = '$ 0,00';
             subtotalText.classList.remove('has-text-link');
+            const subtotalBsNuevo = nuevaFila.querySelector('.text-subtotal-bs');
+            if (subtotalBsNuevo) { subtotalBsNuevo.textContent = ''; }
 
             // Pegamos la nueva fila al final de la tabla
             tbodyDetalles.appendChild(nuevaFila);
@@ -342,5 +363,100 @@ async function guardarPresentacionAjax() {
         mensajeError.classList.remove('is-hidden');
     } finally {
         btnGuardar.classList.remove('is-loading');
+    }
+}
+
+// ==========================================
+// MODAL AJAX: CREAR PRODUCTO NUEVO SIN SALIR DE LA COMPRA
+// ==========================================
+function abrirModalProducto() {
+    const modal = document.getElementById('modalProducto');
+    if (modal) modal.classList.add('is-active');
+    const codigo = document.getElementById('np_codigo');
+    if (codigo) codigo.focus();
+}
+
+function cerrarModalProducto() {
+    const modal = document.getElementById('modalProducto');
+    if (modal) modal.classList.remove('is-active');
+
+    const form = document.getElementById('formNuevoProducto');
+    if (form) form.reset();
+
+    const err = document.getElementById('mensajeErrorProducto');
+    if (err) {
+        err.classList.add('is-hidden');
+        err.innerHTML = '';
+    }
+}
+
+async function guardarProductoAjax() {
+    const form = document.getElementById('formNuevoProducto');
+    const btn = document.getElementById('btnGuardarProducto');
+    const err = document.getElementById('mensajeErrorProducto');
+
+    const mostrarErrores = (lista) => {
+        err.innerHTML = '<ul style="margin-left:1.1rem;list-style:disc;">' +
+            lista.map((t) => '<li>' + String(t).replace(/</g, '&lt;') + '</li>').join('') + '</ul>';
+        err.classList.remove('is-hidden');
+    };
+
+    if (!form.reportValidity()) { return; }
+
+    btn.classList.add('is-loading');
+    err.classList.add('is-hidden');
+
+    try {
+        const respuesta = await fetch(window.urlCrearProducto, {
+            method: 'POST',
+            body: new FormData(form),
+            credentials: 'same-origin',
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        });
+        const r = await respuesta.json();
+
+        if (r.login) {
+            window.location.href = r.redirect || 'index.php';
+            return;
+        }
+        if (!r.ok) {
+            mostrarErrores(r.errores || r.mensajes || ['No se pudo crear el producto.']);
+            return;
+        }
+
+        const p = r.producto;
+        const texto = p.codigo + ' - ' + p.nombre;
+
+        // El producto nuevo aparece en todas las listas de la pantalla (filas de la compra y modal de presentaciones).
+        document.querySelectorAll('select.select-producto, #producto_presentacion').forEach((sel) => {
+            const op = document.createElement('option');
+            op.value = p.id;
+            op.textContent = texto;
+            sel.appendChild(op);
+        });
+
+        // Queda elegido en la primera línea que aún no tenga producto (o en la última).
+        const selects = Array.from(document.querySelectorAll('select.select-producto'));
+        const destino = selects.find((sel) => sel.value === '') || selects[selects.length - 1];
+        if (destino) {
+            destino.value = String(p.id);
+            destino.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+
+        cerrarModalProducto();
+
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: r.mensaje || 'Producto creado',
+            text: 'Ya está seleccionado en la compra. Elige su empaque y escribe cantidad y costo.',
+            showConfirmButton: false,
+            timer: 4000
+        });
+    } catch (e) {
+        mostrarErrores(['Error de conexión con el servidor.']);
+    } finally {
+        btn.classList.remove('is-loading');
     }
 }

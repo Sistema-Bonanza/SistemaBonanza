@@ -80,8 +80,79 @@ function redirigir(string $destino): void
         error_log('Redirección bloqueada: ' . $destino);
         $destino = URL_LOGIN;
     }
+
+    // Petición AJAX (fetch): en vez de una cabecera Location -que el navegador seguiría solo y
+    // devolvería la página entera- se responde un JSON con el resultado y el destino. El JavaScript
+    // (assets/js/ajax.js) muestra el mensaje y decide si navega o se queda en el formulario.
+    if (esAjax()) {
+        responderAjaxDesdeFlash($destino);
+    }
+
     header('Location: ' . $destino);
     exit;
+}
+
+/** ¿La petición viene de fetch/XMLHttpRequest de nuestro propio JavaScript? */
+function esAjax(): bool
+{
+    return strtolower((string) ($_SERVER['HTTP_X_REQUESTED_WITH'] ?? '')) === 'xmlhttprequest';
+}
+
+/** Responde JSON y termina. Úsala en acciones que solo sirven peticiones AJAX. */
+function responderJson(array $datos, int $codigo = 200): void
+{
+    while (ob_get_level() > 0) {
+        ob_end_clean();
+    }
+    http_response_code($codigo);
+    header('Content-Type: application/json; charset=UTF-8');
+    echo json_encode($datos, JSON_UNESCAPED_UNICODE | JSON_INVALID_UTF8_SUBSTITUTE | JSON_PARTIAL_OUTPUT_ON_ERROR);
+    exit;
+}
+
+/**
+ * Traduce el "flash" pendiente (el mensaje que el controlador dejó antes de redirigir) a la
+ * respuesta JSON de una petición AJAX:
+ *   ok        true si no fue un error (éxito o aviso)
+ *   tipo      'exito' | 'error' | 'aviso'
+ *   mensajes  lista de textos
+ *   redirect  a dónde llevaría la redirección normal
+ *   login     true si el destino es el login (sesión vencida)
+ * El mensaje se consume aquí: así no se vuelve a mostrar en la página de destino.
+ */
+function responderAjaxDesdeFlash(string $destino): void
+{
+    asegurarSesion();
+    $flash = $_SESSION['flash'] ?? null;
+    unset($_SESSION['flash']);
+
+    $tipo     = is_array($flash) ? (string) ($flash['tipo'] ?? 'aviso') : 'aviso';
+    $mensajes = is_array($flash) ? array_values((array) ($flash['mensajes'] ?? [])) : [];
+    $esLogin  = ($destino === URL_LOGIN);
+
+    if ($esLogin && empty($mensajes)) {
+        $tipo     = 'error';
+        $mensajes = ['Tu sesión expiró. Inicia sesión de nuevo.'];
+    }
+    if (empty($mensajes)) {
+        $tipo     = 'exito';
+        $mensajes = ['Operación realizada.'];
+    }
+
+    $ok = ($tipo !== 'error');
+    if (!$ok) {
+        // El envío fue rechazado y el usuario se queda en el formulario: lo guardado para
+        // repoblarlo no debe aparecer después en otra visita.
+        unset($_SESSION['formulario_previo']);
+    }
+
+    responderJson([
+        'ok'       => $ok,
+        'tipo'     => $tipo,
+        'mensajes' => $mensajes,
+        'redirect' => $destino,
+        'login'    => $esLogin,
+    ], $esLogin ? 401 : 200);
 }
 
 /**

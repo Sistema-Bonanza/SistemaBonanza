@@ -16,7 +16,6 @@ define('METODOS_PAGO', [
     'tarjeta'       => 'Tarjeta',
     'transferencia' => 'Transferencia',
     'divisa'        => 'Divisa',
-    'credito'       => 'Crédito',
 ]);
 define('TIPOS_PAGO_VENTA', METODOS_PAGO + ['mixto' => 'Pago Mixto']);
 

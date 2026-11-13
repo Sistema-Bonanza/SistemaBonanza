@@ -30,6 +30,8 @@ require_once __DIR__ . '/../../config/constantes.php';
 require_once __DIR__ . '/../model/ventaModel.php';
 require_once __DIR__ . '/../model/clienteModel.php';
 require_once __DIR__ . '/../model/productoModel.php';
+require_once __DIR__ . '/../model/precioModel.php';
+require_once __DIR__ . '/../model/tasaModel.php';
 
 class VentaController
 {
@@ -57,6 +59,8 @@ class VentaController
     private $ventaModel;
     private $clienteModel;
     private $productoModel;
+    private $precioModel;
+    private $tasaModel;
 
     public function __construct()
     {
@@ -66,6 +70,8 @@ class VentaController
         $this->ventaModel    = new VentaModel($pdo);
         $this->clienteModel  = new clienteModel($pdo);
         $this->productoModel = new productoModel($pdo);
+        $this->precioModel   = new PrecioModel($pdo);
+        $this->tasaModel     = new TasaModel($pdo);
     }
 
     // =====================================================================
@@ -150,7 +156,14 @@ class VentaController
 
         // Catálogo para el buscador del formulario (se filtra en el navegador, sin recargar).
         // Los productos agotados o sin precio van incluidos: el buscador los muestra, pero no deja agregarlos.
-        $catalogo = array_map(function ($p) {
+        // 'escalas' = precio por cantidad: [[desde_unidades, % descuento], ...]. La pantalla las usa
+        // para mostrar el descuento al instante; el servidor las vuelve a calcular al guardar.
+        $escalasTodas = $this->precioModel->escalasPorProducto();
+        $catalogo = array_map(function ($p) use ($escalasTodas) {
+            $escalas = [];
+            foreach ($escalasTodas[(int) $p['id_producto']] ?? [] as $e) {
+                $escalas[] = [(int) $e['cantidad_minima'], (float) $e['descuento_pct']];
+            }
             return [
                 'id'        => (int) $p['id_producto'],
                 'codigo'    => $p['codigo'],
@@ -159,6 +172,7 @@ class VentaController
                 'precio'    => numeroInput($p['precio_venta']),
                 'stock'     => (int) $p['stock_actual'],
                 'iva'       => (int) $p['aplica_iva'],
+                'escalas'   => $escalas,
             ];
         }, $productos);
 
@@ -274,12 +288,19 @@ class VentaController
 
             $precioTexto = number_format($precio, 2, '.', '');
 
+            // Precio por cantidad: si la cantidad alcanza una escala, el precio unitario baja y,
+            // con él, el monto de la línea y el total de la factura. Lo calcula SIEMPRE el servidor.
+            $descuentoPct   = descuentoPorCantidad($this->precioModel->escalasDeProducto($idProducto), $cantidad);
+            $precioUnitario = ($descuentoPct > 0) ? precioConDescuento($precioTexto, $descuentoPct) : $precioTexto;
+
             $detalles[] = [
                 'id_producto'     => $idProducto,
                 'cantidad'        => $cantidad,
-                'precio_unitario' => $precioTexto,
+                'precio_lista'    => $precioTexto,                                   // lo que vio el usuario / está en la BD
+                'descuento_pct'   => number_format($descuentoPct, 2, '.', ''),
+                'precio_unitario' => $precioUnitario,                                // ya con el descuento
                 'aplica_iva'      => (int) $producto['aplica_iva'],
-                'subtotal_linea'  => subtotalLinea($cantidad, $precioTexto),
+                'subtotal_linea'  => subtotalLinea($cantidad, $precioUnitario),
             ];
         }
 
@@ -316,6 +337,8 @@ class VentaController
             'tipo_pago'     => $tipoPago,
             'observaciones' => $observaciones['valor'],
             'id_usuario'    => usuarioActualId(),   // de la sesión, nunca del formulario
+            // Tasa BCV vigente al registrar (queda guardada para ver la factura en Bs con la tasa de ese día).
+            'tasa_cambio'   => $this->tasaParaGuardar(),
         ];
 
         $resultado = $this->ventaModel->registrarVentaCompleta($cabecera, $detalles, $pagos);
@@ -323,11 +346,16 @@ class VentaController
         if ($resultado['ok'] === true) {
             // Token nuevo: un reenvío del mismo formulario (F5, doble clic) ya no será válido.
             renovarCsrf();
-            setFlash(
-                'exito',
+            $mensajes = [
                 'Factura ' . $resultado['numero_factura'] . ' registrada. El stock ya fue descontado y '
-                . 'la salida quedó anotada en el kardex.'
-            );
+                . 'la salida quedó anotada en el kardex.',
+            ];
+            // Alerta: productos que quedaron por debajo del stock mínimo fijado por el administrador.
+            foreach (($resultado['bajo_minimo'] ?? []) as $b) {
+                $mensajes[] = 'Stock bajo: «' . $b['nombre'] . '» quedó en ' . $b['stock']
+                    . ' unidad(es), por debajo del mínimo (' . $b['minimo'] . ').';
+            }
+            setFlash('exito', $mensajes);
             // Cada venta genera su factura: se abre de una vez. Con "Registrar e imprimir" se lanza la impresión.
             $parametros = ['id' => $resultado['id']];
             if (($_POST['accion'] ?? '') === 'imprimir') {
@@ -397,6 +425,13 @@ class VentaController
     // =====================================================================
     // UTILIDADES PRIVADAS
     // =====================================================================
+
+    /** Tasa BCV de hoy como texto con 4 decimales, o null si no hay (la venta se registra igual, solo sin tasa). */
+    private function tasaParaGuardar(): ?string
+    {
+        $t = $this->tasaModel->obtenerHoy();
+        return ($t['tasa'] !== null) ? number_format((float) $t['tasa'], 4, '.', '') : null;
+    }
 
     /** Traduce el código que devuelve el modelo a un mensaje que el usuario sepa resolver. */
     private function mensajeErrorRegistro(array $resultado): string

@@ -144,7 +144,8 @@ class CategoriaController {
     public function eliminarCategoria() {
         exigirSesion();
         
-        $id = validarEntero($_GET['id'] ?? null, 1);
+        // Llega por POST (con token CSRF, lo verifica el router); el id puede venir en el cuerpo o en la URL.
+        $id = validarEntero($_POST['id'] ?? $_GET['id'] ?? null, 1);
         if ($id === null || !$this->categoriaModel->getById($id)) {
             setFlash('error', 'La categoría no existe o ya fue procesada.');
             redirigir(urlAccion('categoria', 'formcategoria'));

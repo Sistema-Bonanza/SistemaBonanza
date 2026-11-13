@@ -4,7 +4,7 @@
  *   $mov['tipo'] = 'compra'  -> entrada al inventario (módulo de Compras)
  *   $mov['tipo'] = 'venta'   -> salida del inventario  (módulo de Ventas)
  * Columnas que entrega movimientoModel: tipo, id, documento, fecha, total, estado,
- * entidad, identificacion, nombre_usuario.
+ * entidad, identificacion, nombre_usuario, tasa_cambio (BCV usada, puede ser null).
  *
  * @var array $mov
  */
@@ -96,6 +96,12 @@ if ($esVenta) {
     <!-- Col 5: Monto Total -->
     <td class="is-vcentered px-4 has-text-right">
         <p class="has-text-weight-bold mb-0 is-size-5 <?= $anulado ? 'has-text-grey-light' : 'has-text-dark' ?>" <?= $anulado ? 'style="text-decoration: line-through;"' : '' ?>>$<?= number_format((float)($mov['total'] ?? 0), 2, ',', '.') ?></p>
+        <?php $tasaFila = (float) ($mov['tasa_cambio'] ?? 0); ?>
+        <?php if ($tasaFila > 0): ?>
+            <p class="is-size-7 has-text-weight-bold has-text-grey-dark mb-0" title="Tasa BCV de ese día: <?= esc(number_format($tasaFila, 4, ',', '.')) ?>">
+                Bs <?= number_format((float)($mov['total'] ?? 0) * $tasaFila, 2, ',', '.') ?>
+            </p>
+        <?php endif; ?>
         <p class="is-size-7 has-text-grey mt-1"><?= $esVenta ? 'USD · con IVA' : 'USD Base' ?></p>
     </td>
 

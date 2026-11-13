@@ -47,54 +47,49 @@ $urlCsv = $linkCsv;
 <!-- ========================================== -->
 <div class="box mb-5 no-print" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
     <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-        
-        <!-- Bloque Izquierdo: Ícono + Títulos -->
         <div class="is-flex is-align-items-center" style="gap: 1rem;">
-            <div class="is-flex is-align-items-center is-justify-content-center" style="width: 56px; height: 56px; background: rgba(255,255,255,0.12); border-radius: 12px; backdrop-filter: blur(4px); flex-shrink: 0;">
-                <i class="fas fa-cash-register fa-lg has-text-white"></i>
+            <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                <span class="material-symbols-outlined is-size-3 has-text-white">point_of_sale</span>
             </div>
-            
             <div>
                 <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
                     <h1 class="title is-4 has-text-white mb-0">Cierre de Caja Diario</h1>
                     <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span>
-                        <?= esc($textoFecha) ?>
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> <?= esc($textoFecha) ?>
                     </span>
                     <?php if ($cerrado): ?>
                         <span class="tag is-dark is-rounded has-text-weight-bold is-small">
-                            <i class="fas fa-lock mr-1"></i> Cierre efectuado
+                            <span class="material-symbols-outlined is-size-6 mr-1">lock</span> Cierre efectuado
                         </span>
                     <?php endif; ?>
                 </div>
-                <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 750px;">
+                <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                     Resumen integral de lo facturado, cobrado y liquidado durante la jornada por forma de pago, desglose tributario de IVA y conciliación en gaveta.
                 </p>
             </div>
         </div>
-
         <!-- Botones de Acción Superiores (Único bloque visible) -->
         <div class="buttons mb-0">
-            <a href="<?= esc(urlAccion('reporte', 'historialCierres')) ?>" class="button is-white is-outlined font-semibold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4); color: #ffffff;">
-                <span class="icon"><i class="fas fa-clock-rotate-left"></i></span>
+            <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc(urlAccion('reporte', 'historialCierres')) ?>">
+                <span class="icon"><span class="material-symbols-outlined">history</span></span>
                 <span>Historial de cierres</span>
             </a>
-            <a href="<?= esc(urlAccion('reporte', 'index')) ?>" class="button is-white is-outlined font-semibold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4); color: #ffffff;">
-                <span class="icon"><i class="fas fa-arrow-left"></i></span>
+            <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc(urlAccion('reporte', 'index')) ?>">
+                <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                 <span>Todos los reportes</span>
             </a>
             <?php if (!empty($urlCsv)): ?>
-                <a href="<?= esc($urlCsv) ?>" class="button is-white is-outlined font-semibold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4); color: #ffffff;">
-                    <span class="icon"><i class="fas fa-file-csv"></i></span>
+                <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc($urlCsv) ?>">
+                    <span class="icon"><span class="material-symbols-outlined">download</span></span>
                     <span>Exportar CSV</span>
                 </a>
             <?php endif; ?>
-            <button type="button" class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" onclick="window.print()">
-                <span class="icon"><i class="fas fa-print"></i></span>
+            <button class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" type="button" onclick="window.print()">
+                <span class="icon"><span class="material-symbols-outlined">print</span></span>
                 <span>Imprimir Cierre</span>
             </button>
         </div>
-
+    
     </div>
 </div>
 
@@ -159,7 +154,7 @@ $urlCsv = $linkCsv;
 <?php if (abs($cierre['diferencia_pagos']) >= 0.005): ?>
     <div class="notification is-warning is-light mb-5" style="border: 1px solid #fde68a; border-radius: 10px;">
         <span class="icon mr-1"><i class="fas fa-exclamation-triangle"></i></span>
-        <strong>Atención:</strong> La suma de las formas de pago (<?= esc(dinero($cierre['cobrado'] + $cierre['credito'])) ?>) 
+        <strong>Atención:</strong> La suma de las formas de pago (<?= esc(dinero($cierre['cobrado'])) ?>) 
         no coincide con el total vendido (<?= esc(dinero($cierre['total'])) ?>); 
         la diferencia es de <strong><?= esc(dinero(abs($cierre['diferencia_pagos']))) ?></strong>. 
         Revisa las operaciones en la tabla <code>venta_pagos</code>.
@@ -180,7 +175,7 @@ $urlCsv = $linkCsv;
 <div class="columns is-multiline is-variable is-4 mb-5">
     
     <!-- KPI 1: Total Vendido -->
-    <div class="column is-3-desktop is-6-tablet">
+    <div class="column is-4-desktop is-6-tablet">
         <div class="box is-shadowless h-100 p-4" style="border: 1px solid #cbd5e1; border-left: 4px solid #2563eb; border-radius: 12px; background: white;">
             <div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
                 <span class="is-size-7 font-weight-bold is-uppercase has-text-grey">Total Vendido</span>
@@ -198,7 +193,7 @@ $urlCsv = $linkCsv;
     </div>
 
     <!-- KPI 2: Total Cobrado -->
-    <div class="column is-3-desktop is-6-tablet">
+    <div class="column is-4-desktop is-6-tablet">
         <div class="box is-shadowless h-100 p-4" style="border: 1px solid #cbd5e1; border-left: 4px solid #059669; border-radius: 12px; background: white;">
             <div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
                 <span class="is-size-7 font-weight-bold is-uppercase has-text-grey">Total Cobrado</span>
@@ -210,31 +205,13 @@ $urlCsv = $linkCsv;
                 <?= esc(dinero($cierre['cobrado'])) ?>
             </h2>
             <div class="pt-2 is-size-7 has-text-grey" style="border-top: 1px solid #f1f5f9;">
-                <strong class="has-text-success">Ingreso neto en caja (sin crédito)</strong>
+                <strong class="has-text-success">Ingreso neto en caja</strong>
             </div>
         </div>
     </div>
 
-    <!-- KPI 3: Vendido a Crédito -->
-    <div class="column is-3-desktop is-6-tablet">
-        <div class="box is-shadowless h-100 p-4" style="border: 1px solid #cbd5e1; border-left: 4px solid #d97706; border-radius: 12px; background: white;">
-            <div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
-                <span class="is-size-7 font-weight-bold is-uppercase has-text-grey">Vendido a Crédito</span>
-                <div class="p-2 is-flex is-align-items-center is-justify-content-center" style="background: #fffbeb; color: #d97706; border-radius: 8px; width: 36px; height: 36px;">
-                    <i class="fas fa-hand-holding-dollar"></i>
-                </div>
-            </div>
-            <h2 class="title is-3 mb-2 font-mono font-weight-bold has-text-warning-dark">
-                <?= esc(dinero($cierre['credito'])) ?>
-            </h2>
-            <div class="pt-2 is-size-7 has-text-grey" style="border-top: 1px solid #f1f5f9;">
-                <strong class="has-text-warning-dark">Pendiente por cobrar</strong>
-            </div>
-        </div>
-    </div>
-
-    <!-- KPI 4: Ventas Anuladas -->
-    <div class="column is-3-desktop is-6-tablet">
+    <!-- KPI 3: Ventas Anuladas -->
+    <div class="column is-4-desktop is-6-tablet">
         <div class="box is-shadowless h-100 p-4" style="border: 1px solid #cbd5e1; border-left: 4px solid #e11d48; border-radius: 12px; background: white;">
             <div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
                 <span class="is-size-7 font-weight-bold is-uppercase has-text-grey">Ventas Anuladas</span>
@@ -281,7 +258,6 @@ $urlCsv = $linkCsv;
                     </thead>
                     <tbody>
                         <?php foreach (METODOS_PAGO as $clave => $etiqueta): ?>
-                            <?php if ($clave === 'credito') { continue; } ?>
                             <?php $p = $cierre['pagos'][$clave] ?? ['facturas' => 0, 'monto' => 0.0]; ?>
                             <tr class="<?= $p['facturas'] === 0 ? 'has-background-light' : '' ?>">
                                 <td><strong class="has-text-dark"><?= esc($etiqueta) ?></strong></td>
@@ -295,16 +271,6 @@ $urlCsv = $linkCsv;
                             <td class="font-weight-bold has-text-success-dark">TOTAL COBRADO (Entró a caja)</td>
                             <td class="has-text-centered font-weight-bold">-</td>
                             <td class="has-text-right font-mono title is-5 has-text-success mb-0 font-weight-bold"><?= esc(dinero($cierre['cobrado'])) ?></td>
-                        </tr>
-
-                        <!-- Fila Crédito -->
-                        <?php $cr = $cierre['pagos']['credito'] ?? ['facturas' => 0, 'monto' => 0.0]; ?>
-                        <tr style="background: #fffbeb;">
-                            <td class="font-weight-semibold has-text-warning-dark">
-                                <?= esc(METODOS_PAGO['credito'] ?? 'Crédito') ?> <span class="has-text-grey is-size-7">(por cobrar)</span>
-                            </td>
-                            <td class="has-text-centered font-weight-semibold"><?= (int) $cr['facturas'] ?></td>
-                            <td class="has-text-right font-mono font-weight-bold has-text-warning-dark"><?= esc(dinero($cr['monto'])) ?></td>
                         </tr>
 
                         <!-- Fila Total Vendido -->
@@ -501,7 +467,7 @@ $urlCsv = $linkCsv;
             <div class="p-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;">
                 <span class="is-size-7 font-weight-bold is-uppercase has-text-grey-dark block mb-1">2. Cobrado en Efectivo (Sistema):</span>
                 <p class="title is-4 font-mono font-weight-bold has-text-dark mb-0" id="efectivoSistemaTexto" data-centavos="<?= (int) round($sistemaArqueo * 100) ?>"><?= esc(dinero($sistemaArqueo)) ?></p>
-                <p class="is-size-7 has-text-grey mt-1 mb-0">Solo pagos en efectivo (no incluye tarjeta, transferencia, divisa ni crédito).</p>
+                <p class="is-size-7 has-text-grey mt-1 mb-0">Solo pagos en efectivo (no incluye tarjeta, transferencia ni divisa).</p>
             </div>
         </div>
         <div class="column is-4">
@@ -525,7 +491,7 @@ $urlCsv = $linkCsv;
             <p class="p-3" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; white-space: pre-wrap; min-height: 3rem;"><?= ($guardado['observaciones'] ?? '') !== '' ? esc($guardado['observaciones']) : '—' ?></p>
         <?php else: ?>
             <div class="control">
-                <textarea class="textarea is-small" id="observaciones" name="observaciones" rows="2" maxlength="500" placeholder="Escriba aquí si existió algún inconveniente con el punto de venta, notas de crédito o ajustes de cambio..." style="border-color: #cbd5e1;" <?= $hayVentas ? '' : 'disabled' ?>></textarea>
+                <textarea class="textarea is-small" id="observaciones" name="observaciones" rows="2" maxlength="500" placeholder="Escriba aquí si existió algún inconveniente con el punto de venta, ajustes de cambio..." style="border-color: #cbd5e1;" <?= $hayVentas ? '' : 'disabled' ?>></textarea>
             </div>
         <?php endif; ?>
     </div>

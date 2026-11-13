@@ -118,6 +118,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     const form = document.createElement('form');
                     form.method = 'POST';
                     form.action = urlDestino;
+                    form.setAttribute('data-ajax', '');   // lo envía ajax.js con fetch
+                    form.style.display = 'none';
 
                     if (csrfToken) {
                         const inputToken = document.createElement('input');

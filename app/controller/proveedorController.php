@@ -59,7 +59,8 @@ class ProveedorController {
         exigirSesion();
         evitarCache();
 
-        $id = validarEntero($_GET['id'] ?? null, 1);
+        // Llega por POST (con token CSRF, lo verifica el router); el id puede venir en el cuerpo o en la URL.
+        $id = validarEntero($_POST['id'] ?? $_GET['id'] ?? null, 1);
 
         if ($id && $this->proveedorModel->cambiarEstado($id)) {
             setFlash('exito', 'El estado del proveedor fue actualizado correctamente.');

@@ -71,54 +71,50 @@ $urlCsv = $linkCsv;
 <!-- ========================================== -->
 <!-- 1. BANNER HERO ESTANDARIZADO (INVENTARIO) -->
 <!-- ========================================== -->
+<div id="ajax-reporte" data-ajax-lista>
 <div class="box mb-5 no-print" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
     <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-        
-        <!-- Bloque Izquierdo: Ícono + Títulos -->
         <div class="is-flex is-align-items-center" style="gap: 1rem;">
-            <div class="is-flex is-align-items-center is-justify-content-center" style="width: 56px; height: 56px; background: rgba(255,255,255,0.12); border-radius: 12px; backdrop-filter: blur(4px); flex-shrink: 0;">
-                <i class="fas fa-boxes-stacked fa-lg has-text-white"></i>
+            <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                <span class="material-symbols-outlined is-size-3 has-text-white">inventory_2</span>
             </div>
-            
             <div>
                 <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
                     <h1 class="title is-4 has-text-white mb-0">Reporte de Inventario</h1>
                     <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span>
-                        Kardex Actualizado
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Kardex Actualizado
                     </span>
                 </div>
-                <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 800px;">
+                <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                     <?= esc($textoFecha) ?>
                 </p>
             </div>
         </div>
-
         <!-- Botones de Acción Superiores -->
         <div class="buttons mb-0">
-            <a href="<?= esc(urlAccion('reporte', 'index')) ?>" class="button is-white is-outlined font-semibold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4); color: #ffffff;">
-                <span class="icon"><i class="fas fa-arrow-left"></i></span>
+            <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc(urlAccion('reporte', 'index')) ?>">
+                <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                 <span>Todos los reportes</span>
             </a>
             <?php if (!empty($urlCsv)): ?>
-                <a href="<?= esc($urlCsv) ?>" class="button is-white is-outlined font-semibold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4); color: #ffffff;">
-                    <span class="icon"><i class="fas fa-file-csv"></i></span>
+                <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc($urlCsv) ?>">
+                    <span class="icon"><span class="material-symbols-outlined">download</span></span>
                     <span>Exportar CSV</span>
                 </a>
             <?php endif; ?>
-            <button type="button" class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" onclick="window.print()">
-                <span class="icon"><i class="fas fa-print"></i></span>
+            <button class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" type="button" onclick="window.print()">
+                <span class="icon"><span class="material-symbols-outlined">print</span></span>
                 <span>Imprimir Inventario</span>
             </button>
         </div>
-
+    
     </div>
 </div>
 
 <!-- ========================================== -->
 <!-- 2. FILTROS DE CONSULTA -->
 <!-- ========================================== -->
-<form method="get" action="index.php" class="box is-shadowless p-4 mb-5 no-print" style="background: white; border: 1px solid #cbd5e1; border-radius: 12px;">
+<form method="get" action="index.php" data-ajax-filtro="#ajax-reporte" class="box is-shadowless p-4 mb-5 no-print" style="background: white; border: 1px solid #cbd5e1; border-radius: 12px;">
     <input type="hidden" name="controller" value="reporte">
     <input type="hidden" name="action" value="inventario">
 
@@ -412,4 +408,5 @@ $urlCsv = $linkCsv;
     </div>
 </div>
 
+</div><!-- /ajax-reporte: los filtros actualizan el reporte por AJAX -->
 <?php require __DIR__ . '/_fin.php'; ?>

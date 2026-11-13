@@ -12,6 +12,7 @@ $countInactivos = $totalProveedores - $countActivos;
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="<?= tokenCsrf() ?>">
     <title>Gestión de Proveedores · Distribuidora de Alimentos Bonanza</title>
 
     <!-- Librerías CSS -->
@@ -42,7 +43,7 @@ $countInactivos = $totalProveedores - $countActivos;
             <!-- ========================================== -->
             <!-- BANNER HERO -->
             <!-- ========================================== -->
-            <div class="box mb-5" style="background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
                 <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
                         <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
@@ -50,23 +51,23 @@ $countInactivos = $totalProveedores - $countActivos;
                         </div>
                         <div>
                             <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
-                                <span class="tag is-white is-light is-rounded has-text-weight-bold is-small" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white !important;">
-                                    Gestión de Suministros
+                                <h1 class="title is-4 has-text-white mb-0">Gestión de Proveedores</h1>
+                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Gestión de Suministros
                                 </span>
-                                <span class="has-text-white-ter is-size-7">• Directorio de Proveedores</span>
                             </div>
-                            <h1 class="title is-4 has-text-white mb-0 mt-1">Gestión de Proveedores</h1>
                             <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                                 Administra los proveedores del sistema. Solo los administradores pueden realizar cambios.
                             </p>
                         </div>
                     </div>
                     <div class="buttons mb-0">
-                        <a href="index.php?controller=proveedor&action=formcrearproveedor" class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;">
+                        <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="index.php?controller=proveedor&action=formcrearproveedor">
                             <span class="icon"><span class="material-symbols-outlined">add</span></span>
                             <span>Añadir Proveedor</span>
                         </a>
                     </div>
+                
                 </div>
             </div>
 
@@ -286,6 +287,7 @@ $countInactivos = $totalProveedores - $countActivos;
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
     <script src="assets/js/proveedor.js"></script>
 </body>
 </html>

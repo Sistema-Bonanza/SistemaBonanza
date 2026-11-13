@@ -39,7 +39,7 @@ $rol = ucfirst(strtolower($usuario['rol'] ?? 'Operador'));
         <div class="p-5" style="width: 100%; padding-bottom: 4rem !important;">
 
             <!-- BANNER HERO INSTITUCIONAL -->
-            <div class="box mb-6" style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
                 <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
                         <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
@@ -47,24 +47,23 @@ $rol = ucfirst(strtolower($usuario['rol'] ?? 'Operador'));
                         </div>
                         <div>
                             <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
-                                <span class="tag is-white is-light is-rounded has-text-weight-bold is-small" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white !important;">
-                                    Administración
+                                <h1 class="title is-4 has-text-white mb-0">Editar Usuario</h1>
+                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Administración
                                 </span>
-                                <span class="has-text-white-ter is-size-7">• Seguridad y Accesos</span>
                             </div>
-                            <h1 class="title is-4 has-text-white mb-0 mt-1">Editar Usuario</h1>
                             <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                                 Actualiza la información, permisos y credenciales de acceso del usuario en el sistema.
                             </p>
                         </div>
                     </div>
-
-                    <div>
-                        <a href="<?= urlAccion('usuario', 'formusuario') ?>" class="button is-white is-outlined" style="border-radius: 8px; border-color: rgba(255,255,255,0.3); color: white;">
+                    <div class="buttons mb-0">
+                        <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= urlAccion('usuario', 'formusuario') ?>">
                             <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                             <span>Volver al listado</span>
                         </a>
                     </div>
+                
                 </div>
             </div>
 
@@ -90,7 +89,7 @@ $rol = ucfirst(strtolower($usuario['rol'] ?? 'Operador'));
                         </div>
 
                         <!-- Formulario de Edición -->
-                        <form action="<?= urlAccion('usuario', 'editar') ?>" method="POST" id="formEditarUsuario">
+                        <form action="<?= urlAccion('usuario', 'editar') ?>" method="POST" id="formEditarUsuario" data-ajax>
                             
                             <?= campoCsrf() ?>
                             
@@ -210,6 +209,7 @@ $rol = ucfirst(strtolower($usuario['rol'] ?? 'Operador'));
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
     <script src="assets/js/modulos/editarUsuario.js"></script>
 </body>
 </html>

@@ -56,7 +56,7 @@ class CierreCajaModel
     }
 
     /**
-     * Guarda un cierre. $d: dia, facturas, total, cobrado, credito, efectivo_sistema,
+     * Guarda un cierre. $d: dia, facturas, total, cobrado, efectivo_sistema,
      * efectivo_contado, diferencia (decimales como texto "12.34"), observaciones (o null), id_usuario.
      * Devuelve ['ok' => true] | ['ok' => false, 'motivo' => 'duplicado'|'error'].
      * 'duplicado' = ese día ya estaba cerrado (también si dos personas cierran a la vez).
@@ -66,16 +66,15 @@ class CierreCajaModel
         try {
             $stmt = $this->pdo->prepare(
                 "INSERT INTO cierres_caja
-                    (fecha_cierre, facturas, total_vendido, total_cobrado, total_credito,
+                    (fecha_cierre, facturas, total_vendido, total_cobrado,
                      efectivo_sistema, efectivo_contado, diferencia, observaciones, id_usuario)
-                 VALUES (:dia, :facturas, :total, :cobrado, :credito,
+                 VALUES (:dia, :facturas, :total, :cobrado,
                          :sistema, :contado, :diferencia, :obs, :usuario)"
             );
             $stmt->bindValue(':dia',        $d['dia'], PDO::PARAM_STR);
             $stmt->bindValue(':facturas',   (int) $d['facturas'], PDO::PARAM_INT);
             $stmt->bindValue(':total',      $d['total'], PDO::PARAM_STR);
             $stmt->bindValue(':cobrado',    $d['cobrado'], PDO::PARAM_STR);
-            $stmt->bindValue(':credito',    $d['credito'], PDO::PARAM_STR);
             $stmt->bindValue(':sistema',    $d['efectivo_sistema'], PDO::PARAM_STR);
             $stmt->bindValue(':contado',    $d['efectivo_contado'], PDO::PARAM_STR);
             $stmt->bindValue(':diferencia', $d['diferencia'], PDO::PARAM_STR);

@@ -74,7 +74,7 @@ class ReporteController
             [
                 'accion'      => 'historialCierres',   // primero el historial; desde ahí se abre o se hace un cierre
                 'titulo'      => 'Cierre de caja diario',
-                'descripcion' => 'Ventas del día por forma de pago, lo cobrado, lo vendido a crédito y las anulaciones. Con espacio para el conteo y las firmas.',
+                'descripcion' => 'Ventas del día por forma de pago, lo cobrado y las anulaciones. Con espacio para el conteo y las firmas.',
                 'icono'       => 'fa-cash-register',
                 'color'       => 'success',
                 'roles'       => self::ROLES_CAJA,
@@ -260,7 +260,6 @@ class ReporteController
             'facturas'         => $c['facturas'],
             'total'            => deCentavos(aCentavos($c['total'])),
             'cobrado'          => deCentavos(aCentavos($c['cobrado'])),
-            'credito'          => deCentavos(aCentavos($c['credito'])),
             'efectivo_sistema' => deCentavos(aCentavos($efectivoSistema)),
             'efectivo_contado' => $contado,
             'diferencia'       => deCentavos($diferencia),
@@ -543,9 +542,9 @@ class ReporteController
         $filasPago = [];
         foreach (METODOS_PAGO as $clave => $etiqueta) {
             $p = $c['pagos'][$clave] ?? ['facturas' => 0, 'monto' => 0.0];
-            $filasPago[] = [$etiqueta . ($clave === 'credito' ? ' (por cobrar)' : ''), $p['facturas'], $p['monto']];
+            $filasPago[] = [$etiqueta, $p['facturas'], $p['monto']];
         }
-        $filasPago[] = ['TOTAL COBRADO (sin crédito)', null, $c['cobrado']];
+        $filasPago[] = ['TOTAL COBRADO', null, $c['cobrado']];
         $filasPago[] = ['TOTAL VENDIDO (con IVA)', $c['facturas'], $c['total']];
 
         $filasVentas = [];

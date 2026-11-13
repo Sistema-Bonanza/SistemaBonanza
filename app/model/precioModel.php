@@ -520,6 +520,91 @@ class PrecioModel
     }
 
     // =====================================================================
+    // PRECIO POR CANTIDAD (escalas de descuento por volumen)
+    // =====================================================================
+
+    /** Escalas de UN producto, de menor a mayor cantidad. */
+    public function escalasDeProducto(int $idProducto): array
+    {
+        try {
+            $stmt = $this->pdo->prepare(
+                "SELECT cantidad_minima, descuento_pct
+                   FROM precios_cantidad
+                  WHERE id_producto = :id
+                  ORDER BY cantidad_minima ASC"
+            );
+            $stmt->bindValue(':id', $idProducto, PDO::PARAM_INT);
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('PrecioModel::escalasDeProducto -> ' . $e->getMessage());
+            return [];
+        }
+    }
+
+    /** Escalas de TODOS los productos activos: [id_producto => [escala, ...]]. */
+    public function escalasPorProducto(): array
+    {
+        try {
+            $filas = $this->pdo->query(
+                "SELECT pc.id_producto, pc.cantidad_minima, pc.descuento_pct
+                   FROM precios_cantidad pc
+                  INNER JOIN productos p ON p.id_producto = pc.id_producto AND p.estado = 1
+                  ORDER BY pc.id_producto ASC, pc.cantidad_minima ASC"
+            )->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log('PrecioModel::escalasPorProducto -> ' . $e->getMessage());
+            return [];
+        }
+
+        $mapa = [];
+        foreach ($filas as $f) {
+            $mapa[(int) $f['id_producto']][] = [
+                'cantidad_minima' => (int) $f['cantidad_minima'],
+                'descuento_pct'   => $f['descuento_pct'],
+            ];
+        }
+        return $mapa;
+    }
+
+    /**
+     * Reemplaza TODAS las escalas de un producto por la lista recibida (ya validada).
+     * Una transacción: o queda la lista nueva completa o se conserva la anterior.
+     * $escalas: [['cantidad_minima' => int, 'descuento_pct' => '5.00'], ...]
+     */
+    public function reemplazarEscalas(int $idProducto, array $escalas, int $idUsuario): bool
+    {
+        try {
+            $this->pdo->beginTransaction();
+
+            $del = $this->pdo->prepare("DELETE FROM precios_cantidad WHERE id_producto = :id");
+            $del->bindValue(':id', $idProducto, PDO::PARAM_INT);
+            $del->execute();
+
+            $ins = $this->pdo->prepare(
+                "INSERT INTO precios_cantidad (id_producto, cantidad_minima, descuento_pct, id_usuario)
+                 VALUES (:id, :min, :pct, :usr)"
+            );
+            foreach ($escalas as $e) {
+                $ins->bindValue(':id', $idProducto, PDO::PARAM_INT);
+                $ins->bindValue(':min', (int) $e['cantidad_minima'], PDO::PARAM_INT);
+                $ins->bindValue(':pct', $e['descuento_pct']);
+                $ins->bindValue(':usr', $idUsuario, PDO::PARAM_INT);
+                $ins->execute();
+            }
+
+            $this->pdo->commit();
+            return true;
+        } catch (PDOException $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            error_log('PrecioModel::reemplazarEscalas -> ' . $e->getMessage());
+            return false;
+        }
+    }
+
+    // =====================================================================
     // UTILIDAD
     // =====================================================================
 

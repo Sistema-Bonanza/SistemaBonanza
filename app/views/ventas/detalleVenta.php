@@ -142,7 +142,14 @@ foreach ($detalles as $linea) {
                                     <td class="num" style="text-align: left;"><?= esc($linea['codigo']) ?></td>
                                     <td><?= esc($linea['nombre']) ?></td>
                                     <td class="num"><?= (int) $linea['cantidad'] ?></td>
-                                    <td class="num"><?= esc(dinero($linea['precio_unitario'])) ?></td>
+                                    <td class="num">
+                                        <?= esc(dinero($linea['precio_unitario'])) ?>
+                                        <?php if ((float) ($linea['descuento_pct'] ?? 0) > 0): ?>
+                                            <span class="is-block is-size-7 has-text-grey">
+                                                lista <?= esc(dinero($linea['precio_lista'])) ?> · <?= esc(porcentaje((float) $linea['descuento_pct'])) ?> desc. por cantidad
+                                            </span>
+                                        <?php endif; ?>
+                                    </td>
                                     <td class="has-text-centered">
                                         <?= ((int) $linea['aplica_iva'] === 1) ? esc(porcentaje($venta['tasa_iva'], 0)) : 'Exento' ?>
                                     </td>
@@ -166,6 +173,12 @@ foreach ($detalles as $linea) {
                         <span>Total</span>
                         <span><?= esc(dinero($venta['total'])) ?></span>
                     </div>
+                    <?php if (!empty($venta['tasa_cambio']) && (float) $venta['tasa_cambio'] > 0): ?>
+                        <div class="fila-total">
+                            <span class="has-text-grey">Total en bolívares (tasa BCV <?= esc(number_format((float) $venta['tasa_cambio'], 4, ',', '.')) ?>)</span>
+                            <span>Bs <?= esc(number_format((float) $venta['total'] * (float) $venta['tasa_cambio'], 2, ',', '.')) ?></span>
+                        </div>
+                    <?php endif; ?>
                 </div>
 
                 <?php if (!empty($pagos)): ?>
@@ -181,13 +194,6 @@ foreach ($detalles as $linea) {
                                 <?php endforeach; ?>
                             </tbody>
                         </table>
-                        <?php foreach ($pagos as $pago): ?>
-                            <?php if ($pago['metodo'] === 'credito'): ?>
-                                <p class="has-text-right is-size-7 has-text-grey">
-                                    <?= esc(dinero($pago['monto'])) ?> quedaron a crédito (pendientes de cobro).
-                                </p>
-                            <?php endif; ?>
-                        <?php endforeach; ?>
                     </div>
                 <?php endif; ?>
 
@@ -222,7 +228,7 @@ foreach ($detalles as $linea) {
         <div class="modal no-print" id="modalAnular">
             <div class="modal-background" data-modal-cerrar></div>
             <form class="modal-card" method="POST" action="<?= esc(urlAccion('venta', 'anularVenta')) ?>"
-                  data-confirmar="¿Anular la factura <?= esc($numeroFactura) ?>? Esta acción no se puede deshacer.">
+                  data-confirmar="¿Anular la factura <?= esc($numeroFactura) ?>? Esta acción no se puede deshacer." data-ajax>
                 <?= campoCsrf() ?>
                 <input type="hidden" name="id_venta" value="<?= (int) $venta['id_venta'] ?>">
 
@@ -258,5 +264,7 @@ foreach ($detalles as $linea) {
     <?php endif; ?>
 
     <script src="assets/js/venta.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
 </body>
 </html>

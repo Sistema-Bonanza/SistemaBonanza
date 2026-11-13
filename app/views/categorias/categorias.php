@@ -66,11 +66,12 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
                         </div>
                     </div>
                     <div class="buttons mb-0">
-                        <a href="index.php?controller=categoria&action=fromcrearCategoria" class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;">
+                        <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="index.php?controller=categoria&action=fromcrearCategoria">
                             <span class="icon"><span class="material-symbols-outlined">add</span></span>
                             <span>Nueva Categoría</span>
                         </a>
                     </div>
+                
                 </div>
             </div>
 
@@ -264,9 +265,13 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
 
                                                 <?php else: ?>
                                                     <!-- ACCIÓN PERMITIDA: Tiene 0 artículos y está Activa -->
-                                                    <a href="index.php?controller=categoria&action=eliminarCategoria&id=<?= $categoria['id_categoria'] ?? '' ?>" class="button is-small is-danger is-light" title="Inactivar Categoría (Borrado Lógico)" onclick="return confirm('La categoría está vacía. ¿Seguro que deseas inactivarla?');">
-                                                        <span class="icon"><span class="material-symbols-outlined">delete</span></span>
-                                                    </a>
+                                                    <form action="<?= esc(urlAccion('categoria', 'eliminarCategoria')) ?>" method="POST" style="display: inline-block;" data-ajax>
+                                                        <?= campoCsrf() ?>
+                                                        <input type="hidden" name="id" value="<?= (int) ($categoria['id_categoria'] ?? 0) ?>">
+                                                        <button type="button" class="button is-small is-danger is-light" title="Inactivar Categoría (Borrado Lógico)" data-confirmar="La categoría está vacía. ¿Seguro que deseas inactivarla?">
+                                                            <span class="icon"><span class="material-symbols-outlined">delete</span></span>
+                                                        </button>
+                                                    </form>
                                                 <?php endif; ?>
                                             </div>
                                         </td>
@@ -314,6 +319,7 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const cajaFlash = document.getElementById('caja-flash-oculta');

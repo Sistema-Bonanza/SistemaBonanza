@@ -29,31 +29,33 @@
             <div class="max-w-5xl mx-auto w-full space-y-6">
 
                 <!-- 1. BANNER SUPERIOR (HERO) CORREGIDO Y DEFINITIVO -->
-                <div class="box mb-5 is-shadowless" style="background: linear-gradient(to right, #003ea8, #004ac6, #2563eb); position: relative; overflow: hidden;">
-                <!-- Efecto de brillo de fondo -->
-                <div style="position: absolute; top: -30px; right: -30px; width: 250px; height: 250px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(40px); pointer-events: none;"></div>
-                
-                <div class="is-flex is-flex-direction-column-touch is-align-items-center-desktop is-justify-content-space-between" style="position: relative; z-index: 10; gap: 1rem;">
-                    <div class="is-flex is-align-items-center" style="gap: 1rem;">
-                        <div style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
-                            <span class="material-symbols-outlined has-text-white is-size-4" style="color: white !important;">edit_note</span>
-                        </div>
-                        <div>
-                            <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
-                                <h1 class="title is-4 has-text-white mb-0">Editar Producto</h1>
-                                <span class="tag is-white is-light is-rounded has-text-weight-bold is-small">ID: <?= htmlspecialchars($producto['id_producto'] ?? '') ?></span>
+                <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+                    <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
+                        <div class="is-flex is-align-items-center" style="gap: 1rem;">
+                            <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                                <span class="material-symbols-outlined is-size-3 has-text-white">edit_note</span>
                             </div>
-                            <p class="has-text-white-ter is-size-7 mt-1">Modifica la información de identidad del artículo maestro seleccionado en el sistema de inventario.</p>
+                            <div>
+                                <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
+                                    <h1 class="title is-4 has-text-white mb-0">Editar Producto</h1>
+                                    <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> ID: <?= htmlspecialchars($producto['id_producto'] ?? '') ?>
+                                    </span>
+                                </div>
+                                <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
+                                    Modifica la información de identidad del artículo maestro seleccionado en el sistema de inventario.
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        <button class="button is-white is-outlined has-text-white" onclick="window.history.back()" type="button">
-                            <span class="icon"><span class="material-symbols-outlined">keyboard_backspace</span></span>
-                            <span>Regresar</span>
-                        </button>
+                        <div class="buttons mb-0">
+                            <button class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" onclick="window.history.back()" type="button">
+                                <span class="icon"><span class="material-symbols-outlined">keyboard_backspace</span></span>
+                                <span>Regresar</span>
+                            </button>
+                        </div>
+                    
                     </div>
                 </div>
-            </div>
 
             </div>
 
@@ -80,7 +82,7 @@
                             </div>
 
                             <!-- Formulario Principal -->
-                            <form action="index.php?controller=producto&action=actualizarProducto" method="POST" id="editProductForm">
+                            <form action="index.php?controller=producto&action=actualizarProducto" method="POST" id="editProductForm" data-ajax>
 
                                 <!-- ID Oculto -->
                                 <input type="hidden" name="id_producto" value="<?= htmlspecialchars($producto['id_producto'] ?? '') ?>">
@@ -152,6 +154,61 @@
                                     </div>
                                 </div>
 
+                                <!-- Stock mínimo (alerta de reposición) -->
+                                <div class="box is-shadowless mt-4" style="background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px;">
+                                    <div class="columns is-vcentered is-mobile is-multiline">
+                                        <div class="column is-12-mobile is-7-tablet">
+                                            <strong>Stock mínimo</strong>
+                                            <p class="is-size-7 has-text-grey mt-1">
+                                                Si las existencias bajan de esta cantidad, la tabla de productos marca el artículo en rojo y avisa con una alerta.
+                                                Usa 0 para no recibir alerta.
+                                            </p>
+                                        </div>
+                                        <div class="column is-12-mobile is-5-tablet">
+                                            <div class="field has-addons">
+                                                <div class="control is-expanded">
+                                                    <input class="input has-text-right" type="number" id="stock_minimo" name="stock_minimo"
+                                                           min="0" max="1000000" step="1" inputmode="numeric"
+                                                           value="<?= (int) ($producto['stock_minimo'] ?? 0) ?>">
+                                                </div>
+                                                <div class="control"><span class="button is-static">unidades</span></div>
+                                            </div>
+                                            <p class="help">Existencias actuales: <strong><?= (int) ($producto['stock_actual'] ?? 0) ?></strong></p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Unidades del producto (cómo viene empacado) -->
+                                <div class="box is-shadowless mt-4" style="background-color: #f8f9ff; border: 1px solid #e2e8f0; border-radius: 8px;">
+                                    <strong>Unidad de manejo</strong>
+                                    <p class="is-size-7 has-text-grey mt-1 mb-3">Cómo se presenta el producto y cuántas unidades trae cada empaque (ej.: CAJA de 12 unidades).</p>
+                                    <div class="columns is-mobile is-multiline">
+                                        <div class="column is-12-mobile is-6-tablet">
+                                            <div class="field">
+                                                <label class="label is-small" for="unidad_manejo">Presentación</label>
+                                                <div class="control">
+                                                    <input class="input" type="text" id="unidad_manejo" name="unidad_manejo" maxlength="30"
+                                                           list="sugerenciasUnidad" placeholder="UNIDAD, CAJA, PAQUETE..."
+                                                           value="<?= htmlspecialchars($producto['unidad_manejo'] ?? 'UNIDAD') ?>">
+                                                    <datalist id="sugerenciasUnidad">
+                                                        <option value="UNIDAD"><option value="PAQUETE"><option value="CAJA"><option value="BULTO"><option value="DOCENA"><option value="PACA">
+                                                    </datalist>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="column is-12-mobile is-6-tablet">
+                                            <div class="field">
+                                                <label class="label is-small" for="unidades_por_empaque">Unidades por empaque</label>
+                                                <div class="control">
+                                                    <input class="input" type="number" id="unidades_por_empaque" name="unidades_por_empaque"
+                                                           min="1" max="100000" step="1" inputmode="numeric"
+                                                           value="<?= (int) ($producto['unidades_por_empaque'] ?? 1) ?>">
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 <hr style="background-color: #e2e8f0; height: 1px; border: none; margin: 2rem 0;" />
 
                                 <!-- Botones inferiores -->
@@ -170,7 +227,7 @@
                                 <!-- Botón de desactivación sutil -->
                                 <div class="mt-4 pt-3 is-flex is-justify-content-space-between is-align-items-center" style="border-top: 1px dashed #e2e8f0;">
                                     <span class="is-size-7 has-text-grey">¿Este producto ha sido descontinuado en la planta?</span>
-                                    <button class="button is-small is-danger is-light" id="btnDeactivate" type="button">
+                                    <button class="button is-small is-danger is-light" id="btnDeactivate" type="button" data-csrf="<?= htmlspecialchars(tokenCsrf()) ?>">
                                         <span class="icon"><span class="material-symbols-outlined is-size-6">do_not_disturb_on</span></span>
                                         <span>Desactivar producto del catálogo</span>
                                     </button>
@@ -195,11 +252,16 @@
                                 </div>
                                 <div class="is-flex is-justify-content-space-between py-1 px-2 has-background-white-ter rounded">
                                     <span class="has-text-grey">Stock en Piso:</span>
-                                    <strong class="has-text-link"><?= htmlspecialchars($producto['stock_actual'] ?? '0') ?> UND</strong>
+                                    <?php $bajoMin = ((int) ($producto['stock_minimo'] ?? 0)) > 0 && ((int) $producto['stock_actual']) < ((int) $producto['stock_minimo']); ?>
+                                    <strong class="<?= $bajoMin ? 'has-text-danger' : 'has-text-link' ?>"><?= (int) ($producto['stock_actual'] ?? 0) ?> UND</strong>
+                                </div>
+                                <div class="is-flex is-justify-content-space-between py-1 px-2 has-background-white-ter rounded">
+                                    <span class="has-text-grey">Stock mínimo:</span>
+                                    <strong id="resumenStockMinimo"><?= (int) ($producto['stock_minimo'] ?? 0) ?> UND</strong>
                                 </div>
                                 <div class="is-flex is-justify-content-space-between py-1 px-2 has-background-white-ter rounded">
                                     <span class="has-text-grey">Unidad de Manejo:</span>
-                                    <strong>Paquete  12 Unidades</strong>
+                                    <strong id="resumenUnidadManejo"><?= htmlspecialchars(($producto['unidad_manejo'] ?? 'UNIDAD')) ?> · <?= (int) ($producto['unidades_por_empaque'] ?? 1) ?> <?= ((int) ($producto['unidades_por_empaque'] ?? 1)) === 1 ? 'unidad' : 'unidades' ?></strong>
                                 </div>
                             </div>
 
@@ -216,6 +278,8 @@
         </div>
         
         <!-- Cargar script desacoplado -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="assets/js/ajax.js"></script>
         <script src="assets/js/editar-producto.js"></script>
     </main>
 

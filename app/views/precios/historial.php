@@ -61,37 +61,35 @@ function mostrarVariacion($anterior, $nuevo): string
             <!-- ========================================== -->
             <!-- BANNER HERO (Alto contraste) -->
             <!-- ========================================== -->
-            <div class="box mb-5" style="background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%); border-radius: 12px; border: none; overflow: hidden; position: relative; box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.2);">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
                 <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-                    
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
-                        <div class="is-flex is-align-items-center is-justify-content-center has-text-white" style="width: 60px; height: 60px; background: rgba(255,255,255,0.25); border-radius: 12px; backdrop-filter: blur(4px);">
-                            <span class="material-symbols-outlined is-size-2">history</span>
+                        <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                            <span class="material-symbols-outlined is-size-3 has-text-white">history</span>
                         </div>
                         <div>
                             <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
-                                <span class="tag is-white is-rounded has-text-weight-bold is-small" style="background: rgba(255,255,255,0.2); color: white !important;">
-                                    Auditoría y Trazabilidad
+                                <h1 class="title is-4 has-text-white mb-0">Historial de Precios</h1>
+                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Auditoría y Trazabilidad
                                 </span>
-                                <span class="has-text-white is-size-7 font-weight-medium">• Finanzas y Comercial</span>
                             </div>
-                            <h1 class="title is-4 has-text-white mb-0 mt-1">Historial de Precios</h1>
-                            <p class="has-text-white-bis is-size-7 mt-1" style="max-width: 700px; opacity: 0.95;">
+                            <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                                 Auditoría de cada cambio de costo y de precio de venta: qué cambió, cuándo y quién lo hizo.
                             </p>
                         </div>
                     </div>
-
-                    <div>
-                        <a href="<?= esc(urlAccion('precio', 'tablaPrecios')) ?>" class="button is-white has-text-weight-bold" style="border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div class="buttons mb-0">
+                        <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc(urlAccion('precio', 'tablaPrecios')) ?>">
                             <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                             <span>Volver a la lista de precios</span>
                         </a>
                     </div>
-
+                
                 </div>
             </div>
 
+            <div id="ajax-historial" data-ajax-lista>
             <!-- ========================================== -->
             <!-- TARJETA DE FILTROS (Alto contraste) -->
             <!-- ========================================== -->
@@ -109,7 +107,7 @@ function mostrarVariacion($anterior, $nuevo): string
                     </div>
                 </div>
 
-                <form method="GET" action="index.php">
+                <form method="GET" action="index.php" data-ajax-filtro="#ajax-historial">
                     <input type="hidden" name="controller" value="precio">
                     <input type="hidden" name="action" value="historial">
 
@@ -300,6 +298,8 @@ function mostrarVariacion($anterior, $nuevo): string
 
             </div>
 
+            </div><!-- /ajax-historial: filtros y tabla se actualizan por AJAX -->
+
             <!-- ========================================== -->
             <!-- TARJETAS DE RESUMEN OPERATIVO (Inferiores con contraste) -->
             <!-- ========================================== -->
@@ -378,6 +378,7 @@ function mostrarVariacion($anterior, $nuevo): string
 
     <!-- Librería SweetAlert2 y Script JS del Módulo Historial -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
     <script src="assets/js/modulos/historialPrecios.js?v=<?= time() ?>"></script>
 </body>
 </html>

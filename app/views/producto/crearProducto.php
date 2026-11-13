@@ -27,29 +27,31 @@
         <div class="p-5" style="width: 100%;">
             
             <!-- 1. BANNER PRINCIPAL (HERO) -->
-            <div class="box mb-5 is-shadowless" style="background: linear-gradient(to right, #003ea8, #004ac6, #2563eb); position: relative; overflow: hidden;">
-                <!-- Efecto de brillo de fondo -->
-                <div style="position: absolute; top: -30px; right: -30px; width: 250px; height: 250px; background: rgba(255,255,255,0.1); border-radius: 50%; filter: blur(40px); pointer-events: none;"></div>
-                
-                <div class="is-flex is-flex-direction-column-touch is-align-items-center-desktop is-justify-content-space-between" style="position: relative; z-index: 10; gap: 1rem;">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+                <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
-                        <div style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px; background: rgba(255,255,255,0.2); backdrop-filter: blur(10px);">
-                            <span class="material-symbols-outlined has-text-white is-size-4">inventory</span>
+                        <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                            <span class="material-symbols-outlined is-size-3 has-text-white">inventory</span>
                         </div>
                         <div>
                             <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
                                 <h1 class="title is-4 has-text-white mb-0">Registrar Nuevo Producto</h1>
-                                <span class="tag is-white is-light is-rounded has-text-weight-bold is-small">Catálogo 2026</span>
+                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Catálogo 2026
+                                </span>
                             </div>
-                            <p class="has-text-white-ter is-size-7 mt-1">Completa el formulario para incorporar mercancía estandarizada al catálogo general de inventario.</p>
+                            <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
+                                Completa el formulario para incorporar mercancía estandarizada al catálogo general de inventario.
+                            </p>
                         </div>
                     </div>
-                    <div>
-                        <button class="button is-white is-outlined has-text-white" onclick="window.history.back()" type="button">
+                    <div class="buttons mb-0">
+                        <button class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" onclick="window.history.back()" type="button">
                             <span class="icon"><span class="material-symbols-outlined">keyboard_backspace</span></span>
                             <span>Regresar</span>
                         </button>
                     </div>
+                
                 </div>
             </div>
 
@@ -70,7 +72,8 @@
                         </div>
 
                         <!-- Formulario de Registro (Apunta a tu controlador) -->
-                        <form action="index.php?controller=producto&action=guardar" method="POST" class="p-5">
+                        <form action="<?= esc(urlAccion('producto', 'guardarProducto')) ?>" method="POST" class="p-5" data-ajax>
+                            <?= campoCsrf() ?>
                             
                             <!-- SECCIÓN 1: Datos Indispensables -->
                             <div class="mb-5">
@@ -153,6 +156,48 @@
 
                             <hr style="background-color: #e2e8f0; height: 1px; border: none;" />
 
+                            <!-- 3. INVENTARIO: stock mínimo y unidad de manejo -->
+                            <div class="mb-5">
+                                <div class="is-flex is-align-items-center mb-4" style="gap: 0.5rem;">
+                                    <span style="width: 6px; height: 16px; background-color: #f59e0b; border-radius: 4px;"></span>
+                                    <h3 class="title is-6 mb-0" style="font-size: 15px; text-transform: uppercase;">3. Inventario</h3>
+                                </div>
+                                <div class="columns is-multiline">
+                                    <div class="column is-12-mobile is-4-tablet">
+                                        <div class="field">
+                                            <label class="label is-small" for="stock_minimo">Stock mínimo</label>
+                                            <div class="control">
+                                                <input class="input" type="number" id="stock_minimo" name="stock_minimo" min="0" max="1000000" step="1" value="0" inputmode="numeric">
+                                            </div>
+                                            <p class="help">Por debajo de esta cantidad el producto se marca en rojo. 0 = sin alerta.</p>
+                                        </div>
+                                    </div>
+                                    <div class="column is-12-mobile is-4-tablet">
+                                        <div class="field">
+                                            <label class="label is-small" for="unidad_manejo">Unidad de manejo</label>
+                                            <div class="control">
+                                                <input class="input" type="text" id="unidad_manejo" name="unidad_manejo" maxlength="30" value="UNIDAD" list="sugerenciasUnidad">
+                                                <datalist id="sugerenciasUnidad">
+                                                    <option value="UNIDAD"><option value="PAQUETE"><option value="CAJA"><option value="BULTO"><option value="DOCENA"><option value="PACA">
+                                                </datalist>
+                                            </div>
+                                            <p class="help">Cómo viene empacado: UNIDAD, CAJA, PAQUETE...</p>
+                                        </div>
+                                    </div>
+                                    <div class="column is-12-mobile is-4-tablet">
+                                        <div class="field">
+                                            <label class="label is-small" for="unidades_por_empaque">Unidades por empaque</label>
+                                            <div class="control">
+                                                <input class="input" type="number" id="unidades_por_empaque" name="unidades_por_empaque" min="1" max="100000" step="1" value="1" inputmode="numeric">
+                                            </div>
+                                            <p class="help">Cuántas unidades trae cada empaque.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr style="background-color: #e2e8f0; height: 1px; border: none;" />
+
                             <!-- BOTONES DE ACCIÓN (FOOTER DEL FORMULARIO) -->
                             <div class="is-flex is-justify-content-space-between is-align-items-center">
                                 <button class="button is-light" type="reset">Limpiar Campos</button>
@@ -215,6 +260,8 @@
         </div>
         
         <!-- Cargar script desacoplado -->
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+        <script src="assets/js/ajax.js"></script>
         <script src="assets/js/crear-producto.js"></script>
     </main>
 

@@ -119,21 +119,51 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModal();
     });
 
+    // --- EXPORTAR: lo que se ve en la tabla (respeta el buscador y el filtro) ---
     document.getElementById('btn-export-csv')?.addEventListener('click', function() {
-        const headers = ['Producto', 'Codigo', 'Costo', 'Stock', 'Estado'];
-        const rowsData = [
-            ['Chimo Tapa Amarilla', '006', '$0.00', '120', 'Activo'],
-            ['Tabaco Kijih', '004', '$0.00', '650', 'Activo'],
-            ['Cigarro Belmont', '002', '$0.00', '200', 'Activo']
-        ];
-        
-        let csvContent = 'data:text/csv;charset=utf-8,' + headers.join(',') + '\n' + rowsData.map(e => e.join(',')).join('\n');
-        const encodedUri = encodeURI(csvContent);
-        const link = document.createElement('a');
-        link.setAttribute('href', encodedUri);
-        link.setAttribute('download', 'catalogo_productos_bonanza.csv');
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
+        const comillas = (t) => '"' + String(t).replace(/"/g, '""') + '"';
+        const headers = ['Producto', 'Codigo', 'Costo', 'Precio venta', 'Precio por cantidad', 'Stock', 'Stock minimo'];
+        const filas = [];
+        document.querySelectorAll('.product-row').forEach(row => {
+            if (row.style.display === 'none') { return; }
+            const celdas = row.querySelectorAll('td');
+            const escalas = Array.from(row.querySelectorAll('.tags .tag')).map(t => t.textContent.trim().replace(/\s+/g, ' ')).join(' | ');
+            filas.push([
+                row.getAttribute('data-name'),
+                row.getAttribute('data-code'),
+                celdas[2].textContent.trim(),
+                celdas[3].textContent.trim(),
+                escalas,
+                row.getAttribute('data-stock'),
+                row.getAttribute('data-minimo')
+            ].map(comillas).join(','));
+        });
+        const csv = '\uFEFF' + headers.map(comillas).join(',') + '\n' + filas.join('\n');
+        const enlace = document.createElement('a');
+        enlace.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+        enlace.download = 'catalogo_productos_bonanza.csv';
+        document.body.appendChild(enlace);
+        enlace.click();
+        document.body.removeChild(enlace);
     });
+
+    // --- ALERTA DE STOCK MÍNIMO (SweetAlert) ---
+    // PHP deja en window.productosBajoMinimo los productos cuyo stock está por debajo del mínimo
+    // que fijó el administrador (se edita en "Editar producto"). Esos mismos productos van en rojo en la tabla.
+    const bajo = Array.isArray(window.productosBajoMinimo) ? window.productosBajoMinimo : [];
+    if (bajo.length > 0 && typeof Swal !== 'undefined') {
+        const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const visibles = bajo.slice(0, 8).map(p =>
+            '<li><strong>' + esc(p.nombre) + '</strong> <span style="color:#64748b">(' + esc(p.codigo) + ')</span>: ' +
+            '<span style="color:#dc2626;font-weight:700">' + p.stock + '</span> de mín. ' + p.minimo + '</li>'
+        ).join('');
+        const resto = bajo.length > 8 ? '<p style="margin-top:8px;color:#64748b">y ' + (bajo.length - 8) + ' más (marcados en rojo en la tabla)</p>' : '';
+        Swal.fire({
+            icon: 'warning',
+            title: bajo.length === 1 ? '1 producto bajo el stock mínimo' : bajo.length + ' productos bajo el stock mínimo',
+            html: '<ul style="text-align:left;margin:0 0 0 1.2rem;list-style:disc;">' + visibles + '</ul>' + resto,
+            confirmButtonText: 'Entendido',
+            confirmButtonColor: '#dc2626'
+        });
+    }
 });

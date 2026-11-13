@@ -41,7 +41,6 @@ require_once __DIR__ . '/../helpers/formato.php';
 class ReporteModel
 {
     /** Forma de pago que NO entra a la caja: es dinero por cobrar. */
-    private const METODO_CREDITO = 'credito';
 
     /**
      * Subconsulta: último costo unitario de compra del producto (compras NO anuladas).
@@ -126,8 +125,7 @@ class ReporteModel
      *   dia, facturas, unidades
      *   subtotal, iva, total             ventas registradas (total = lo vendido, con IVA)
      *   pagos[metodo] = [facturas, monto]  desglose por forma de pago (solo las usadas)
-     *   cobrado                          lo que entró de verdad: todo menos el crédito
-     *   credito                          vendido a crédito: queda POR COBRAR
+     *   cobrado                          lo que entró de verdad: la suma de todas las formas de pago
      *   diferencia_pagos                 total - suma de pagos; debe ser 0 (si no, hay ventas sin desglose)
      *   anuladas[cantidad, total]        ventas de ese día que se anularon (no suman)
      *   anulaciones_previas[cantidad, total]  ventas de días ANTERIORES anuladas ese día
@@ -172,15 +170,10 @@ class ReporteModel
 
         $pagos = [];
         $centavosCobrado = 0;
-        $centavosCredito = 0;
         foreach ($filasPago as $f) {
             $c = aCentavos($f['monto']);
             $pagos[$f['metodo']] = ['facturas' => (int) $f['facturas'], 'monto' => $this->dec($c)];
-            if ($f['metodo'] === self::METODO_CREDITO) {
-                $centavosCredito += $c;
-            } else {
-                $centavosCobrado += $c;
-            }
+            $centavosCobrado += $c;
         }
         $centavosTotal = aCentavos($t['total']);
 
@@ -250,8 +243,7 @@ class ReporteModel
             'total'               => $this->dec($centavosTotal),
             'pagos'               => $pagos,
             'cobrado'             => $this->dec($centavosCobrado),
-            'credito'             => $this->dec($centavosCredito),
-            'diferencia_pagos'    => $this->dec($centavosTotal - $centavosCobrado - $centavosCredito),
+            'diferencia_pagos'    => $this->dec($centavosTotal - $centavosCobrado),
             'anuladas'            => [
                 'cantidad' => (int) $anuladas['cantidad'],
                 'total'    => $this->dec(aCentavos($anuladas['total'])),
@@ -382,8 +374,8 @@ class ReporteModel
 
     /**
      * Una página del historial de cierres, del más reciente al más antiguo.
-     * Cada fila: dia, facturas, total, cobrado, credito, anuladas (cantidad), usuarios.
-     * Mismas reglas del cierre diario: solo las ventas REGISTRADAS suman; el crédito no es "cobrado".
+     * Cada fila: dia, facturas, total, cobrado, anuladas (cantidad), usuarios.
+     * Mismas reglas del cierre diario: solo las ventas REGISTRADAS suman.
      */
     public function historialCierres(?string $desde, ?string $hasta, string $q, int $limite, int $desplazamiento): array
     {
@@ -413,21 +405,18 @@ class ReporteModel
             return [];
         }
 
-        // Cobrado y crédito de esos días (una sola consulta para toda la página).
+        // Cobrado de esos días (una sola consulta para toda la página).
         $primero = end($dias)['dia'];     // el más antiguo de la página
         $ultimo  = reset($dias)['dia'];   // el más reciente de la página
         $pagos = $this->consultar(
             "SELECT DATE(v.fecha_venta) AS dia,
-                    COALESCE(SUM(CASE WHEN pg.metodo = :credito THEN pg.monto ELSE 0 END), 0)  AS credito,
-                    COALESCE(SUM(CASE WHEN pg.metodo <> :no_credito THEN pg.monto ELSE 0 END), 0) AS cobrado
+                    COALESCE(SUM(pg.monto), 0) AS cobrado
                FROM venta_pagos pg
               INNER JOIN ventas v ON v.id_venta = pg.id_venta
               WHERE v.estado = 1
                 AND v.fecha_venta >= :ini AND v.fecha_venta < :fin
               GROUP BY DATE(v.fecha_venta)",
             [
-                ':credito'    => self::METODO_CREDITO,
-                ':no_credito' => self::METODO_CREDITO,
                 ':ini'        => $primero,
                 ':fin'        => $this->siguienteDia($ultimo),
             ]
@@ -439,13 +428,12 @@ class ReporteModel
 
         $filas = [];
         foreach ($dias as $d) {
-            $pg = $porDia[$d['dia']] ?? ['credito' => 0, 'cobrado' => 0];
+            $pg = $porDia[$d['dia']] ?? ['cobrado' => 0];
             $filas[] = [
                 'dia'           => $d['dia'],
                 'facturas'      => (int) $d['facturas'],
                 'total'         => $this->dec(aCentavos($d['total'])),
                 'cobrado'       => $this->dec(aCentavos($pg['cobrado'])),
-                'credito'       => $this->dec(aCentavos($pg['credito'])),
                 'anuladas'      => (int) $d['anuladas'],
                 'total_anulado' => $this->dec(aCentavos($d['total_anulado'])),
                 'usuarios'      => (int) $d['usuarios'],

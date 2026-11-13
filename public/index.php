@@ -168,6 +168,10 @@ $rutas = [
             'formcrear'          => ruta('GET',  ROLES_ADMIN),
             'formeditar'         => ruta('GET',  ROLES_ADMIN),
             'guardarproducto'    => ruta('POST', ROLES_ADMIN, false), // LEGADO: sin token
+            // AJAX: crear un producto desde "Registrar compra" sin salir del formulario.
+            // Decisión de negocio: se deja a ROLES_TODOS porque quien registra compras (operador)
+            // necesita poder dar de alta el producto que acaba de llegar. Cámbialo a ROLES_ADMIN si no.
+            'crearajax'          => ruta('POST', ROLES_TODOS, true, true),
             'actualizarproducto' => ruta('POST', ROLES_ADMIN, false), // LEGADO: sin token
             'eliminarproducto'   => ruta('POST', ROLES_ADMIN),        // LEGADO: enlace GET. Convertir a POST + token
         ],
@@ -182,6 +186,7 @@ $rutas = [
             'fromeditarcategoria' => ruta('GET',  ROLES_ADMIN),
             'guardarcategoria'    => ruta('POST', ROLES_ADMIN, false),  // LEGADO: sin token
             'actualizarcategoria' => ruta('POST', ROLES_ADMIN, false),  // LEGADO: sin token
+            'eliminarcategoria'   => ruta('POST', ROLES_ADMIN),         // inactivar (AJAX, con token). Antes era un enlace GET sin ruta
         ],
     ],
 
@@ -194,7 +199,7 @@ $rutas = [
             'formedit'           => ruta('GET',  ROLES_ADMIN),
             'guardar'            => ruta('POST', ROLES_ADMIN, false), // LEGADO: sin token
             'actualizar'         => ruta('POST', ROLES_ADMIN, false), // LEGADO: sin token
-            // La vista proveedor.php enlaza a 'eliminar', pero el controlador no tiene ese método.
+            'cambiarestado'      => ruta('POST', ROLES_ADMIN),        // inactivar / reactivar (AJAX, con token). Antes era un enlace GET sin ruta
         ],
     ],
 
@@ -221,8 +226,17 @@ $rutas = [
             // Si sí, cambia ROLES_ADMIN por ROLES_TODOS.
             'guardarpresentacionajax' => ruta('POST', ROLES_TODOS, true, true),     // fetch: errores en JSON
             'buscarajax' => ruta('GET', ROLES_TODOS, true, true),
-            // Descomenta cuando exista el método en el controlador (la vista ya lo enlaza):
-            // 'verdetallecompra'     => ruta('GET',  ROLES_TODOS),
+            'verdetallecompra'        => ruta('GET',  ROLES_TODOS),                 // nota de recepción de una compra
+        ],
+    ],
+
+    // Tasa de cambio oficial (BCV) del día, para mostrar montos en Bs y en dólares.
+    'tasa' => [
+        'archivo'  => 'TasaController.php',
+        'clase'    => 'TasaController',
+        'acciones' => [
+            'obtener'       => ruta('GET',  ROLES_TODOS, true, true),   // AJAX: devuelve la tasa de hoy (la consulta si no está guardada)
+            'guardarmanual' => ruta('POST', ROLES_ADMIN, true, true),   // AJAX: el admin fija la tasa a mano si el servicio externo falla
         ],
     ],
 
@@ -245,6 +259,7 @@ $rutas = [
             'tablaprecios'      => ruta('GET',  ROLES_ADMIN),
             'formeditar'        => ruta('GET',  ROLES_ADMIN),
             'guardarprecio'     => ruta('POST', ROLES_ADMIN),
+            'guardarescalas'    => ruta('POST', ROLES_ADMIN, true, true),   // AJAX: precio por cantidad
             'historial'         => ruta('GET',  ROLES_ADMIN),
             'formmasivo'        => ruta('GET',  ROLES_ADMIN),
             'previsualizarmasivo' => ruta('POST', ROLES_ADMIN),
@@ -303,7 +318,7 @@ function registrarEvento(string $tipo, string $detalle = ''): void
 function responderError(int $codigo, string $mensaje, bool $json = false): void
 {
     http_response_code($codigo);
-    if ($json) {
+    if ($json || esAjax()) {
         header('Content-Type: application/json; charset=UTF-8');
         echo json_encode(['ok' => false, 'error' => $mensaje], JSON_UNESCAPED_UNICODE);
         exit;

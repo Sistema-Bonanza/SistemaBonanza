@@ -5,15 +5,26 @@
 $totalProductos = isset($productos) ? count($productos) : 0;
 $totalStock = 0;
 $activos = 0;
+$bajoMinimoLista = [];   // productos por debajo del stock mínimo fijado por el administrador
 
 if (!empty($productos)) {
     foreach ($productos as $p) {
         $totalStock += (int)($p['stock_actual'] ?? 0);
+        $minP = (int)($p['stock_minimo'] ?? 0);
+        if ($minP > 0 && (int)($p['stock_actual'] ?? 0) < $minP) {
+            $bajoMinimoLista[] = [
+                'nombre' => (string)($p['nombre'] ?? ''),
+                'codigo' => (string)($p['codigo'] ?? ''),
+                'stock'  => (int)($p['stock_actual'] ?? 0),
+                'minimo' => $minP,
+            ];
+        }
         if (($p['estado'] ?? 'activo') === 'activo') {
             $activos++;
         }
     }
 }
+$totalBajoMinimo = count($bajoMinimoLista);
 $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 100) : 0;
 ?>
 <!DOCTYPE html>
@@ -47,36 +58,33 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
             <!-- ========================================== -->
     <!-- BANNER PRINCIPAL (Estandarizado) -->
     <!-- ========================================== -->
-    <div class="box mb-5" style="background: linear-gradient(90deg, #003899 0%, #004ac6 50%, #2563eb 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+    <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
         <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-            
             <div class="is-flex is-align-items-center" style="gap: 1rem;">
-                <!-- Icono translúcido estandarizado -->
                 <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
                     <span class="material-symbols-outlined is-size-3 has-text-white">inventory_2</span>
                 </div>
-                
-                <!-- Textos -->
                 <div>
                     <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
                         <h1 class="title is-4 has-text-white mb-0">Gestión de Inventario</h1>
-                        <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">Matriz Distribuidora de Alimentos Bonanza</span>
+                        <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                            <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Matriz Distribuidora de Alimentos Bonanza
+                        </span>
                     </div>
                     <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                         Administra los productos de Distribuidora de Alimentos Bonanza C.A. Controla costos, precios y niveles de stock con trazabilidad total.
                     </p>
                 </div>
             </div>
-
             <!-- Botón de Acción Estandarizado -->
             <div class="buttons mb-0">
                 <!-- Asegúrate de que el action de urlAccion coincida con tu enrutador -->
-                <a href="<?= esc(urlAccion('producto', 'formCrear')) ?>" class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;">
+                <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="<?= esc(urlAccion('producto', 'formCrear')) ?>">
                     <span class="icon"><span class="material-symbols-outlined">add</span></span>
                     <span>Añadir Producto</span>
                 </a>
             </div>
-            
+        
         </div>
     </div>
 
@@ -119,14 +127,19 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                 
                 <!-- KPI 3: Estado de Salud (Verde / Éxito) -->
                 <div class="column is-4-desktop">
-                    <div class="box is-shadowless is-flex is-justify-content-space-between is-align-items-center" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid #48c774;">
+                    <div class="box is-shadowless is-flex is-justify-content-space-between is-align-items-center" style="border: 1px solid #e2e8f0; border-radius: 12px; border-left: 4px solid <?= $totalBajoMinimo > 0 ? '#f14668' : '#48c774' ?>;">
                         <div>
                             <p class="heading has-text-grey mb-1">Estado de Salud</p>
-                            <p class="title is-5 mb-0 has-text-success">Óptimo</p>
-                            <p class="is-size-7 has-text-grey mt-1"><?= $activos ?> de <?= $totalProductos ?> listos para venta</p>
+                            <?php if ($totalBajoMinimo > 0): ?>
+                                <p class="title is-5 mb-0 has-text-danger"><?= $totalBajoMinimo ?> bajo el mínimo</p>
+                                <p class="is-size-7 has-text-grey mt-1">Requieren reposición (marcados en rojo)</p>
+                            <?php else: ?>
+                                <p class="title is-5 mb-0 has-text-success">Óptimo</p>
+                                <p class="is-size-7 has-text-grey mt-1"><?= $activos ?> de <?= $totalProductos ?> listos para venta</p>
+                            <?php endif; ?>
                         </div>
-                        <div class="has-background-success-light has-text-success" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">
-                            <span class="material-symbols-outlined is-size-4">verified</span>
+                        <div class="<?= $totalBajoMinimo > 0 ? 'has-background-danger-light has-text-danger' : 'has-background-success-light has-text-success' ?>" style="width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; border-radius: 12px;">
+                            <span class="material-symbols-outlined is-size-4"><?= $totalBajoMinimo > 0 ? 'warning' : 'verified' ?></span>
                         </div>
                     </div>
                 </div>
@@ -182,6 +195,8 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                 <th class="py-3 px-4">Producto</th>
                                 <th class="py-3 px-4 has-text-centered">Código</th>
                                 <th class="py-3 px-4 has-text-right">Costo Unitario</th>
+                                <th class="py-3 px-4 has-text-right">Precio Venta</th>
+                                <th class="py-3 px-4">Precio por Cantidad</th>
                                 <th class="py-3 px-4 has-text-centered">Stock Disponible</th>
                                 <th class="py-3 px-4 has-text-centered">Estado</th>
                                 <th class="py-3 px-4 has-text-centered">Acciones</th>
@@ -200,6 +215,15 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                         $stock = (int)($p['stock_actual'] ?? 0);
                                         $stockMinimo = (int)($p['stock_minimo'] ?? 0);
                                         $esActivo = (($p['estado'] ?? 'activo') === 'activo');
+                                        $bajoMinimo = $stockMinimo > 0 && $stock < $stockMinimo;
+                                        $precioVenta = number_format((float)($p['precio_venta'] ?? 0), 2);
+                                        $escalasFila = [];
+                                        if (!empty($p['escalas_txt'])) {
+                                            foreach (explode(',', $p['escalas_txt']) as $par) {
+                                                list($cMin, $pctEsc) = array_pad(explode(':', $par), 2, '0');
+                                                $escalasFila[] = [(int) $cMin, (float) $pctEsc];
+                                            }
+                                        }
                                         $nombreCategoria = esc($p['nombre_categoria'] ?? $p['categoria'] ?? 'Sin categoría');
                                         
                                         // Inicial del Avatar
@@ -207,7 +231,7 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                     ?>
                                     
                                     <!-- Fila de Producto -->
-                                    <tr class="product-row" data-category="General" data-code="<?= $codigo ?>" data-name="<?= $nombre ?>">
+                                    <tr class="product-row<?= $bajoMinimo ? ' has-background-danger-light' : '' ?>" data-category="General" data-code="<?= $codigo ?>" data-name="<?= $nombre ?>" data-stock="<?= $stock ?>" data-minimo="<?= $stockMinimo ?>" data-bajo="<?= $bajoMinimo ? '1' : '0' ?>">
                                         <td class="py-3 px-4">
                                             <div class="is-flex is-align-items-center" style="gap: 0.75rem;">
                                                 <div class="has-background-info-light has-text-link has-text-weight-bold is-size-5" style="width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; border-radius: 8px;">
@@ -228,11 +252,30 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                             $<?= $costo ?>
                                         </td>
                                         
+                                        <td class="py-3 px-4 has-text-right align-middle font-mono has-text-weight-bold">
+                                            $<?= $precioVenta ?>
+                                        </td>
+
+                                        <td class="py-3 px-4 align-middle">
+                                            <?php if (!empty($escalasFila)): ?>
+                                                <div class="tags mb-0" style="gap: 4px;">
+                                                    <?php foreach ($escalasFila as $e): ?>
+                                                        <span class="tag is-success is-light is-small has-text-weight-bold" title="Desde <?= (int) $e[0] ?> unidades, <?= esc(rtrim(rtrim(number_format($e[1], 2, '.', ''), '0'), '.')) ?>% de descuento">
+                                                            ≥<?= (int) $e[0] ?> · -<?= esc(rtrim(rtrim(number_format($e[1], 2, '.', ''), '0'), '.')) ?>%
+                                                        </span>
+                                                    <?php endforeach; ?>
+                                                </div>
+                                            <?php else: ?>
+                                                <span class="is-size-7 has-text-grey-light">—</span>
+                                            <?php endif; ?>
+                                        </td>
+
                                         <td class="py-3 px-4 has-text-centered align-middle">
-                                            <?php if ($stock <= $stockMinimo): ?>
-                                                <span class="tag is-warning is-light is-rounded has-text-weight-bold" title="Stock por debajo del mínimo">
+                                            <?php if ($bajoMinimo): ?>
+                                                <span class="tag is-danger is-rounded has-text-weight-bold" title="Por debajo del stock mínimo (<?= $stockMinimo ?>)">
                                                     ⚠️ <?= $stock ?> unids
                                                 </span>
+                                                <p class="is-size-7 has-text-danger has-text-weight-bold mt-1">mín. <?= $stockMinimo ?></p>
                                             <?php else: ?>
                                                 <span class="tag is-link is-light is-rounded has-text-weight-bold">
                                                     <?= $stock ?> unids
@@ -261,7 +304,7 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                                 </a>
                                                 
                                                 <!-- BOTÓN DESACTIVAR (Controlado por SweetAlert) -->
-                                            <form action="index.php?controller=producto&action=eliminarproducto" method="POST" style="display: inline-block;">
+                                            <form action="index.php?controller=producto&action=eliminarproducto" method="POST" style="display: inline-block;" data-ajax>
                                                 <?= campoCsrf() ?>
                                                 <input type="hidden" name="id" value="<?= htmlspecialchars($id) ?>">
                                                 
@@ -277,7 +320,7 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                             <?php else: ?>
                                 <!-- ESTADO VACÍO -->
                                 <tr>
-                                    <td colspan="6" class="has-text-centered py-6">
+                                    <td colspan="8" class="has-text-centered py-6">
                                         <div class="is-flex is-flex-direction-column is-align-items-center">
                                             <span class="material-symbols-outlined is-size-1 has-text-grey-light mb-3">inventory_2</span>
                                             <h4 class="title is-5 has-text-grey">No hay productos registrados</h4>
@@ -304,14 +347,11 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
         <!-- 1. CDN de SweetAlert2 -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <!-- 2. Puente PHP -> JS (Solo se imprime si hay un error) -->
-        <?php if (isset($_SESSION['sweet_error_stock'])): ?>
-            <script>
-                // Guardamos el mensaje de PHP en una variable global de JS
-                window.sweetErrorStock = "<?= htmlspecialchars($_SESSION['sweet_error_stock'], ENT_QUOTES, 'UTF-8') ?>";
-            </script>
-            <?php unset($_SESSION['sweet_error_stock']); ?>
-        <?php endif; ?>
+        <!-- 2. Puente PHP -> JS: productos por debajo del stock mínimo (la alerta SweetAlert la muestra productos.js) -->
+        <script>
+            window.productosBajoMinimo = <?= json_encode($bajoMinimoLista, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
+        </script>
+        <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
 
         <!-- 3. Tu archivo JS (Asegúrate de que la ruta absoluta o relativa sea la correcta según lo vimos) -->
         <script src="assets/js/productos.js?v=<?= time() ?>"></script>

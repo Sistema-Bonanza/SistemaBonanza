@@ -34,9 +34,8 @@
             <!-- ========================================== -->
             <!-- 1. BANNER PRINCIPAL (Estandarizado) -->
             <!-- ========================================== -->
-            <div class="box mb-5" style="background: linear-gradient(90deg, #003899 0%, #004ac6 50%, #2563eb 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
                 <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-                    
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
                         <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
                             <span class="material-symbols-outlined is-size-3 has-text-white">sync_alt</span>
@@ -53,18 +52,18 @@
                             </p>
                         </div>
                     </div>
-
                     <!-- Botones Dinámicos de Acción -->
                     <div class="buttons mb-0">
-                        <a href="<?= esc(urlAccion('movimiento', 'crearcompra')) ?>" class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;">
+                        <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="<?= esc(urlAccion('movimiento', 'crearcompra')) ?>">
                             <span class="icon"><span class="material-symbols-outlined">add_circle</span></span>
                             <span>Registrar Entrada (Compra)</span>
                         </a>
-                        <a href="<?= esc(urlAccion('venta', 'crearVenta')) ?>" class="button is-ghost has-text-white" style="border-radius: 8px; background: rgba(255,255,255,0.15);">
+                        <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc(urlAccion('venta', 'crearVenta')) ?>">
                             <span class="icon"><span class="material-symbols-outlined">output</span></span>
                             <span>Registrar Salida / Venta</span>
                         </a>
                     </div>
+                
                 </div>
             </div>
 

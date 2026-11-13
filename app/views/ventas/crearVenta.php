@@ -67,7 +67,7 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
             <!-- ========================================== -->
             <!-- BANNER SUPERIOR -->
             <!-- ========================================== -->
-            <div class="box mb-5" style="background: linear-gradient(90deg, #003899 0%, #004ac6 50%, #2563eb 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
                 <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
                         <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
@@ -86,11 +86,12 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
                         </div>
                     </div>
                     <div class="buttons mb-0">
-                        <a href="<?= esc(urlAccion('venta', 'tablaVentas')) ?>" class="button is-white is-outlined has-text-white style-round" style="border-radius: 8px;">
+                        <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc(urlAccion('venta', 'tablaVentas')) ?>">
                             <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                             <span>Volver al listado</span>
                         </a>
                     </div>
+                
                 </div>
             </div>
 
@@ -102,7 +103,9 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
                 </div>
             </div>
 
-            <form id="formVenta" action="<?= esc(urlAccion('venta', 'guardarVenta')) ?>" method="POST" data-tasa-iva="<?= esc(numeroInput($tasaIva)) ?>">
+            <?php require __DIR__ . '/../layouts/tasaBcv.php'; ?>
+
+            <form id="formVenta" action="<?= esc(urlAccion('venta', 'guardarVenta')) ?>" method="POST" data-ajax data-tasa-iva="<?= esc(numeroInput($tasaIva)) ?>">
                 <?= campoCsrf() ?>
                 
                 <!-- Truco Oculto: El input radio verdadero de la forma de pago (El JS lo controlará) -->
@@ -111,7 +114,6 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
                     <input type="radio" name="tipo_pago" value="tarjeta" <?= $tipoPrevio === 'tarjeta' ? 'checked' : '' ?>>
                     <input type="radio" name="tipo_pago" value="transferencia" <?= $tipoPrevio === 'transferencia' ? 'checked' : '' ?>>
                     <input type="radio" name="tipo_pago" value="divisa" <?= $tipoPrevio === 'divisa' ? 'checked' : '' ?>>
-                    <input type="radio" name="tipo_pago" value="credito" <?= $tipoPrevio === 'credito' ? 'checked' : '' ?>>
                     <input type="radio" name="tipo_pago" value="mixto" <?= $tipoPrevio === 'mixto' ? 'checked' : '' ?>>
                 </div>
 
@@ -201,7 +203,8 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
                                     <th class="py-3 px-4">Producto Maestro</th>
                                     <th class="py-3 px-4 has-text-centered" style="width: 100px;">Disp.</th>
                                     <th class="py-3 px-4 has-text-centered" style="width: 130px;">Cantidad</th>
-                                    <th class="py-3 px-4 has-text-right" style="width: 140px;">Precio Unit. ($)</th>
+                                    <th class="py-3 px-4 has-text-right" style="width: 150px;">Precio Unit. ($)</th>
+                                    <th class="py-3 px-4 has-text-centered" style="width: 100px;">Desc.</th>
                                     <th class="py-3 px-4 has-text-centered" style="width: 100px;">IVA</th>
                                     <th class="py-3 px-4 has-text-right" style="width: 140px;">Subtotal ($)</th>
                                     <th class="py-3 px-4 has-text-centered" style="width: 60px;">Acción</th>
@@ -209,7 +212,7 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
                             </thead>
                             <tbody id="lineasVenta" data-lineas-previas="<?= esc(json_encode($lineasPrevias)) ?>" class="is-size-6">
                                 <tr id="filaVacia">
-                                    <td colspan="8" class="has-text-centered has-text-grey py-5">Aún no hay productos. Búscalos arriba para agregarlos.</td>
+                                    <td colspan="9" class="has-text-centered has-text-grey py-5">Aún no hay productos. Búscalos arriba para agregarlos.</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -258,12 +261,6 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
                                     </div>
                                 </div>
                                 <div class="column is-4-mobile is-4-tablet is-4-desktop">
-                                    <div class="box btn-pago-ui is-shadowless has-text-centered p-3 is-clickable" data-pago="credito" style="border: 1px solid #e2e8f0;">
-                                        <span class="material-symbols-outlined is-size-3 has-text-grey mb-1">handshake</span>
-                                        <p class="has-text-weight-bold is-size-7 text-dark mb-0">Crédito</p>
-                                    </div>
-                                </div>
-                                <div class="column is-4-mobile is-4-tablet is-4-desktop">
                                     <div class="box btn-pago-ui is-shadowless has-text-centered p-3 is-clickable" data-pago="mixto" style="border: 1px solid #e2e8f0;">
                                         <span class="material-symbols-outlined is-size-3 has-text-grey mb-1">receipt</span>
                                         <p class="has-text-weight-bold is-size-7 text-dark mb-0">Mixto</p>
@@ -295,6 +292,11 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
                                     </div>
                                 </div>
 
+                                <div class="is-flex is-justify-content-space-between is-align-items-center mb-2 is-hidden" id="filaDescuento">
+                                    <span class="is-size-7 has-text-success has-text-weight-bold">Descuento por cantidad:</span>
+                                    <span class="has-text-weight-bold font-mono has-text-success" id="totalDescuento"><?= esc(dinero(0)) ?></span>
+                                </div>
+
                                 <div class="is-flex is-justify-content-space-between is-align-items-center mb-2">
                                     <span class="is-size-7 has-text-grey">Subtotal Neto Imponible:</span>
                                     <span class="has-text-weight-bold font-mono" id="totalSubtotal"><?= esc(dinero(0)) ?></span>
@@ -315,6 +317,7 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
                                     </div>
                                     <div class="has-text-right">
                                         <p class="title is-3 has-text-link mb-0 font-mono" id="totalGeneral"><?= esc(dinero(0)) ?></p>
+                                        <p class="has-text-weight-bold has-text-grey-dark font-mono mb-0" id="totalGeneralBs">—</p>
                                     </div>
                                 </div>
                             </div>
@@ -360,7 +363,7 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
                         </header>
                         <section class="modal-card-body">
                             <div class="notification is-info is-light p-3 mb-4">
-                                <p class="is-size-7">Total a cubrir: <strong class="is-size-6" id="mixtoTotal"><?= esc(dinero(0)) ?></strong></p>
+                                <p class="is-size-7">Total a cubrir: <strong class="is-size-6" id="mixtoTotal"><?= esc(dinero(0)) ?></strong> <span class="has-text-grey" id="mixtoTotalBs"></span></p>
                             </div>
                             
                             <div class="columns is-multiline">
@@ -386,12 +389,6 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
                                     <div class="field">
                                         <label class="label is-size-7"><i class="fas fa-dollar-sign has-text-success"></i> Divisa</label>
                                         <input type="number" class="input" id="pago_divisa" name="pago_divisa" min="0" step="0.01" value="<?= esc($pagosPrev['divisa']) ?>">
-                                    </div>
-                                </div>
-                                <div class="column is-12">
-                                    <div class="field">
-                                        <label class="label is-size-7"><i class="fas fa-handshake has-text-warning"></i> Crédito</label>
-                                        <input type="number" class="input" id="pago_credito" name="pago_credito" min="0" step="0.01" value="<?= esc($pagosPrev['credito']) ?>">
                                     </div>
                                 </div>
                             </div>
@@ -425,9 +422,16 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
                         <td>
                             <input type="number" name="cantidad[]" class="input is-small has-text-centered input-cantidad" min="1" max="100000" step="1" placeholder="0">
                         </td>
-                        <td class="celda-precio has-text-right font-mono text-dark"></td>
+                        <td class="has-text-right font-mono text-dark">
+                            <span class="celda-precio"></span>
+                            <span class="celda-precio-bs is-block is-size-7 has-text-grey"></span>
+                        </td>
+                        <td class="has-text-centered"><span class="celda-desc tag is-light is-small"></span></td>
                         <td class="has-text-centered"><span class="celda-iva tag is-warning is-light is-small"></span></td>
-                        <td class="celda-subtotal has-text-right has-text-link has-text-weight-bold font-mono text-[15px]"></td>
+                        <td class="has-text-right has-text-link has-text-weight-bold font-mono text-[15px]">
+                            <span class="celda-subtotal"></span>
+                            <span class="celda-subtotal-bs is-block is-size-7 has-text-grey has-text-weight-normal"></span>
+                        </td>
                         <td class="has-text-centered">
                             <button type="button" class="button is-small is-danger is-light" data-quitar>
                                 <span class="icon"><span class="material-symbols-outlined">delete</span></span>
@@ -443,6 +447,8 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/tasaBcv.js?v=<?= time() ?>"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
     <script src="assets/js/crearVenta.js?v=<?= time() ?>"></script>
 </body>
 </html>

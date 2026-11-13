@@ -37,7 +37,7 @@ $proveedores = $proveedores ?? [];
             <!-- ========================================== -->
             <!-- BANNER HERO -->
             <!-- ========================================== -->
-            <div class="box mb-6" style="background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
                 <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
                         <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
@@ -45,23 +45,23 @@ $proveedores = $proveedores ?? [];
                         </div>
                         <div>
                             <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
-                                <span class="tag is-white is-light is-rounded has-text-weight-bold is-small" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white !important;">
-                                    Gestión de Suministros
+                                <h1 class="title is-4 has-text-white mb-0">Registrar Nuevo Proveedor</h1>
+                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Gestión de Suministros
                                 </span>
-                                <span class="has-text-white-ter is-size-7">• Alta de Proveedores</span>
                             </div>
-                            <h1 class="title is-4 has-text-white mb-0 mt-1">Registrar Nuevo Proveedor</h1>
                             <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                                 Complete los datos fiscales y de contacto para dar de alta a un nuevo proveedor en el sistema.
                             </p>
                         </div>
                     </div>
                     <div class="buttons mb-0">
-                        <a href="index.php?controller=proveedor&action=TablaProveedores" class="button is-white has-text-link has-text-weight-bold" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white !important; border-radius: 8px;">
+                        <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="index.php?controller=proveedor&action=TablaProveedores">
                             <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                             <span>Volver al listado</span>
                         </a>
                     </div>
+                
                 </div>
             </div>
 
@@ -70,7 +70,7 @@ $proveedores = $proveedores ?? [];
                 <!-- COLUMNA IZQUIERDA: FORMULARIO (8 Cols) -->
                 <!-- ========================================== -->
                 <div class="column is-8">
-                    <form action="index.php?controller=proveedor&action=guardar" method="POST" id="formCrearProveedor" class="box is-shadowless" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;">
+                    <form action="index.php?controller=proveedor&action=guardar" method="POST" id="formCrearProveedor" class="box is-shadowless" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;" data-ajax>
                         
                         <!-- Header del Formulario -->
                         <div class="is-flex is-align-items-center is-justify-content-space-between mb-5" style="border-bottom: 1px solid #f1f5f9; padding-bottom: 1rem;">
@@ -249,6 +249,7 @@ $proveedores = $proveedores ?? [];
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
     <script src="assets/js/crearProveedor.js"></script>
 </body>
 </html>

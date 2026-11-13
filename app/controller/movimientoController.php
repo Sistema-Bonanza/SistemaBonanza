@@ -10,12 +10,16 @@ require_once __DIR__ . '/../../config/constantes.php';
 require_once __DIR__ . '/../model/movimientoModel.php';
 require_once __DIR__ . '/../model/proveedorModel.php';
 require_once __DIR__ . '/../model/productoModel.php';
+require_once __DIR__ . '/../model/categoriaModel.php';
+require_once __DIR__ . '/../model/tasaModel.php';
 
 class MovimientoController {
     
     private $movimientoModel;
     private $proveedorModel;
     private $productoModel;
+    private $categoriaModel;
+    private $tasaModel;
 
     public function __construct() {
         $database = new Database();
@@ -25,6 +29,8 @@ class MovimientoController {
         $this->movimientoModel = new MovimientoModel($pdo);
         $this->proveedorModel = new ProveedorModel($pdo);
         $this->productoModel = new ProductoModel($pdo);
+        $this->categoriaModel = new CategoriaModel($pdo);
+        $this->tasaModel = new TasaModel($pdo);
     }
 
     // =======================================================
@@ -127,6 +133,25 @@ class MovimientoController {
     // 3. MÉTODOS PARA CREAR UNA COMPRA Y PROCESARLA
     // =======================================================
     
+    // Nota de recepción de una compra (a la que enlaza el listado de Movimientos).
+    public function verDetalleCompra() {
+        exigirSesion();
+        evitarCache();
+
+        $id     = validarEntero($_GET['id'] ?? null, 1);
+        $compra = ($id !== null) ? $this->movimientoModel->obtenerCompra($id) : null;
+
+        if ($compra === null) {
+            setFlash('error', 'La compra que buscas no existe.');
+            redirigir(urlAccion('movimiento', 'tablaMovimientos'));
+        }
+
+        $detalles        = $this->movimientoModel->obtenerDetalleCompra($id);
+        $numeroOperacion = numeroOperacion('COMP', $compra['id_compra']);
+
+        require __DIR__ . '/../views/movimientos/detalleCompra.php';
+    }
+
     // Método que carga la vista de crear compra (formulario)
     public function crearcompra(){
         exigirSesion();
@@ -134,6 +159,10 @@ class MovimientoController {
         $proveedores = $this->proveedorModel->getActivos();
         $productos = $this->productoModel->obtenerProductos();
         $empaques = $this->productoModel->obtenerTodasLasPresentacionesActivas();
+        // Categorías activas: las usa el modal "Crear producto nuevo" sin salir de esta pantalla.
+        $categorias = array_filter($this->categoriaModel->getAll(), function ($c) {
+            return (int) $c['estado'] === 1;
+        });
         
         require_once __DIR__ . '/../views/movimientos/crearCompra.php';
     }
@@ -321,7 +350,9 @@ class MovimientoController {
             'tasa_iva' => TASA_IVA, 
             'monto_iva' => $monto_iva_factura,
             'total' => $total_factura,
-            'id_usuario' => $id_usuario
+            'id_usuario' => $id_usuario,
+            // Tasa BCV vigente al registrar: permite ver la compra en Bs con la tasa de ese día.
+            'tasa_cambio' => $this->tasaParaGuardar()
         ];
 
         $resultado = $this->movimientoModel->registrarCompraCompleta($datos_cabecera, $detalles_validos);
@@ -338,6 +369,12 @@ class MovimientoController {
             guardarFormulario($_POST);
             redirigir(urlAccion('movimiento', 'crearcompra'));
         }
+    }
+
+    /** Tasa BCV de hoy (texto con 4 decimales) o null si no hay; la compra se registra igual. */
+    private function tasaParaGuardar() {
+        $t = $this->tasaModel->obtenerHoy();
+        return ($t['tasa'] !== null) ? number_format((float) $t['tasa'], 4, '.', '') : null;
     }
 
     // ============================================================================================================

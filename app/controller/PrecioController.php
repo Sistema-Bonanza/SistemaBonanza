@@ -112,6 +112,7 @@ class PrecioController
 
         $recientes = $this->precioModel->historial(['id_producto' => $id], 5, 0);
         $tasaIva   = self::TASA_IVA;
+        $escalas   = $this->precioModel->escalasDeProducto($id);   // precio por cantidad
 
         require __DIR__ . '/../views/precios/editarPrecio.php';
     }
@@ -204,6 +205,124 @@ class PrecioController
                 setFlash('error', 'No se pudo guardar el cambio. Inténtalo de nuevo.');
                 redirigir($urlFormulario);
         }
+    }
+
+    // =====================================================================
+    // PRECIO POR CANTIDAD (AJAX)
+    // =====================================================================
+
+    /** Máximo de escalas por producto: más de esto no tiene sentido comercial y complica la pantalla. */
+    private const MAX_ESCALAS = 10;
+
+    /**
+     * POST (fetch): guarda las escalas de descuento por cantidad de UN producto.
+     * Recibe id_producto y los arreglos cantidad_minima[] y descuento_pct[]. Reemplaza la lista completa.
+     * Responde JSON: {ok, mensaje, escalas, advertencias} o {ok:false, errores}.
+     * Quién puede: solo ROLES_EDITAR (igual que cambiar un precio).
+     */
+    public function guardarEscalas(): void
+    {
+        if (!tieneRol(self::ROLES_EDITAR)) {
+            responderJson(['ok' => false, 'errores' => ['Solo los administradores pueden modificar precios.']], 403);
+        }
+
+        $id       = validarEntero($_POST['id_producto'] ?? null, 1);
+        $producto = ($id !== null) ? $this->precioModel->obtenerProducto($id) : null;
+        if ($producto === null) {
+            responderJson(['ok' => false, 'errores' => ['El producto no existe o está inactivo.']], 404);
+        }
+
+        $minimos    = postArray('cantidad_minima');
+        $descuentos = postArray('descuento_pct');
+        $total      = max(count($minimos), count($descuentos));
+
+        $errores = [];
+        $escalas = [];
+        $vistos  = [];
+
+        if ($total > self::MAX_ESCALAS) {
+            $errores[] = 'Máximo ' . self::MAX_ESCALAS . ' escalas por producto.';
+            $total = 0;
+        }
+
+        for ($i = 0; $i < $total; $i++) {
+            $n   = $i + 1;
+            $min = $minimos[$i] ?? '';
+            $pct = $descuentos[$i] ?? '';
+            $min = is_string($min) ? trim($min) : '';
+            $pct = is_string($pct) ? trim($pct) : '';
+
+            if ($min === '' && $pct === '') {
+                continue;   // fila vacía
+            }
+
+            $cantidad = validarEntero($min, 2, 100000);
+            if ($cantidad === null) {
+                $errores[] = "Escala $n: la cantidad mínima debe ser un entero entre 2 y 100000.";
+                continue;
+            }
+            $porcentaje = validarDecimal($pct, 2, 2, false);
+            if ($porcentaje === null || (float) $porcentaje >= 100) {
+                $errores[] = "Escala $n: el descuento debe ser mayor que 0 y menor que 100 (máximo 2 decimales).";
+                continue;
+            }
+            if (isset($vistos[$cantidad])) {
+                $errores[] = "Escala $n: la cantidad $cantidad está repetida.";
+                continue;
+            }
+            $vistos[$cantidad] = true;
+            $escalas[] = ['cantidad_minima' => $cantidad, 'descuento_pct' => $porcentaje];
+        }
+
+        // Ordenadas por cantidad; a más cantidad, el descuento no puede ser menor.
+        usort($escalas, function ($a, $b) {
+            return $a['cantidad_minima'] <=> $b['cantidad_minima'];
+        });
+        for ($i = 1; $i < count($escalas); $i++) {
+            if ((float) $escalas[$i]['descuento_pct'] <= (float) $escalas[$i - 1]['descuento_pct']) {
+                $errores[] = 'A mayor cantidad el descuento debe ser mayor: revisa las escalas de '
+                    . $escalas[$i - 1]['cantidad_minima'] . ' y ' . $escalas[$i]['cantidad_minima'] . ' unidades.';
+                break;
+            }
+        }
+
+        if (!empty($errores)) {
+            responderJson(['ok' => false, 'errores' => $errores], 422);
+        }
+
+        // Advertencias (no bloquean): una escala que deja el precio por debajo del costo.
+        $advertencias = [];
+        $costo = (float) $producto['costo_ref'];
+        foreach ($escalas as $e) {
+            $precio = (float) precioConDescuento($producto['precio_venta'], (float) $e['descuento_pct']);
+            if ($costo > 0 && $precio < $costo) {
+                $advertencias[] = 'Desde ' . $e['cantidad_minima'] . ' unidades el precio (' . dinero($precio)
+                    . ') queda por debajo del costo (' . dinero($costo) . ').';
+            }
+        }
+
+        if (!$this->precioModel->reemplazarEscalas($id, $escalas, usuarioActualId())) {
+            responderJson(['ok' => false, 'errores' => ['No se pudieron guardar las escalas. Inténtalo de nuevo.']], 500);
+        }
+
+        // Respuesta con los precios ya calculados, para refrescar la tabla de la pantalla sin recargar.
+        $salida = [];
+        foreach ($escalas as $e) {
+            $salida[] = [
+                'cantidad_minima' => $e['cantidad_minima'],
+                'descuento_pct'   => $e['descuento_pct'],
+                'precio'          => precioConDescuento($producto['precio_venta'], (float) $e['descuento_pct']),
+            ];
+        }
+
+        responderJson([
+            'ok'           => true,
+            'mensaje'      => empty($escalas)
+                ? 'Se quitó el precio por cantidad de «' . $producto['nombre'] . '».'
+                : 'Precio por cantidad de «' . $producto['nombre'] . '» guardado (' . count($escalas) . ' escala(s)).',
+            'escalas'      => $salida,
+            'advertencias' => $advertencias,
+        ]);
     }
 
     // =====================================================================

@@ -81,7 +81,7 @@ Class productoController{
         // 2. DATOS QUE NO VIENEN DEL FORMULARIO (valores fijos al crear)
         $precio_compra = 0;
         $precio_venta  = 0; // Se gestiona en el módulo de Control de Precios
-        $stock_minimo  = 0;
+        $stock_minimo  = $datos['stock_minimo'];   // lo define el administrador (0 = sin alerta)
         $stock_actual  = 0; // El stock solo sube con compras (módulo de Movimientos)
 
         // 3. GUARDAR
@@ -93,7 +93,9 @@ Class productoController{
             $stock_minimo,
             $stock_actual,
             $precio_compra,
-            $precio_venta
+            $precio_venta,
+            $datos['unidad_manejo'],
+            $datos['unidades_por_empaque']
         );
 
         if($exito){
@@ -103,6 +105,57 @@ Class productoController{
 
         setFlash('error', 'No se pudo guardar el producto en la base de datos.');
         redirigir($urlFormulario);
+    }
+
+    /**
+     * AJAX (fetch): crea un producto desde "Registrar compra" sin salir de esa pantalla.
+     * Usa las MISMAS validaciones que el formulario normal (validarDatos). Responde JSON:
+     *   {ok:true, producto:{id, codigo, nombre, categoria, stock, precio_compra, ...}}
+     *   {ok:false, errores:[...]}
+     */
+    public function crearAjax(){
+        exigirSesion();
+
+        list($datos, $errores) = $this->validarDatos(null);
+        if(!empty($errores)){
+            responderJson(['ok' => false, 'errores' => $errores], 422);
+        }
+
+        $id = $this->productoModel->crearProducto(
+            $datos['codigo'],
+            $datos['nombre'],
+            $datos['id_categoria'],
+            $datos['aplica_iva'],
+            $datos['stock_minimo'],
+            0,      // stock: sube con la compra que se está registrando
+            0,      // precio de compra: lo define la compra
+            0,      // precio de venta: se gestiona en el módulo de Precios
+            $datos['unidad_manejo'],
+            $datos['unidades_por_empaque']
+        );
+
+        if(!$id){
+            responderJson(['ok' => false, 'errores' => ['No se pudo guardar el producto en la base de datos.']], 500);
+        }
+
+        $nombreCategoria = '';
+        foreach($this->categoriaModel->getAll() as $c){
+            if((int) $c['id_categoria'] === (int) $datos['id_categoria']){
+                $nombreCategoria = $c['nombre'];
+            }
+        }
+
+        responderJson([
+            'ok'       => true,
+            'mensaje'  => 'Producto «' . $datos['nombre'] . '» creado.',
+            'producto' => [
+                'id'        => (int) $id,
+                'codigo'    => $datos['codigo'],
+                'nombre'    => $datos['nombre'],
+                'categoria' => $nombreCategoria,
+                'stock'     => 0,
+            ],
+        ]);
     }
 
     public function formEditar(){
@@ -158,7 +211,10 @@ Class productoController{
             $datos['codigo'],
             $datos['nombre'],
             $datos['id_categoria'],
-            $datos['aplica_iva']
+            $datos['aplica_iva'],
+            $datos['stock_minimo'],
+            $datos['unidad_manejo'],
+            $datos['unidades_por_empaque']
         );
 
         if($exito){
@@ -197,8 +253,7 @@ Class productoController{
         }
 
         if((int) $producto['stock_actual'] > 0){
-            // Guardamos el error en una variable de sesión única para SweetAlert
-            $_SESSION['sweet_error_stock'] = 'No se puede desactivar «' . $producto['nombre'] . '»: todavía tiene ' . (int) $producto['stock_actual'] . ' unidad(es) en almacén.';
+            setFlash('error', 'No se puede desactivar «' . $producto['nombre'] . '»: todavía tiene ' . (int) $producto['stock_actual'] . ' unidad(es) en almacén.');
             redirigir($urlLista);
         }
 
@@ -245,11 +300,37 @@ Class productoController{
             $id_categoria = null;
         }
 
+        // stock_minimo: INT. Si el stock baja de este número, la tabla de productos lo marca en rojo
+        // y avisa con SweetAlert. 0 = sin alerta. Si el campo no viene (formularios viejos) se toma 0.
+        $stock_minimo = validarEntero(($_POST['stock_minimo'] ?? '') === '' ? '0' : $_POST['stock_minimo'], 0, 1000000);
+        if($stock_minimo === null){
+            $errores[] = 'El stock mínimo debe ser un entero entre 0 y 1.000.000.';
+            $stock_minimo = 0;
+        }
+
+        // unidad de manejo (cómo viene empacado: UNIDAD, CAJA, PAQUETE...) y cuántas unidades trae cada una.
+        $unidad_manejo = strtoupper(trim((string) ($_POST['unidad_manejo'] ?? '')));
+        if($unidad_manejo === ''){
+            $unidad_manejo = 'UNIDAD';
+        } elseif(!preg_match('/^[A-ZÁÉÍÓÚÑ0-9 ._-]{2,30}$/u', $unidad_manejo)){
+            $errores[] = 'La unidad de manejo debe tener de 2 a 30 caracteres (letras, números, espacio, punto o guion).';
+            $unidad_manejo = 'UNIDAD';
+        }
+
+        $unidades_por_empaque = validarEntero(($_POST['unidades_por_empaque'] ?? '') === '' ? '1' : $_POST['unidades_por_empaque'], 1, 100000);
+        if($unidades_por_empaque === null){
+            $errores[] = 'Las unidades por empaque deben ser un entero entre 1 y 100000.';
+            $unidades_por_empaque = 1;
+        }
+
         return [[
             'codigo'       => $codigo,
             'nombre'       => $nombre,
             'id_categoria' => $id_categoria,
             'aplica_iva'   => isset($_POST['aplica_iva']) ? 1 : 0, // Checkbox booleano
+            'stock_minimo' => $stock_minimo,
+            'unidad_manejo' => $unidad_manejo,
+            'unidades_por_empaque' => $unidades_por_empaque,
         ], $errores];
     }
 

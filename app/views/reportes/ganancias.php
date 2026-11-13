@@ -44,46 +44,43 @@ require __DIR__ . '/_inicio.php';
 </style>
 
 <!-- BEGIN: Banner Hero (Azul Institucional Bonanza) -->
-<div class="box is-shadowless mb-5 p-5 no-print" style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #4338ca 100%); border-radius: 16px; position: relative; overflow: hidden; border: 1px solid rgba(255,255,255,0.15);">
+<div id="ajax-reporte" data-ajax-lista>
+<div class="box mb-5 no-print" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
     <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-        
-        <!-- Bloque Izquierdo: Ícono + Títulos -->
         <div class="is-flex is-align-items-center" style="gap: 1rem;">
-            <div class="is-flex is-align-items-center is-justify-content-center" style="width: 56px; height: 56px; background: rgba(255,255,255,0.15); border-radius: 12px; backdrop-filter: blur(4px); flex-shrink: 0; border: 1px solid rgba(255,255,255,0.25);">
-                <i class="fas fa-chart-line fa-lg has-text-white"></i>
+            <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                <span class="material-symbols-outlined is-size-3 has-text-white">monitoring</span>
             </div>
-            
             <div>
                 <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
                     <h1 class="title is-4 has-text-white mb-0"><?= esc($tituloPagina) ?></h1>
-                    <span class="tag is-success is-light is-rounded has-text-weight-bold is-small" style="background-color: rgba(255,255,255,0.15) !important; color: #ffffff !important; border: 1px solid rgba(255,255,255,0.25);">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span>
-                        Rentabilidad Comercial
+                    <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Rentabilidad Comercial
                     </span>
                 </div>
-                <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 750px; opacity: 0.95;">
+                <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                     <?= esc($descripcionPagina) ?>
                 </p>
             </div>
         </div>
-
         <!-- Bloque Derecho: Botones de Acción (Separación corregida) -->
         <div class="is-flex is-align-items-center flex-shrink-0" style="gap: 0.75rem;">
-            <a href="index.php?controller=reporte&action=index" class="button is-ghost has-text-white mb-0" style="background-color: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.25);">
-                <span class="icon is-small mr-2"><i class="fas fa-arrow-left"></i></span>
+            <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="index.php?controller=reporte&action=index">
+                <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                 <span>Todos los reportes</span>
             </a>
             <?php if (isset($urlCsv) && $urlCsv): ?>
-            <a href="<?= esc($urlCsv) ?>" class="button is-success mb-0" style="background-color: #10b981; border-color: #059669; font-weight: 600;">
-                <span class="icon is-small mr-2"><i class="fas fa-download"></i></span>
+            <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc($urlCsv) ?>">
+                <span class="icon"><span class="material-symbols-outlined">download</span></span>
                 <span>Exportar CSV</span>
             </a>
             <?php endif; ?>
-            <button type="button" onclick="window.print()" class="button is-white has-text-link has-text-weight-bold mb-0">
-                <span class="icon is-small mr-2"><i class="fas fa-print"></i></span>
+            <button class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" type="button" onclick="window.print()">
+                <span class="icon"><span class="material-symbols-outlined">print</span></span>
                 <span>Imprimir Reporte</span>
             </button>
         </div>
+    
     </div>
 </div>
 <!-- END: Banner Hero -->
@@ -96,7 +93,7 @@ require __DIR__ . '/_inicio.php';
 
 <!-- BEGIN: Panel de Filtros -->
 <div class="box is-shadowless mb-5 p-5 no-print" style="border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
-    <form method="get" action="index.php">
+    <form method="get" action="index.php" data-ajax-filtro="#ajax-reporte">
         <input type="hidden" name="controller" value="reporte">
         <input type="hidden" name="action" value="ganancias">
 
@@ -337,4 +334,5 @@ require __DIR__ . '/_inicio.php';
 </div>
 <!-- END: Tabla de Detalle -->
 
+</div><!-- /ajax-reporte: los filtros actualizan el reporte por AJAX -->
 <?php require __DIR__ . '/_fin.php'; ?>

@@ -6,6 +6,7 @@
     <title>Historial de Presentaciones ·Distribuidora de Alimentos Bonanza</title>
     
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/sidebar.css" />
 </head>
@@ -18,26 +19,40 @@
         <div class="container is-max-widescreen">
             
             <!-- CABECERA -->
-            <div class="level mb-6">
-                <div class="level-left">
-                    <div>
-                        <h1 class="title is-4 mb-1">Gestión de Presentaciones y Empaques</h1>
-                        <p class="has-text-grey mt-1">Administre las excepciones de contenido para productos específicos.</p>
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+                <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
+                    <div class="is-flex is-align-items-center" style="gap: 1rem;">
+                        <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                            <span class="material-symbols-outlined is-size-3 has-text-white">inventory</span>
+                        </div>
+                        <div>
+                            <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
+                                <h1 class="title is-4 has-text-white mb-0">Presentaciones y Empaques</h1>
+                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Catálogo Maestro
+                                </span>
+                            </div>
+                            <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
+                                Administre las excepciones de contenido para productos específicos.
+                            </p>
+                        </div>
                     </div>
-                </div>
-                <div class="level-right">
-                    <a href="<?= esc(urlAccion('Presentacion', 'crear')) ?>" class="button is-link has-text-weight-bold">
-                        <span class="icon is-small"><i class="fas fa-plus"></i></span>
-                        <span>Nueva Presentación Especial</span>
-                    </a>
+                    <div class="buttons mb-0">
+                        <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="<?= esc(urlAccion('Presentacion', 'crear')) ?>">
+                            <span class="icon"><span class="material-symbols-outlined">add</span></span>
+                            <span>Nueva Presentación Especial</span>
+                        </a>
+                    </div>
+                
                 </div>
             </div>
 
             <?php echo mostrarFlash(); ?>
 
+            <div id="ajax-presentaciones" data-ajax-lista>
             <!-- FILTRO DE PRODUCTOS -->
             <div class="box mb-5">
-                <form method="GET" action="index.php">
+                <form method="GET" action="index.php" data-ajax-filtro="#ajax-presentaciones">
                     <input type="hidden" name="controller" value="presentacion">
                     <input type="hidden" name="action" value="index">
                     
@@ -121,7 +136,7 @@
                                     <td class="has-text-right">
                                         <?php if ($estado == 1): ?>
                                             <!-- Formulario seguro por POST para desactivar -->
-                                            <form action="<?= esc(urlAccion('presentacion', 'desactivar')) ?>" method="POST" style="display:inline;" onsubmit="return confirm('¿Seguro que desea desactivar esta presentación? No aparecerá en futuras compras.');">
+                                            <form action="<?= esc(urlAccion('presentacion', 'desactivar')) ?>" method="POST" style="display:inline;" onsubmit="return confirm('¿Seguro que desea desactivar esta presentación? No aparecerá en futuras compras.');" data-ajax>
                                                 <input type="hidden" name="csrf_token" value="<?= esc($_SESSION['csrf_token'] ?? '') ?>">
                                                 <input type="hidden" name="id_presentacion" value="<?= esc($pres['id_presentacion']) ?>">
                                                 <input type="hidden" name="id_producto" value="<?= esc($pres['id_producto']) ?>">
@@ -149,9 +164,12 @@
                     </table>
                 </div>
             </div>
+            </div><!-- /ajax-presentaciones -->
 
         </div>
     </main>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
 </body>
 </html>

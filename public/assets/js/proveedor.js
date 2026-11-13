@@ -115,7 +115,22 @@ document.addEventListener('DOMContentLoaded', () => {
                 cancelButtonText: 'Cancelar'
             }).then((result) => {
                 if (result.isConfirmed && urlDestino) {
-                    window.location.href = urlDestino;
+                    // POST con token CSRF, enviado por AJAX (ajax.js). Antes era un enlace GET.
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = urlDestino;
+                    form.setAttribute('data-ajax', '');
+                    form.style.display = 'none';
+                    const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
+                    if (token) {
+                        const input = document.createElement('input');
+                        input.type = 'hidden';
+                        input.name = 'csrf_token';
+                        input.value = token;
+                        form.appendChild(input);
+                    }
+                    document.body.appendChild(form);
+                    form.submit();
                 }
             });
         });

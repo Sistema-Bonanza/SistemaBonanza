@@ -185,7 +185,7 @@ class VentaModel
     {
         $sql = "SELECT
                     v.id_venta, v.numero_factura, v.id_cliente, v.fecha_venta,
-                    v.subtotal, v.tasa_iva, v.monto_iva, v.total, v.tipo_pago,
+                    v.subtotal, v.tasa_iva, v.monto_iva, v.total, v.tipo_pago, v.tasa_cambio,
                     v.observaciones, v.estado, v.id_usuario,
                     v.fecha_anulacion, v.id_usuario_anula, v.motivo_anulacion,
                     c.tipo_documento, c.num_documento,
@@ -214,6 +214,7 @@ class VentaModel
     {
         $sql = "SELECT
                     d.id_detalle, d.id_producto, d.cantidad, d.precio_unitario,
+                    d.precio_lista, d.descuento_pct,
                     d.aplica_iva, d.subtotal_linea,
                     p.codigo, p.nombre
                 FROM detalle_ventas d
@@ -247,9 +248,11 @@ class VentaModel
     /**
      * Guarda la venta completa y descuenta el stock.
      *
-     * $cabecera: id_cliente, subtotal, tasa_iva, monto_iva, total, tipo_pago, observaciones (o null), id_usuario
+     * $cabecera: id_cliente, subtotal, tasa_iva, monto_iva, total, tipo_pago, observaciones (o null), id_usuario,
+     *             tasa_cambio (tasa BCV de ese momento, o null)
      * $detalles: lista de líneas, cada una con
-     *            id_producto, cantidad (en unidades), precio_unitario, aplica_iva, subtotal_linea
+     *            id_producto, cantidad (en unidades), precio_lista (el de la BD), descuento_pct (precio por cantidad),
+     *            precio_unitario (ya con el descuento), aplica_iva, subtotal_linea
      * $pagos:    lista de ['metodo' => 'efectivo', 'monto' => '12.50']. Una fila si se pagó con una
      *            sola forma de pago; varias si fue pago mixto. Deben sumar EXACTAMENTE el total.
      *
@@ -290,7 +293,7 @@ class VentaModel
 
             // 1. Bloquear los productos, SIEMPRE en orden de id (evita deadlocks entre ventas).
             $stmtBloqueo = $this->pdo->prepare(
-                "SELECT id_producto, nombre, precio_compra, precio_venta, aplica_iva, stock_actual, estado
+                "SELECT id_producto, nombre, precio_compra, precio_venta, aplica_iva, stock_actual, stock_minimo, estado
                    FROM productos
                   WHERE id_producto = ?
                     FOR UPDATE"
@@ -317,8 +320,9 @@ class VentaModel
             foreach ($detalles as $det) {
                 $prod = $productos[(int) $det['id_producto']];
 
+                // Se compara el precio de LISTA (el unitario puede llevar descuento por cantidad).
                 $precioActual = number_format((float) $prod['precio_venta'], 2, '.', '');
-                if ($precioActual !== (string) $det['precio_unitario']
+                if ($precioActual !== (string) $det['precio_lista']
                     || (int) $prod['aplica_iva'] !== (int) $det['aplica_iva']) {
                     $this->pdo->rollBack();
                     return ['ok' => false, 'motivo' => 'conflicto', 'producto' => $prod['nombre']];
@@ -338,8 +342,8 @@ class VentaModel
             // 3. Cabecera.
             $stmtVenta = $this->pdo->prepare(
                 "INSERT INTO ventas
-                    (id_cliente, subtotal, tasa_iva, monto_iva, total, tipo_pago, observaciones, id_usuario, estado)
-                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, 1)"
+                    (id_cliente, subtotal, tasa_iva, monto_iva, total, tipo_pago, observaciones, id_usuario, tasa_cambio, estado)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)"
             );
             $stmtVenta->execute([
                 $cabecera['id_cliente'],
@@ -350,6 +354,7 @@ class VentaModel
                 $cabecera['tipo_pago'],
                 $cabecera['observaciones'],
                 $cabecera['id_usuario'],
+                $cabecera['tasa_cambio'] ?? null,
             ]);
             $idVenta = (int) $this->pdo->lastInsertId();
 
@@ -369,8 +374,8 @@ class VentaModel
             // 4. Líneas + kardex + descuento de stock.
             $stmtDetalle = $this->pdo->prepare(
                 "INSERT INTO detalle_ventas
-                    (id_venta, id_producto, cantidad, precio_unitario, aplica_iva, subtotal_linea, costo_unitario)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)"
+                    (id_venta, id_producto, cantidad, precio_unitario, precio_lista, descuento_pct, aplica_iva, subtotal_linea, costo_unitario)
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)"
             );
             $stmtKardex = $this->pdo->prepare(
                 "INSERT INTO movimientos
@@ -382,6 +387,7 @@ class VentaModel
             );
 
             $motivo = 'Factura ' . $numeroFactura;   // así el kardex muestra a qué factura pertenece cada salida
+            $bajoMinimo = [];                         // productos que quedan por debajo del stock mínimo
 
             foreach ($detalles as $det) {
                 $idProducto = (int) $det['id_producto'];
@@ -393,6 +399,8 @@ class VentaModel
                     $idProducto,
                     $cantidad,
                     $det['precio_unitario'],
+                    $det['precio_lista'],
+                    $det['descuento_pct'],
                     (int) $det['aplica_iva'],
                     $det['subtotal_linea'],
                     $this->costoReferencia($idProducto, $prod['precio_compra']),
@@ -412,12 +420,17 @@ class VentaModel
                 ]);
                 $stmtStock->execute([$stockDespues, $idProducto]);
 
+                $minimo = (int) $prod['stock_minimo'];
+                if ($minimo > 0 && $stockDespues < $minimo) {
+                    $bajoMinimo[] = ['nombre' => $prod['nombre'], 'stock' => $stockDespues, 'minimo' => $minimo];
+                }
+
                 // Si el mismo producto apareciera dos veces, la segunda línea parte del stock ya descontado.
                 $productos[$idProducto]['stock_actual'] = $stockDespues;
             }
 
             $this->pdo->commit();
-            return ['ok' => true, 'id' => $idVenta, 'numero_factura' => $numeroFactura];
+            return ['ok' => true, 'id' => $idVenta, 'numero_factura' => $numeroFactura, 'bajo_minimo' => $bajoMinimo];
 
         } catch (PDOException $e) {
             if ($this->pdo->inTransaction()) {

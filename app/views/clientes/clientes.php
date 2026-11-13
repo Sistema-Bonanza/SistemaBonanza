@@ -47,7 +47,7 @@ $countConSaldo     = $countConSaldo ?? 0;
         <div class="p-5" style="width: 100%; padding-bottom: 4rem !important;">
 
             <!-- BANNER HERO -->
-            <div class="box mb-5" style="background: linear-gradient(90deg, #1d4ed8 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
                 <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
                         <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
@@ -67,11 +67,12 @@ $countConSaldo     = $countConSaldo ?? 0;
                     </div>
                     <div class="buttons mb-0">
                         <!-- Enlace dinámico con tu controlador actual -->
-                        <a href="index.php?controller=cliente&action=formcrearcliente" class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;">
+                        <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="index.php?controller=cliente&action=formcrearcliente">
                             <span class="icon"><span class="material-symbols-outlined">add</span></span>
                             <span>Añadir Cliente</span>
                         </a>
                     </div>
+                
                 </div>
             </div>
 
@@ -290,6 +291,7 @@ $countConSaldo     = $countConSaldo ?? 0;
 
     <!-- Librerías JS -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
     <!-- Tu archivo JS Separado -->
     <script src="assets/js/cliente.js"></script>
 </body>

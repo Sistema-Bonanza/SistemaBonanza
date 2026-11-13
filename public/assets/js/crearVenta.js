@@ -24,6 +24,25 @@
         return (centavos < 0 ? '-' : '') + '$' + enteros + ',' + decimales;
     }
 
+    // Precio por cantidad: misma regla entera que descuentoPorCantidad()/precioConDescuento() de
+    // app/helpers/formato.php, para que la pantalla y el servidor coincidan al centavo.
+    function descuentoPara(producto, cantidad) {
+        var pct = 0, mejor = 0;
+        (producto.escalas || []).forEach(function (e) {
+            if (e[0] <= cantidad && e[0] > mejor) { mejor = e[0]; pct = e[1]; }
+        });
+        return pct;
+    }
+
+    function precioConDescuento(centavos, pct) {
+        var base = Math.round(pct * 100);
+        return Math.floor((centavos * (10000 - base) + 5000) / 10000);
+    }
+
+    function bs(centavosUsd) {
+        return (window.BonanzaTasa && window.BonanzaTasa.tasa !== null) ? window.BonanzaTasa.formatoBs(centavosUsd / 100) : '—';
+    }
+
     function calcularTotales(lineas, tasaIva) {
         var subtotal = 0;
         var iva = 0;
@@ -56,7 +75,7 @@
 
     var ETIQUETAS_PAGO = {
         efectivo: 'Efectivo', tarjeta: 'Tarjeta', transferencia: 'Transferencia',
-        divisa: 'Divisa', credito: 'Crédito', mixto: 'Pago Mixto'
+        divisa: 'Divisa', mixto: 'Pago Mixto'
     };
 
     // ------------------------------------------------------------------
@@ -283,9 +302,13 @@
         var saldoTxt    = document.getElementById('saldoMixto');
         var saldoCaja   = document.getElementById('cajaSaldoMixto');
         var mixtoTotal  = document.getElementById('mixtoTotal');
+        var mixtoTotalBs = document.getElementById('mixtoTotalBs');
+        var elDescuento = document.getElementById('totalDescuento');
+        var filaDescuento = document.getElementById('filaDescuento');
+        var elTotalBs   = document.getElementById('totalGeneralBs');
         var campos      = {};
         
-        ['efectivo', 'tarjeta', 'transferencia', 'divisa', 'credito'].forEach(function (clave) {
+        ['efectivo', 'tarjeta', 'transferencia', 'divisa'].forEach(function (clave) {
             campos[clave] = document.getElementById('pago_' + clave);
         });
 
@@ -388,7 +411,7 @@
 
         function recalcular() {
             var lineas = [];
-            var unidades = 0, hayError = false, incompletas = 0;
+            var unidades = 0, hayError = false, incompletas = 0, descuentoTotal = 0;
             var lista = filas();
 
             lista.forEach(function (fila, i) {
@@ -397,15 +420,39 @@
                 var cantidad = parseInt(input.value, 10);
                 if (isNaN(cantidad) || cantidad < 0) { cantidad = 0; }
 
-                var precio = aCentavos(p.precio);
+                var precioLista = aCentavos(p.precio);
+                var pctDesc = descuentoPara(p, cantidad);
+                var precio = pctDesc > 0 ? precioConDescuento(precioLista, pctDesc) : precioLista;
                 var subtotal = cantidad * precio;
+                descuentoTotal += cantidad * (precioLista - precio);
                 var excede = cantidad > p.stock;
+
+                // Alerta (SweetAlert) cuando la cantidad entra en una escala nueva de descuento.
+                var pctAntes = fila.getAttribute('data-pct');
+                fila.setAttribute('data-pct', String(pctDesc));
+                if (pctAntes !== null && parseFloat(pctAntes) !== pctDesc && pctDesc > 0 && typeof Swal !== 'undefined') {
+                    Swal.fire({
+                        toast: true, position: 'top-end', icon: 'success', showConfirmButton: false, timer: 3500, timerProgressBar: true,
+                        title: 'Descuento por cantidad: ' + pctDesc + '% en «' + p.nombre + '»',
+                        text: 'Precio unitario ' + dinero(precio) + ' (lista ' + dinero(precioLista) + ')'
+                    });
+                }
+                var celdaDesc = fila.querySelector('.celda-desc');
+                if (celdaDesc) {
+                    celdaDesc.textContent = pctDesc > 0 ? '-' + pctDesc + '%' : '—';
+                    celdaDesc.className = 'celda-desc tag is-small ' + (pctDesc > 0 ? 'is-success' : 'is-light');
+                    var siguiente = null;
+                    (p.escalas || []).forEach(function (e) { if (e[0] > cantidad && (siguiente === null || e[0] < siguiente[0])) { siguiente = e; } });
+                    celdaDesc.title = siguiente ? 'Desde ' + siguiente[0] + ' unidades: ' + siguiente[1] + '% de descuento' : '';
+                }
 
                 fila.querySelector('.celda-num').textContent = i + 1;
                 fila.querySelector('.celda-stock').textContent = p.stock;
                 fila.querySelector('.celda-precio').textContent = dinero(precio);
                 fila.querySelector('.celda-iva').textContent = p.iva || p.aplica_iva ? 'Con IVA' : 'Exento';
                 fila.querySelector('.celda-subtotal').textContent = cantidad > 0 ? dinero(subtotal) : '';
+                fila.querySelector('.celda-precio-bs').textContent = bs(precio);
+                fila.querySelector('.celda-subtotal-bs').textContent = cantidad > 0 ? bs(subtotal) : '';
 
                 input.classList.toggle('is-danger', excede);
                 if (excede) { input.title = 'Supera el stock disponible (' + p.stock + ').'; } else { input.removeAttribute('title'); }
@@ -428,6 +475,10 @@
             if (elIva)      { elIva.textContent      = dinero(totales.iva); }
             if (elTotal)    { elTotal.textContent    = dinero(totales.total); }
             if (mixtoTotal) { mixtoTotal.textContent = dinero(totales.total); }
+            if (mixtoTotalBs) { mixtoTotalBs.textContent = totales.total > 0 ? '(' + bs(totales.total) + ')' : ''; }
+            if (elTotalBs)  { elTotalBs.textContent  = bs(totales.total); }
+            if (elDescuento) { elDescuento.textContent = '-' + dinero(descuentoTotal); }
+            if (filaDescuento) { filaDescuento.classList.toggle('is-hidden', descuentoTotal <= 0); }
 
             var esMixto = tipoPago() === 'mixto';
             if (resumenBox) { 
@@ -571,7 +622,7 @@
             }
 
             var etiqueta = tipoPago() === 'mixto' ? 'Pago mixto' : ETIQUETAS_PAGO[tipoPago()];
-            var accionMsg = (btnPulsado && btnPulsado.value === 'imprimir') ? '¿Desea solo imprimir la cotización (sin afectar Kardex)?' : 'Se registrará la factura por ' + dinero(r.total) + ' (' + etiqueta + ') y se descontará el stock. No se puede editar, solo anular. ¿Continuar?';
+            var accionMsg = (btnPulsado && btnPulsado.value === 'imprimir') ? 'Se registrará la factura por ' + dinero(r.total) + ' (' + etiqueta + '), se descontará el stock y se abrirá la nota para imprimir. ¿Continuar?' : 'Se registrará la factura por ' + dinero(r.total) + ' (' + etiqueta + ') y se descontará el stock. No se puede editar, solo anular. ¿Continuar?';
 
             Swal.fire({
                 title: '¿Confirmar Operación?',
@@ -610,7 +661,7 @@
                 }).then(function(r) {
                     if (r.isConfirmed) {
                         form.reset();
-                        tbody.innerHTML = '<tr id="filaVacia"><td colspan="8" class="has-text-centered has-text-grey py-5">Aún no hay productos. Búscalos arriba.</td></tr>';
+                        filas().forEach(function (f) { f.parentNode.removeChild(f); });
                         var radEf = form.querySelector('input[name="tipo_pago"][value="efectivo"]');
                         if (radEf) { 
                             radEf.checked = true; 
@@ -629,6 +680,9 @@
             }
             recalcular();
         });
+
+        // Cuando llega (o cambia) la tasa BCV, se repintan los montos en Bs.
+        if (window.BonanzaTasa) { window.BonanzaTasa.alCambiar(function () { recalcular(); }); }
 
         // ---------------- arranque ----------------
 

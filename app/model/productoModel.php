@@ -17,9 +17,17 @@ class productoModel {
                         prod.nombre,
                         c.nombre AS nombre_categoria,
                         prod.stock_actual,
+                        prod.stock_minimo,
+                        prod.unidad_manejo,
+                        prod.unidades_por_empaque,
                         prod.precio_compra,
                         prod.precio_venta,
-                        prod.aplica_iva
+                        prod.aplica_iva,
+                        (SELECT GROUP_CONCAT(CONCAT(pc.cantidad_min, ':', pc.modo, ':', pc.valor)
+                     ORDER BY pc.cantidad_min SEPARATOR ',')
+                     FROM precios_cantidad pc
+                     WHERE pc.id_producto = prod.id_producto
+                     AND pc.estado = 1) AS escalas_txt
                         FROM productos prod
                         INNER JOIN categorias c ON prod.id_categoria = c.id_categoria
                         WHERE prod.estado = 1 
@@ -80,11 +88,12 @@ class productoModel {
     // ==================================================================================
     // CREAR PRODUCTO   
     // ==================================================================================
-    public function crearProducto($codigo, $nombre, $id_categoria, $aplica_iva, $stock_minimo = 0, $stock_actual = 0, $precio_compra = 0.00, $precio_venta = 0.00){
+    // Devuelve el id del producto nuevo (número > 0, que también sirve como "true") o false si falla.
+    public function crearProducto($codigo, $nombre, $id_categoria, $aplica_iva, $stock_minimo = 0, $stock_actual = 0, $precio_compra = 0.00, $precio_venta = 0.00, $unidad_manejo = 'UNIDAD', $unidades_por_empaque = 1){
         try {
-            $sql = "INSERT INTO productos (codigo, nombre, id_categoria, aplica_iva, stock_minimo, stock_actual, precio_compra, precio_venta) 
+            $sql = "INSERT INTO productos (codigo, nombre, id_categoria, aplica_iva, stock_minimo, unidad_manejo, unidades_por_empaque, stock_actual, precio_compra, precio_venta) 
                     VALUES 
-                    (:codigo, :nombre, :id_categoria, :aplica_iva, :stock_minimo, :stock_actual, :precio_compra, :precio_venta)";
+                    (:codigo, :nombre, :id_categoria, :aplica_iva, :stock_minimo, :unidad_manejo, :unidades_por_empaque, :stock_actual, :precio_compra, :precio_venta)";
 
             $stmt = $this->pdo->prepare($sql);
             $stmt->execute([
@@ -93,12 +102,14 @@ class productoModel {
                 ':id_categoria' => $id_categoria,
                 ':aplica_iva'   => $aplica_iva,
                 ':stock_minimo' => $stock_minimo,
+                ':unidad_manejo' => $unidad_manejo,
+                ':unidades_por_empaque' => $unidades_por_empaque,
                 ':stock_actual' => $stock_actual,
                 ':precio_compra'=> $precio_compra,
                 ':precio_venta' => $precio_venta
             ]);
 
-            return true;
+            return (int) $this->pdo->lastInsertId();
         } catch(PDOException $e){
             error_log("Error al crear el producto: " . $e->getMessage());
             return false;
@@ -108,13 +119,16 @@ class productoModel {
     // ==================================================================================
     // ACTUALIZAR PRODUCTO
     // ==================================================================================
-    public function actualizarProducto($id_producto, $codigo, $nombre, $id_categoria, $aplica_iva){
+    public function actualizarProducto($id_producto, $codigo, $nombre, $id_categoria, $aplica_iva, $stock_minimo = 0, $unidad_manejo = 'UNIDAD', $unidades_por_empaque = 1){
         try {
             $sql = "UPDATE productos SET
                         codigo = :codigo, 
                         nombre = :nombre, 
                         id_categoria = :id_categoria, 
-                        aplica_iva = :aplica_iva 
+                        aplica_iva = :aplica_iva,
+                        stock_minimo = :stock_minimo,
+                        unidad_manejo = :unidad_manejo,
+                        unidades_por_empaque = :unidades_por_empaque
                     WHERE id_producto = :id_producto";
                 
             $stmt = $this->pdo->prepare($sql);
@@ -123,7 +137,10 @@ class productoModel {
                 ':codigo'        => $codigo,
                 ':nombre'        => $nombre,
                 ':id_categoria'  => $id_categoria,
-                ':aplica_iva'    => $aplica_iva
+                ':aplica_iva'    => $aplica_iva,
+                ':stock_minimo'  => $stock_minimo,
+                ':unidad_manejo' => $unidad_manejo,
+                ':unidades_por_empaque' => $unidades_por_empaque
             ]);
             
             return true;
@@ -233,7 +250,8 @@ class productoModel {
         try {
             $sql = "SELECT 
                         COALESCE(SUM(stock_actual), 0) AS stock_total,
-                        COALESCE(SUM(stock_actual * precio_venta), 0.00) AS valor_inventario
+                        COALESCE(SUM(stock_actual * precio_venta), 0.00) AS valor_inventario,
+                        COALESCE(SUM(CASE WHEN stock_minimo > 0 AND stock_actual < stock_minimo THEN 1 ELSE 0 END), 0) AS bajo_minimo
                     FROM productos 
                     WHERE estado = 1";
                     

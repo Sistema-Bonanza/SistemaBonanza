@@ -11,29 +11,22 @@ require __DIR__ . '/_inicio.php';
 <!-- BANNER HERO ESTANDARIZADO -->
 <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
     <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-        
-        <!-- Bloque Izquierdo: Ícono + Títulos -->
         <div class="is-flex is-align-items-center" style="gap: 1rem;">
-            <!-- Ícono con FontAwesome -->
-            <div class="is-flex is-align-items-center is-justify-content-center" style="width: 56px; height: 56px; background: rgba(255,255,255,0.12); border-radius: 12px; backdrop-filter: blur(4px); flex-shrink: 0;">
-                <i class="fas fa-chart-pie fa-lg has-text-white"></i>
+            <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                <span class="material-symbols-outlined is-size-3 has-text-white">pie_chart</span>
             </div>
-            
             <div>
-                <!-- Título + Tag -->
                 <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
                     <h1 class="title is-4 has-text-white mb-0">Módulo de Reportes</h1>
                     <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
                         <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Centro de Inteligencia
                     </span>
                 </div>
-                <!-- Descripción -->
-                <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 750px;">
+                <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                     Elige el reporte que necesitas. Todos se pueden consultar en pantalla, imprimir y exportar a formato Excel (CSV) o PDF oficial.
                 </p>
             </div>
         </div>
-
     </div>
 </div>
 

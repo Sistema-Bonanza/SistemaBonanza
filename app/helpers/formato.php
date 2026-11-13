@@ -136,3 +136,45 @@ function calcularTotalesDocumento(array $lineas, float $tasaIva): array
         'total'     => deCentavos($subtotal + $iva),
     ];
 }
+
+
+// ============================================================
+// PRECIO POR CANTIDAD (descuento por volumen)
+// ------------------------------------------------------------
+// Cada producto puede tener escalas: "desde N unidades, X % de descuento".
+// Se aplica la escala MÁS ALTA que la cantidad alcance (no se acumulan).
+// El descuento se resta del precio unitario de la línea, así el monto final de la venta baja.
+// El cálculo usa solo enteros para que el servidor (PHP) y la pantalla (JavaScript) den
+// exactamente el mismo precio al centavo. Si cambias esta regla, cambia también
+// precioConDescuento() en assets/js/crearVenta.js.
+// ============================================================
+
+/**
+ * Porcentaje de descuento que corresponde a una cantidad.
+ * $escalas: lista de ['cantidad_minima' => int, 'descuento_pct' => '5.00'].
+ */
+function descuentoPorCantidad(array $escalas, int $cantidad): float
+{
+    $mejorMinimo = 0;
+    $pct         = 0.0;
+    foreach ($escalas as $e) {
+        $min = (int) $e['cantidad_minima'];
+        if ($min <= $cantidad && $min > $mejorMinimo) {
+            $mejorMinimo = $min;
+            $pct         = (float) $e['descuento_pct'];
+        }
+    }
+    return $pct;
+}
+
+/**
+ * Precio unitario con el descuento aplicado, como texto con 2 decimales.
+ * precioConDescuento('1.20', 5) => "1.14"
+ */
+function precioConDescuento($precioLista, float $pct): string
+{
+    $centavos   = aCentavos($precioLista);
+    $puntosBase = (int) round($pct * 100);                 // 5.25 % => 525 (centésimas de punto)
+    $nuevo      = intdiv($centavos * (10000 - $puntosBase) + 5000, 10000);   // redondeo al centavo más cercano
+    return deCentavos(max($nuevo, 0));
+}

@@ -48,34 +48,31 @@ $etiquetaTipo = (($entrada['tipo'] ?? 'aumento') === 'descuento') ? 'descuento' 
             <!-- ========================================== -->
             <!-- BANNER HERO (Alto Contraste) -->
             <!-- ========================================== -->
-            <div class="box mb-5" style="background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%); border-radius: 12px; border: none; overflow: hidden; position: relative; box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.2);">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
                 <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-                    
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
-                        <div class="is-flex is-align-items-center is-justify-content-center has-text-white" style="width: 60px; height: 60px; background: rgba(255,255,255,0.25); border-radius: 12px; backdrop-filter: blur(4px);">
-                            <span class="material-symbols-outlined is-size-2">trending_up</span>
+                        <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                            <span class="material-symbols-outlined is-size-3 has-text-white">trending_up</span>
                         </div>
                         <div>
                             <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
-                                <span class="tag is-white is-rounded has-text-weight-bold is-small" style="background: rgba(255,255,255,0.2); color: white !important;">
-                                    Finanzas y Gestión Comercial
+                                <h1 class="title is-4 has-text-white mb-0">Ajuste de Precios por Porcentaje</h1>
+                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Finanzas y Gestión Comercial
                                 </span>
-                                <span class="has-text-white is-size-7">• Revalorización Masiva</span>
                             </div>
-                            <h1 class="title is-4 has-text-white mb-0 mt-1">Ajuste de Precios por Porcentaje</h1>
-                            <p class="has-text-white-bis is-size-7 mt-1" style="max-width: 700px; opacity: 0.95;">
+                            <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                                 Sube o baja el precio de venta de varios productos a la vez. Primero verás el resultado simulado; nada se guarda en el catálogo central hasta que confirmes la transacción.
                             </p>
                         </div>
                     </div>
-
-                    <div>
-                        <a href="<?= esc(urlAccion('precio', 'tablaPrecios')) ?>" class="button is-white has-text-weight-bold" style="border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                    <div class="buttons mb-0">
+                        <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc(urlAccion('precio', 'tablaPrecios')) ?>">
                             <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                             <span>Volver a la lista</span>
                         </a>
                     </div>
-
+                
                 </div>
             </div>
 
@@ -268,7 +265,7 @@ $etiquetaTipo = (($entrada['tipo'] ?? 'aumento') === 'descuento') ? 'descuento' 
                         <div class="px-5 py-4 has-background-light is-flex is-align-items-center is-justify-content-space-between" style="border-top: 2px solid #cbd5e1;">
                             <span class="is-size-7 has-text-grey-dark">Revisa los valores antes de registrar la actualización oficial en la base de datos.</span>
                             
-                            <form action="<?= esc(urlAccion('precio', 'aplicarMasivo')) ?>" method="POST" id="form-aplicar">
+                            <form action="<?= esc(urlAccion('precio', 'aplicarMasivo')) ?>" method="POST" id="form-aplicar" data-ajax>
                                 <?= campoCsrf() ?>
                                 <input type="hidden" name="id_categoria" value="<?= esc($entrada['id_categoria'] ?? '') ?>">
                                 <input type="hidden" name="tipo" value="<?= esc($entrada['tipo']) ?>">
@@ -334,6 +331,7 @@ $etiquetaTipo = (($entrada['tipo'] ?? 'aumento') === 'descuento') ? 'descuento' 
 
     <!-- Librerías de JavaScript del Sistema -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
     <script src="assets/js/precioMasivo.js?v=<?= time() ?>"></script>
 </body>
 </html>

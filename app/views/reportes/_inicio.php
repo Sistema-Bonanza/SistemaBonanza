@@ -23,6 +23,7 @@ $rifEmpresa    = defined('RIF_EMPRESA') ? RIF_EMPRESA : '';
     <title><?= esc($tituloPagina) ?> · Distribuidora de Alimentos Bonanza</title>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="assets/css/sidebar.css" />

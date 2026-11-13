@@ -64,33 +64,31 @@ $hayPerdidaInicial = ((float) $valorVenta > 0 && (float) $valorCosto > 0 && (flo
         <div class="p-5" style="width: 100%; padding-bottom: 4rem !important;">
 
             <!-- ========== BANNER ========== -->
-            <div class="box mb-6" style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
                 <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
-                        <div class="is-flex is-align-items-center is-justify-content-center has-text-white" style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 12px;">
-                            <span class="material-symbols-outlined is-size-2">sell</span>
+                        <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                            <span class="material-symbols-outlined is-size-3 has-text-white">sell</span>
                         </div>
                         <div>
                             <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
-                                <span class="tag is-rounded has-text-weight-bold is-small" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white;">
-                                    Control de Precios
+                                <h1 class="title is-4 has-text-white mb-0">Actualizar Precio</h1>
+                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Control de Precios
                                 </span>
                             </div>
-                            <h1 class="title is-4 has-text-white mb-0 mt-1">Actualizar Precio</h1>
                             <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                                 Define el costo y el precio de venta. Cada cambio queda registrado en el historial con fecha y usuario.
                             </p>
                         </div>
                     </div>
-
-                    <div>
-                        <a href="<?= esc(urlAccion('precio', 'tablaPrecios')) ?>" class="button is-white is-outlined" style="border-radius: 8px; border-color: rgba(255,255,255,0.3); color: white;">
+                    <div class="buttons mb-0">
+                        <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc(urlAccion('precio', 'tablaPrecios')) ?>">
                             <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                             <span>Volver al listado</span>
                         </a>
                     </div>
-
+                
                 </div>
             </div>
 
@@ -143,7 +141,7 @@ $hayPerdidaInicial = ((float) $valorVenta > 0 && (float) $valorCosto > 0 && (flo
                             </div>
 
                             <!-- ========== FORMULARIO ========== -->
-                            <form action="<?= esc(urlAccion('precio', 'guardarPrecio')) ?>" method="POST" id="form-precio" autocomplete="off">
+                            <form action="<?= esc(urlAccion('precio', 'guardarPrecio')) ?>" method="POST" id="form-precio" autocomplete="off" data-ajax>
 
                                 <?= campoCsrf() ?>
                                 <input type="hidden" name="id_producto" value="<?= (int) $producto['id_producto'] ?>">
@@ -270,6 +268,70 @@ $hayPerdidaInicial = ((float) $valorVenta > 0 && (float) $valorCosto > 0 && (flo
                             </form>
                         </div>
                     </div>
+
+                    <!-- ========== PRECIO POR CANTIDAD (descuento por volumen) ========== -->
+                    <div class="box is-shadowless p-0 mt-5" style="border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; background: white;">
+                        <div class="has-background-link px-5 py-3 is-flex is-align-items-center is-justify-content-space-between">
+                            <div class="is-flex is-align-items-center" style="gap: 8px;">
+                                <span class="material-symbols-outlined has-text-white">stacks</span>
+                                <h2 class="title is-6 mb-0 has-text-white">Precio por cantidad</h2>
+                            </div>
+                            <span class="tag is-white is-light is-rounded is-small has-text-weight-bold" id="escalas-contador"><?= count($escalas) ?> escala(s)</span>
+                        </div>
+
+                        <div class="p-5">
+                            <p class="is-size-7 has-text-grey mb-4">
+                                Define descuentos por volumen: a partir de cierta cantidad en una venta, el precio unitario baja y el
+                                monto final de la factura también. Se aplica la escala más alta que la cantidad alcance.
+                                Se refleja en la tabla maestra de productos y en el formulario de ventas.
+                            </p>
+
+                            <form id="form-escalas" autocomplete="off"
+                                  data-url="<?= esc(urlAccion('precio', 'guardarEscalas')) ?>"
+                                  data-precio-venta="<?= esc(numeroInput($producto['precio_venta'])) ?>"
+                                  data-costo="<?= esc(numeroInput($producto['costo_ref'])) ?>">
+                                <?= campoCsrf() ?>
+                                <input type="hidden" name="id_producto" value="<?= (int) $producto['id_producto'] ?>">
+
+                                <div class="table-container mb-3">
+                                    <table class="table is-fullwidth is-vcentered mb-0">
+                                        <thead>
+                                            <tr class="is-size-7 has-text-grey is-uppercase">
+                                                <th>Desde (unidades)</th>
+                                                <th>Descuento (%)</th>
+                                                <th class="has-text-right">Precio unitario resultante</th>
+                                                <th style="width: 50px;"></th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="escalas-cuerpo">
+                                            <?php foreach ($escalas as $e): ?>
+                                                <tr class="fila-escala">
+                                                    <td><input type="number" name="cantidad_minima[]" class="input is-small" min="2" max="100000" step="1" value="<?= (int) $e['cantidad_minima'] ?>" placeholder="Ej: 10"></td>
+                                                    <td><input type="number" name="descuento_pct[]" class="input is-small" min="0.01" max="99.99" step="0.01" value="<?= esc(numeroInput($e['descuento_pct'])) ?>" placeholder="Ej: 5"></td>
+                                                    <td class="has-text-right has-text-weight-bold has-text-link font-mono celda-precio-escala">—</td>
+                                                    <td><button type="button" class="button is-small is-danger is-light" data-quitar-escala title="Quitar escala"><span class="icon"><span class="material-symbols-outlined">delete</span></span></button></td>
+                                                </tr>
+                                            <?php endforeach; ?>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <p class="is-size-7 has-text-grey has-text-centered mb-3 <?= empty($escalas) ? '' : 'is-hidden' ?>" id="escalas-vacio">
+                                    Este producto no tiene precio por cantidad. Agrega una escala para ofrecer descuentos por volumen.
+                                </p>
+
+                                <div class="is-flex is-justify-content-space-between is-flex-wrap-wrap" style="gap: 10px;">
+                                    <button type="button" class="button is-small is-link is-light" id="btn-agregar-escala">
+                                        <span class="icon"><span class="material-symbols-outlined">add</span></span>
+                                        <span>Agregar escala</span>
+                                    </button>
+                                    <button type="submit" class="button is-link has-text-weight-bold" id="btn-guardar-escalas">
+                                        <span class="icon"><span class="material-symbols-outlined">save</span></span>
+                                        <span>Guardar precio por cantidad</span>
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
                 </div>
 
                 <!-- COLUMNA DERECHA: REGLAS E HISTORIAL -->
@@ -361,5 +423,7 @@ $hayPerdidaInicial = ((float) $valorVenta > 0 && (float) $valorCosto > 0 && (flo
     </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="assets/js/editarPrecio.js?v=<?= time() ?>"></script>
+    <script src="assets/js/precioCantidad.js?v=<?= time() ?>"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
 </body>
 </html>

@@ -61,38 +61,35 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
             <!-- ========================================== -->
             <!-- BANNER HERO INSTITUCIONAL (Alto Contraste) -->
             <!-- ========================================== -->
-            <div class="box mb-5" style="background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 50%, #2563eb 100%); border-radius: 12px; border: none; overflow: hidden; position: relative; box-shadow: 0 10px 15px -3px rgba(30, 58, 138, 0.2);">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
                 <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-                    
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
-                        <div class="is-flex is-align-items-center is-justify-content-center has-text-white" style="width: 60px; height: 60px; background: rgba(255,255,255,0.25); border-radius: 12px; backdrop-filter: blur(4px);">
-                            <span class="material-symbols-outlined is-size-2">dashboard_customize</span>
+                        <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                            <span class="material-symbols-outlined is-size-3 has-text-white">dashboard_customize</span>
                         </div>
                         <div>
                             <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
-                                <span class="tag is-white is-rounded has-text-weight-bold is-small" style="background: rgba(255,255,255,0.2); color: white !important;">
-                                    Operaciones Globales
+                                <h1 class="title is-4 has-text-white mb-0">Panel de Control General</h1>
+                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Operaciones Globales
                                 </span>
-                                <span class="has-text-white is-size-7">• Control de Almacén Central</span>
                             </div>
-                            <h1 class="title is-4 has-text-white mb-0 mt-1">Panel de Control General</h1>
-                            <p class="has-text-white-bis is-size-7 mt-1" style="max-width: 700px; opacity: 0.95;">
+                            <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                                 Planta Central • Almacén General de Dotaciones e Insumos Industriales.
                             </p>
                         </div>
                     </div>
-
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
                         <div class="has-text-right has-text-white is-hidden-touch">
                             <p class="is-size-7 has-text-weight-bold mb-0" id="live-fecha">Sábado, 31 Octubre 2026</p>
                             <p class="is-size-7 has-text-white-bis font-mono" id="live-chronometer">05:14:00 AM</p>
                         </div>
-                        <a href="<?= esc(urlAccion('movimiento', 'crear')) ?>" class="button is-white has-text-weight-bold" style="border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                            <span class="icon has-text-link"><span class="material-symbols-outlined">add_circle</span></span>
+                        <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="<?= esc(urlAccion('movimiento', 'crearCompra')) ?>">
+                            <span class="icon"><span class="material-symbols-outlined">add_circle</span></span>
                             <span>+ Nueva Entrada</span>
                         </a>
                     </div>
- 
+                
                 </div>
             </div>
 
@@ -298,7 +295,7 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
                         <span class="tag is-link is-rounded is-small"></span>
                         <h3 class="title is-6 mb-0 has-text-white has-text-weight-bold">Inventario Completo y Stock en Servidor</h3>
                     </div>
-                    <a href="<?= esc(urlAccion('producto', 'crear')) ?>" class="button is-link is-small has-text-weight-bold">
+                    <a href="<?= esc(urlAccion('producto', 'formCrear')) ?>" class="button is-link is-small has-text-weight-bold">
                         <span class="icon"><span class="material-symbols-outlined">add_box</span></span>
                         <span>Añadir Producto</span>
                     </a>
@@ -345,7 +342,7 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
                                         </td>
                                         <td class="has-text-right">
                                             <div class="is-flex is-justify-content-flex-end" style="gap: 5px;">
-                                                <a href="<?= esc(urlAccion('producto', 'editar', ['id' => $inv['id_producto']])) ?>" class="button is-white is-small" style="border: 1px solid #cbd5e1;" title="Editar">
+                                                <a href="<?= esc(urlAccion('producto', 'formEditar', ['id' => $inv['id_producto']])) ?>" class="button is-white is-small" style="border: 1px solid #cbd5e1;" title="Editar">
                                                     <span class="icon has-text-link"><span class="material-symbols-outlined" style="font-size: 16px;">edit</span></span>
                                                 </a>
                                             </div>

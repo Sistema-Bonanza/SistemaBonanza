@@ -25,38 +25,37 @@ require __DIR__ . '/_inicio.php';
 <!-- ========================================== -->
 <!-- BANNER (mismo estilo del cierre de caja) -->
 <!-- ========================================== -->
+<div id="ajax-reporte" data-ajax-lista>
 <div class="box mb-5 no-print" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
     <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
-
         <div class="is-flex is-align-items-center" style="gap: 1rem;">
-            <div class="is-flex is-align-items-center is-justify-content-center" style="width: 56px; height: 56px; background: rgba(255,255,255,0.12); border-radius: 12px; backdrop-filter: blur(4px); flex-shrink: 0;">
-                <i class="fas fa-clock-rotate-left fa-lg has-text-white"></i>
+            <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                <span class="material-symbols-outlined is-size-3 has-text-white">history</span>
             </div>
             <div>
                 <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
                     <h1 class="title is-4 has-text-white mb-0">Cierres de Caja</h1>
                     <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
-                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span>
-                        Historial
+                        <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Historial
                     </span>
                 </div>
-                <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 750px;">
+                <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                     Consulta los cierres de días anteriores o realiza el cierre de caja de hoy. Cada fila es un día con ventas; ábrela para ver su detalle completo.
                 </p>
             </div>
         </div>
-
         <!-- Botones: volver a la vista inicial del módulo y realizar el cierre -->
         <div class="buttons mb-0">
-            <a href="<?= esc(urlAccion('reporte', 'index')) ?>" class="button is-white is-outlined font-semibold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4); color: #ffffff;">
-                <span class="icon"><i class="fas fa-arrow-left"></i></span>
+            <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc(urlAccion('reporte', 'index')) ?>">
+                <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                 <span>Volver a reportes</span>
             </a>
-            <a href="<?= esc(urlAccion('reporte', 'cierreCaja')) ?>" class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;">
-                <span class="icon"><i class="fas fa-cash-register"></i></span>
+            <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="<?= esc(urlAccion('reporte', 'cierreCaja')) ?>">
+                <span class="icon"><span class="material-symbols-outlined">point_of_sale</span></span>
                 <span>Realizar cierre de caja</span>
             </a>
         </div>
+    
     </div>
 </div>
 
@@ -64,7 +63,7 @@ require __DIR__ . '/_inicio.php';
 <!-- BUSCADOR Y FILTROS -->
 <!-- ========================================== -->
 <div class="box is-shadowless p-4 mb-5 no-print" style="background: white; border: 1px solid #cbd5e1; border-radius: 12px;">
-    <form method="get" action="index.php" class="is-flex is-flex-wrap-wrap is-align-items-flex-end" style="gap: 1rem;">
+    <form method="get" action="index.php" data-ajax-filtro="#ajax-reporte" class="is-flex is-flex-wrap-wrap is-align-items-flex-end" style="gap: 1rem;">
         <input type="hidden" name="controller" value="reporte">
         <input type="hidden" name="action" value="historialCierres">
 
@@ -122,7 +121,6 @@ require __DIR__ . '/_inicio.php';
                     <th class="is-size-7 font-weight-bold is-uppercase has-text-centered">Facturas</th>
                     <th class="is-size-7 font-weight-bold is-uppercase has-text-right">Total vendido</th>
                     <th class="is-size-7 font-weight-bold is-uppercase has-text-right">Total cobrado</th>
-                    <th class="is-size-7 font-weight-bold is-uppercase has-text-right">A crédito</th>
                     <th class="is-size-7 font-weight-bold is-uppercase has-text-centered">Anuladas</th>
                     <th class="is-size-7 font-weight-bold is-uppercase has-text-centered">Estado</th>
                     <th class="is-size-7 font-weight-bold is-uppercase has-text-right no-print">Acciones</th>
@@ -152,9 +150,6 @@ require __DIR__ . '/_inicio.php';
                             <td class="has-text-centered font-weight-semibold"><?= (int) $c['facturas'] ?></td>
                             <td class="has-text-right font-mono font-weight-bold has-text-dark"><?= esc(dinero($c['total'])) ?></td>
                             <td class="has-text-right font-mono font-weight-bold has-text-success"><?= esc(dinero($c['cobrado'])) ?></td>
-                            <td class="has-text-right font-mono <?= $c['credito'] > 0 ? 'has-text-warning-dark font-weight-bold' : 'has-text-grey-light' ?>">
-                                <?= esc(dinero($c['credito'])) ?>
-                            </td>
                             <td class="has-text-centered">
                                 <?php if ($c['anuladas'] > 0): ?>
                                     <span class="tag is-danger is-light" title="Por <?= esc(dinero($c['total_anulado'])) ?>"><?= (int) $c['anuladas'] ?></span>
@@ -189,7 +184,7 @@ require __DIR__ . '/_inicio.php';
                     <?php endforeach; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="8" class="has-text-centered has-text-grey py-6">
+                        <td colspan="7" class="has-text-centered has-text-grey py-6">
                             <span class="icon is-large has-text-grey-light"><i class="fas fa-folder-open fa-2x"></i></span>
                             <p class="has-text-weight-bold mt-2">
                                 <?= $hayFiltros ? 'No se encontraron cierres con esa búsqueda.' : 'Todavía no hay ventas registradas, así que no hay cierres.' ?>
@@ -205,7 +200,7 @@ require __DIR__ . '/_inicio.php';
     </div>
 
     <div class="p-3 is-size-7 has-text-grey" style="background: #f8fafc; border-top: 1px solid #e2e8f0;">
-        Solo suman las ventas registradas; las anuladas se cuentan aparte. «Total cobrado» es lo que entró a caja (sin crédito). Los cierres «Cerrados» son de solo lectura: únicamente se pueden imprimir.
+        Solo suman las ventas registradas; las anuladas se cuentan aparte. «Total cobrado» es lo que entró a caja. Los cierres «Cerrados» son de solo lectura: únicamente se pueden imprimir.
     </div>
 
     <!-- PAGINACIÓN -->
@@ -239,4 +234,5 @@ require __DIR__ . '/_inicio.php';
     <?php endif; ?>
 </div>
 
+</div><!-- /ajax-reporte: los filtros actualizan el reporte por AJAX -->
 <?php require __DIR__ . '/_fin.php'; ?>

@@ -51,32 +51,31 @@ $situaciones = [
             <!-- ========================================== -->
             <!-- BANNER HERO -->
             <!-- ========================================== -->
-            <div class="box mb-6" style="background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+            <div class="box mb-5" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
                 <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
                     <div class="is-flex is-align-items-center" style="gap: 1rem;">
-                        <div class="is-flex is-align-items-center is-justify-content-center has-text-white has-background-white-ter" style="width: 60px; height: 60px; background: rgba(255,255,255,0.2) !important; border-radius: 12px; backdrop-filter: blur(4px);">
-                            <span class="material-symbols-outlined is-size-2">attach_money</span>
+                        <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 12px; backdrop-filter: blur(4px);">
+                            <span class="material-symbols-outlined is-size-3 has-text-white">attach_money</span>
                         </div>
                         <div>
                             <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
-                                <span class="tag is-white is-light is-rounded has-text-weight-bold is-small" style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.2); color: white !important;">
-                                    Finanzas y Comercial
+                                <h1 class="title is-4 has-text-white mb-0">Control de Precios</h1>
+                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #34d399; margin-right: 6px; box-shadow: 0 0 8px #34d399;"></span> Finanzas y Comercial
                                 </span>
-                                <span class="has-text-white-ter is-size-7">• Tarifario General</span>
                             </div>
-                            <h1 class="title is-4 has-text-white mb-0 mt-1">Control de Precios</h1>
                             <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
                                 Define costos y precios de venta, vigila los márgenes operativos y consulta cada cambio realizado.
                             </p>
                         </div>
                     </div>
-
                     <div class="is-flex is-flex-direction-column is-align-items-flex-end" style="gap: 6px;">
                         <span class="tag is-medium has-text-weight-bold" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.25);">
                             <span class="material-symbols-outlined is-size-5 has-text-success mr-2">paid</span>
                             Divisa Base: USD ($)
                         </span>
                     </div>
+                
                 </div>
             </div>
 
@@ -162,8 +161,9 @@ $situaciones = [
                             <span class="tag is-light is-rounded has-text-weight-bold"><?= count($productos) ?> listados</span>
                         </div>
 
+                        <div id="ajax-precios" data-ajax-lista>
                         <!-- Barra de Filtros Backend[cite: 15] -->
-                        <form method="GET" action="index.php" class="mb-5 p-3 has-background-white-bis" style="border: 1px solid #e2e8f0; border-radius: 10px;">
+                        <form method="GET" action="index.php" data-ajax-filtro="#ajax-precios" class="mb-5 p-3 has-background-white-bis" style="border: 1px solid #e2e8f0; border-radius: 10px;">
                             <input type="hidden" name="controller" value="precio">
                             <input type="hidden" name="action" value="tablaPrecios">
 
@@ -321,6 +321,8 @@ $situaciones = [
                             </table>
                         </div>
 
+                        </div><!-- /ajax-precios -->
+
                         <!-- Nota de Cálculo[cite: 15] -->
                         <div class="is-flex is-align-items-start pt-3" style="gap: 8px; border-top: 1px solid #f1f5f9;">
                             <span class="material-symbols-outlined is-size-6 has-text-grey">functions</span>
@@ -337,6 +339,7 @@ $situaciones = [
         </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
     <script>
         // Interceptor para el mensaje Flash
         document.addEventListener('DOMContentLoaded', () => {
