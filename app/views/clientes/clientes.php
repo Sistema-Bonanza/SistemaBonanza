@@ -27,8 +27,8 @@ $countConSaldo     = $countConSaldo ?? 0;
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
     
     <!-- Tus estilos base -->
-    <link rel="stylesheet" href="assets/css/sidebar.css" />
-    <link rel="stylesheet" href="assets/css/tablas.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/sidebar.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/tablas.css" />
 </head>
 
 <body class="is-flex" style="background-color: #f8f9ff; height: 100vh; overflow: hidden; width: 100%;">
@@ -67,7 +67,7 @@ $countConSaldo     = $countConSaldo ?? 0;
                     </div>
                     <div class="buttons mb-0">
                         <!-- Enlace dinámico con tu controlador actual -->
-                        <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="index.php?controller=cliente&action=formcrearcliente">
+                        <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="<?= esc(urlAccion('cliente', 'formcrearcliente')) ?>">
                             <span class="icon"><span class="material-symbols-outlined">add</span></span>
                             <span>Añadir Cliente</span>
                         </a>
@@ -261,13 +261,26 @@ $countConSaldo     = $countConSaldo ?? 0;
                                         <td class="has-text-right">
                                             <div class="buttons is-right mb-0">
                                                 <!-- Botón Editar (Tradicional) -->
-                                                <a href="index.php?controller=cliente&action=formeditarcliente&id=<?= $c['id_cliente'] ?? '' ?>" class="button is-small is-info is-light" title="Editar Cliente">
+                                                <a href="<?= esc(urlAccion('cliente', 'formeditarcliente', ['id' => (int) ($c['id_cliente'] ?? 0)])) ?>" class="button is-small is-info is-light" title="Editar Cliente">
                                                     <span class="icon"><span class="material-symbols-outlined">edit</span></span>
                                                 </a>
-                                                <!-- Botón Eliminar/Inactivar (Preparado para AJAX) -->
-                                                <button type="button" class="button is-small is-danger is-light btn-eliminar-ajax" data-id="<?= $c['id_cliente'] ?? '' ?>" data-nombre="<?= htmlspecialchars($c['nombre_razon_social'] ?? '') ?>" title="Inactivar Cliente">
-                                                    <span class="icon"><span class="material-symbols-outlined">delete</span></span>
-                                                </button>
+                                                <!-- Botón Eliminar/Inactivar (Estandarizado para ajax.js) -->
+                                                    <?php if ((int) ($c['estado'] ?? 1) === 1): ?>
+                                                        <form action="<?= esc(urlAccion('cliente', 'eliminarcliente')) ?>" method="POST" style="display: inline-block;" data-ajax>
+                                                            <?= campoCsrf() ?>
+                                                            <input type="hidden" name="id" value="<?= (int) ($c['id_cliente'] ?? 0) ?>">
+                                                            <button type="button"
+                                                                    class="button is-small is-danger is-light"
+                                                                    title="Inactivar Cliente"
+                                                                    data-confirmar="¿Seguro que deseas inactivar al cliente <?= esc($c['nombre_razon_social'] ?? '') ?>?">
+                                                                <span class="icon"><span class="material-symbols-outlined">delete</span></span>
+                                                            </button>
+                                                        </form>
+                                                    <?php else: ?>
+                                                        <button type="button" class="button is-small is-light has-text-grey-light" disabled title="Este cliente ya se encuentra inactivo">
+                                                            <span class="icon"><span class="material-symbols-outlined">lock</span></span>
+                                                        </button>
+                                                    <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>
@@ -289,10 +302,13 @@ $countConSaldo     = $countConSaldo ?? 0;
         </div>
     </main>
 
-    <!-- Librerías JS -->
+   <!-- Librerías JS -->
+    <script>
+        const URL_BASE = <?= json_encode(URL_BASE) ?>;
+        window.csrfToken = <?= json_encode(tokenCsrf()) ?>;
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
-    <!-- Tu archivo JS Separado -->
-    <script src="assets/js/cliente.js"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/cliente.js?v=<?= time() ?>"></script>
 </body>
 </html>

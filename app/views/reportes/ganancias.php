@@ -65,7 +65,7 @@ require __DIR__ . '/_inicio.php';
         </div>
         <!-- Bloque Derecho: Botones de Acción (Separación corregida) -->
         <div class="is-flex is-align-items-center flex-shrink-0" style="gap: 0.75rem;">
-            <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="index.php?controller=reporte&action=index">
+            <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc(urlAccion('reporte', 'index')) ?>">
                 <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                 <span>Todos los reportes</span>
             </a>

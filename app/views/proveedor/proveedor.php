@@ -21,8 +21,8 @@ $countInactivos = $totalProveedores - $countActivos;
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
 
     <!-- Hojas de estilo del sistema -->
-    <link rel="stylesheet" href="assets/css/sidebar.css" />
-    <link rel="stylesheet" href="assets/css/tablas.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/sidebar.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/tablas.css" />
 </head>
 
 <body class="is-flex" style="background-color: #f8f9ff; height: 100vh; overflow: hidden; width: 100%;">

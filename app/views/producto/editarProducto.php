@@ -12,9 +12,9 @@
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
     
     <!-- CSS del Sistema -->
-    <link rel="stylesheet" href="assets/css/sidebar.css" />
-    <link rel="stylesheet" href="assets/css/dashboard.css" />
-    <link rel="stylesheet" href="assets/css/editar-producto.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/sidebar.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/dashboard.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/editar-producto.css" />
 </head>
 <body class="is-flex" style="height: 100vh; overflow: hidden; width: 100%;">
     

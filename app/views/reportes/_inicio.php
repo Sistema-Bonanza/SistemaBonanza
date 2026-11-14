@@ -26,8 +26,8 @@ $rifEmpresa    = defined('RIF_EMPRESA') ? RIF_EMPRESA : '';
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="assets/css/sidebar.css" />
-    <link rel="stylesheet" href="assets/css/reportes.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/sidebar.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/reportes.css" />
 </head>
 <body>
 

@@ -11,8 +11,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
     
     <!-- CSS del sistema -->
-    <link rel="stylesheet" href="assets/css/sidebar.css" />
-    <link rel="stylesheet" href="assets/css/tablas.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/sidebar.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/tablas.css" />
 </head>
 
 <body class="is-flex" style="background-color: #f8f9ff; height: 100vh; overflow: hidden; width: 100%;">
@@ -274,13 +274,19 @@
             window.csrfToken = "<?= esc(tokenCsrf()) ?>";
         </script>
         
-       <!-- 1. Cargamos SweetAlert2 primero -->
+       <!-- 1. Inyectar variables globales para JS -->
+        <script>
+            const URL_BASE = <?= json_encode(URL_BASE) ?>;
+            window.csrfToken = "<?= esc(tokenCsrf()) ?>";
+        </script>
+
+        <!-- 2. Cargamos SweetAlert2 una sola vez -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-        <!-- 2. Cargamos tu archivo JavaScript de la tabla -->
-        <script src="assets/js/movimiento.js?v=<?= time() ?>"></script>
+        <!-- 3. Cargamos tu archivo JavaScript de la tabla -->
+        <script src="<?= esc(URL_BASE) ?>/assets/js/movimiento.js?v=<?= time() ?>"></script>
 
-    <!-- 3. El interceptor inteligente de alertas -->
+    <!-- 4. El interceptor inteligente de alertas -->
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             // Buscamos directamente la caja oculta por su ID exacto

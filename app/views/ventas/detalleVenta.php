@@ -23,8 +23,8 @@ foreach ($detalles as $linea) {
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="assets/css/sidebar.css" />
-    <link rel="stylesheet" href="assets/css/ventas.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/sidebar.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/ventas.css" />
 </head>
 <body<?= $autoImprimir ? ' data-autoimprimir' : '' ?>>
 
@@ -43,7 +43,7 @@ foreach ($detalles as $linea) {
                 </div>
                 <div class="level-right">
                     <div class="buttons">
-                        <a href="<?= esc(urlAccion('venta', 'tablaVentas')) ?>" class="button is-light">
+                        <a href="<?= esc(urlAccion('movimiento', 'tablaMovimientos')) ?>" class="button is-light">
                             <span class="icon is-small"><i class="fas fa-arrow-left"></i></span>
                             <span>Volver al listado</span>
                         </a>

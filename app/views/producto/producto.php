@@ -41,8 +41,8 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet">
     
     <!-- 3. CSS externos originales de tu sistema -->
-    <link rel="stylesheet" href="assets/css/sidebar.css" />
-    <link rel="stylesheet" href="assets/css/tablas.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/sidebar.css">
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/tablas.css" />
 </head>
 <body class="is-flex" style="height: 100vh; overflow: hidden; width: 100%;">
     
@@ -298,16 +298,16 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                         <td class="py-3 px-4 has-text-centered align-middle">
                                             <div class="buttons is-centered mb-0 are-small">
                                                 <!-- BOTÓN EDITAR -->
-                                                <a href="index.php?controller=producto&action=formEditar&id=<?= $id ?>" class="button is-light has-text-link has-text-weight-bold" title="Editar">
+                                                <a href="<?= esc(urlAccion('producto', 'formEditar', ['id' => $id])) ?>" class="button is-light has-text-link has-text-weight-bold" title="Editar">
                                                     <span class="icon"><span class="material-symbols-outlined is-size-6">edit</span></span>
                                                     <span>Editar</span>
                                                 </a>
                                                 
                                                 <!-- BOTÓN DESACTIVAR (Controlado por SweetAlert) -->
-                                            <form action="index.php?controller=producto&action=eliminarproducto" method="POST" style="display: inline-block;" data-ajax>
+                                            <form action="<?= esc(urlAccion('producto', 'eliminarproducto')) ?>" method="POST" style="display: inline-block;" data-ajax>
                                                 <?= campoCsrf() ?>
-                                                <input type="hidden" name="id" value="<?= htmlspecialchars($id) ?>">
-                                                
+                                                <input type="hidden" name="id" value="<?= esc($id) ?>">
+
                                                 <!-- Nota que cambiamos type="submit" a type="button" y agregamos el onclick -->
                                                 <button type="button" class="button is-warning is-small is-light" title="Desactivar Producto" onclick="confirmarDesactivacion(this.form)">
                                                     <span class="icon"><span class="material-symbols-outlined is-size-6">block</span></span>

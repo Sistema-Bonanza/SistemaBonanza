@@ -32,7 +32,7 @@ class CategoriaController {
         require_once __DIR__ . '/../../app/views/categorias/categorias.php';
     }
 
-    public function fromcrearCategoria() {
+    public function formcrearCategoria() {
         exigirSesion();
         evitarCache();
 
@@ -40,7 +40,7 @@ class CategoriaController {
         require_once __DIR__ . '/../../app/views/categorias/crearCategoria.php';
     }
 
-    public function fromeditarCategoria() {
+    public function formeditarCategoria() {
         exigirSesion();
         evitarCache();
 
@@ -66,7 +66,7 @@ class CategoriaController {
 
     public function guardarCategoria() {
         exigirSesion();
-        $urlFormulario = urlAccion('categoria', 'fromcrearCategoria');
+        $urlFormulario = urlAccion('categoria', 'formcrearCategoria');
         exigirPost($urlFormulario);
 
         list($datos, $errores) = $this->validarDatos(null);
@@ -94,7 +94,7 @@ class CategoriaController {
             redirigir(urlAccion('categoria', 'formcategoria'));
         }
 
-        $urlFormulario = urlAccion('categoria', 'fromeditarCategoria', ['id' => $id]);
+        $urlFormulario = urlAccion('categoria', 'formeditarcategoria', ['id' => $id]);
 
         list($datos, $errores) = $this->validarDatos($id);
         if (!empty($errores)) {

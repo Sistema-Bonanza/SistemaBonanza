@@ -48,8 +48,7 @@ class SistemaController{
                 $_SESSION['username'] = $datosUsuario['username'];
                 $_SESSION['is_admin'] = $datosUsuario['rol'];
 
-                header("Location: index.php?controller=sistema&action=dashboard");
-                exit();
+               redirigir(URL_DASHBOARD);
             } else {
                 $errorLogin = "Datos inválidos. Por favor, verifica tu usuario y contraseña.";
                 require_once __DIR__ . '/../views/login/login.php'; 
@@ -59,10 +58,7 @@ class SistemaController{
     }
 
     public function dashboard() {
-        if (!isset($_SESSION['user_id'])) {
-            header("Location: index.php");
-            exit();
-        }
+            exigirSesion();
 
         $inventario  = $this->productoModel->obtenerProductos();
         $catalogo    = $this->productoModel->obtenerProductosActivos(12); // Productos para el catálogo rápido
@@ -94,18 +90,30 @@ class SistemaController{
             'proveedores_activos' => count($proveedores)
         ];
 
-        header("Cache-Control: no-cache, no-store, must-revalidate");
-        header("Pragma: no-cache");
-        header("Expires: 0");
+       evitarCache(); // Usa el helper centralizado de seguridad.php
 
         require_once __DIR__ . '/../views/dashboard.php';
     }
 
 
     public function logout(){
-        $_SESSION = array();
-        session_destroy();
-        header("Location: index.php");
-        exit();
+        asegurarSesion();
+    $_SESSION = [];
+
+    if (ini_get('session.use_cookies')) {
+        $params = session_get_cookie_params();
+        setcookie(
+            session_name(),
+            '',
+            time() - 42000,
+            $params['path'],
+            $params['domain'],
+            $params['secure'],
+            $params['httponly']
+        );
+    }
+
+    session_destroy();
+    redirigir(URL_LOGIN); // Redirige limpiamente a /SistemaBonanza/public/
     }
 }

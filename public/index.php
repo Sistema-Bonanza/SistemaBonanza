@@ -182,8 +182,8 @@ $rutas = [
         'clase'    => 'CategoriaController',
         'acciones' => [
             'formcategoria'       => ruta('GET',  ROLES_ADMIN),
-            'fromcrearcategoria'  => ruta('GET',  ROLES_ADMIN),
-            'fromeditarcategoria' => ruta('GET',  ROLES_ADMIN),
+            'formcrearcategoria'  => ruta('GET',  ROLES_ADMIN),
+            'formeditarcategoria' => ruta('GET',  ROLES_ADMIN),
             'guardarcategoria'    => ruta('POST', ROLES_ADMIN, false),  // LEGADO: sin token
             'actualizarcategoria' => ruta('POST', ROLES_ADMIN, false),  // LEGADO: sin token
             'eliminarcategoria'   => ruta('POST', ROLES_ADMIN),         // inactivar (AJAX, con token). Antes era un enlace GET sin ruta
@@ -272,7 +272,6 @@ $rutas = [
          'archivo'  => 'VentaController.php',
          'clase'    => 'VentaController',
          'acciones' => [
-             'tablaventas'   => ruta('GET',  ROLES_TODOS),
              'verdetalleventa'   => ruta('GET',  ROLES_TODOS),
              'crearventa' => ruta('GET', ROLES_TODOS),
              'guardarventa' => ruta('POST', ROLES_TODOS), 
@@ -439,11 +438,26 @@ function origenValido(): bool
 evitarCache();   // las páginas del sistema no se guardan en caché (botón "atrás" tras cerrar sesión)
 
 // --- Puerta 1: la ruta existe en la lista blanca -----------------------------
-$controlador = $_GET['controller'] ?? 'sistema';
-$accion      = $_GET['action']     ?? 'index';
-// Si llega un arreglo (?controller[]=x) se descarta; si es texto, a minúsculas.
-$controlador = is_string($controlador) ? strtolower($controlador) : '';
-$accion      = is_string($accion)      ? strtolower($accion)      : '';
+$rutaUrl = $_GET['ruta'] ?? null;
+
+if (is_string($rutaUrl) && trim($rutaUrl, '/') !== '') {
+    $segmentos = explode('/', trim($rutaUrl, '/'));
+
+    // Si tiene más de 2 niveles (ej: /reporte/variacion/extra), no es una ruta válida
+    if (count($segmentos) > 2) {
+        registrarEvento('ruta_inexistente', $rutaUrl);
+        responderError(404, 'La página que buscas no existe.');
+    }
+
+    $controlador = strtolower($segmentos[0] ?? '');
+    $accion      = strtolower($segmentos[1] ?? 'index');
+} else {
+    // Respaldo para enlaces legados con ?controller=...&action=...
+    $controlador = $_GET['controller'] ?? 'sistema';
+    $accion      = $_GET['action']     ?? 'index';
+    $controlador = is_string($controlador) ? strtolower($controlador) : '';
+    $accion      = is_string($accion)      ? strtolower($accion)      : '';
+}
 
 if (!preg_match('/^[a-z0-9]{1,40}\z/', $controlador)
     || !preg_match('/^[a-z0-9]{1,40}\z/', $accion)
@@ -452,6 +466,7 @@ if (!preg_match('/^[a-z0-9]{1,40}\z/', $controlador)
     responderError(404, 'La página que buscas no existe.');
 }
 
+// ESTAS 3 LÍNEAS SON LAS QUE FALTABAN:
 $definicion = $rutas[$controlador];
 $ruta       = $definicion['acciones'][$accion];
 $json       = $ruta['json'];

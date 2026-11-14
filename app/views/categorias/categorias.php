@@ -26,8 +26,8 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
     
-    <link rel="stylesheet" href="assets/css/sidebar.css" />
-    <link rel="stylesheet" href="assets/css/tablas.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/sidebar.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/tablas.css" />
 </head>
 
 <body class="is-flex" style="background-color: #f8f9ff; height: 100vh; overflow: hidden; width: 100%;">
@@ -66,7 +66,7 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
                         </div>
                     </div>
                     <div class="buttons mb-0">
-                        <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="index.php?controller=categoria&action=fromcrearCategoria">
+                        <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="<?= esc(urlAccion('categoria', 'formcrearCategoria')) ?>">
                             <span class="icon"><span class="material-symbols-outlined">add</span></span>
                             <span>Nueva Categoría</span>
                         </a>
@@ -247,7 +247,7 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
                                         <td class="has-text-right">
                                             <div class="buttons is-right mb-0">
                                                 <!-- Botón de Editar siempre disponible -->
-                                                <a href="index.php?controller=categoria&action=fromeditarCategoria&id=<?= $categoria['id_categoria'] ?? '' ?>" class="button is-small is-info is-light" title="Editar Categoría">
+                                                <a href="<?= esc(urlAccion('categoria', 'formeditarcategoria', ['id' => $categoria['id_categoria'] ?? 0])) ?>" class="button is-small is-info is-light" title="Editar Categoría">
                                                     <span class="icon"><span class="material-symbols-outlined">edit</span></span>
                                                 </a>
                                                 
@@ -319,7 +319,7 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const cajaFlash = document.getElementById('caja-flash-oculta');

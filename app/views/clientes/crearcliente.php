@@ -11,8 +11,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
     
     <!-- Hojas de estilo del sistema -->
-    <link rel="stylesheet" href="assets/css/sidebar.css" />
-    <link rel="stylesheet" href="assets/css/tablas.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/sidebar.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/tablas.css" />
 </head>
 
 <body class="is-flex" style="background-color: #f8f9ff; height: 100vh; overflow: hidden; width: 100%;">
@@ -52,7 +52,7 @@
                         </div>
                     </div>
                     <div class="buttons mb-0">
-                        <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="index.php?controller=cliente&action=tablaClientes">
+                        <a class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);" href="<?= esc(urlAccion('cliente', 'tablaclientes')) ?>">
                             <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
                             <span>Volver al listado</span>
                         </a>
@@ -182,7 +182,7 @@
 
                         <!-- Botones de Acción -->
                         <div class="is-flex is-align-items-center is-justify-content-flex-end" style="border-top: 1px solid #f1f5f9; padding-top: 1.5rem; gap: 12px;">
-                            <a href="index.php?controller=cliente&action=tablaClientes" class="button is-light has-text-weight-semibold" style="border-radius: 8px;">
+                            <a href="<?= esc(urlAccion('cliente', 'tablaclientes')) ?>" class="button is-light has-text-weight-semibold" style="border-radius: 8px;">
                                 Cancelar
                             </a>
                             <button type="submit" class="button is-link has-text-weight-bold" style="border-radius: 8px;">

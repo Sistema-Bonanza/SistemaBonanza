@@ -127,7 +127,7 @@ class VentaController
 
         if ($venta === null) {
             setFlash('error', 'La venta que buscas no existe.');
-            redirigir(urlAccion('venta', 'tablaVentas'));
+            redirigir(urlAccion('movimiento', 'tablaMovimientos'));
         }
 
         $detalles        = $this->ventaModel->obtenerDetalle($id);
@@ -377,7 +377,7 @@ class VentaController
     {
         exigirRol(self::ROLES_ANULAR);
 
-        $urlListado = urlAccion('venta', 'tablaVentas');
+        $urlListado = urlAccion('movimiento', 'tablaMovimientos');
         $id         = validarEntero($_POST['id_venta'] ?? null, 1);
         $urlDetalle = ($id !== null) ? urlAccion('venta', 'verDetalleVenta', ['id' => $id]) : $urlListado;
 

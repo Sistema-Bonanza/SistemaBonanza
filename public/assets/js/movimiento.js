@@ -20,7 +20,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
         try {
             // 2. Enviamos la petición por GET con la firma oficial de AJAX
-            const respuesta = await fetch(`index.php?controller=movimiento&action=buscarajax&${params.toString()}`, {
+            const respuesta = await fetch(`${URL_BASE}/movimiento/buscarajax?${params.toString()}`, {
                 method: 'GET',
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest'

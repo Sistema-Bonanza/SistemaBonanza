@@ -23,16 +23,22 @@
 // 1. CONFIGURACIÓN
 // ============================================================
 
-// Claves de $_SESSION que escribe tu SistemaController::procesarLogin().
-// Si algún día las renombras, solo cambias estas líneas.
 const SESION_ID  = 'user_id';
-const SESION_ROL = 'is_admin';   // OJO: el nombre engaña. Guarda el TEXTO del rol
-                                 // (por ejemplo 'admin'), no un true/false.
+const SESION_ROL = 'is_admin';
 
-const URL_LOGIN     = 'index.php';
-const URL_DASHBOARD = 'index.php?controller=sistema&action=dashboard';
+// Calcula la ruta base física respecto a DOCUMENT_ROOT (no falla en :3000 ni en subrutas)
+$docRoot   = str_replace('\\', '/', realpath($_SERVER['DOCUMENT_ROOT'] ?? '') ?: '');
+$dirPublic = str_replace('\\', '/', realpath(__DIR__ . '/../../public') ?: '');
 
+if ($docRoot !== '' && strpos($dirPublic, $docRoot) === 0) {
+    $rutaRelativa = trim(substr($dirPublic, strlen($docRoot)), '/');
+    define('URL_BASE', $rutaRelativa === '' ? '' : '/' . $rutaRelativa);
+} else {
+    define('URL_BASE', '');
+}
 
+define('URL_LOGIN',     URL_BASE . '/');
+define('URL_DASHBOARD', URL_BASE . '/sistema/dashboard');
 // ============================================================
 // 2. SALIDA Y NAVEGACIÓN
 // ============================================================
@@ -59,13 +65,22 @@ function esc($valor): string
  * Evita errores de tipeo y de mayúsculas. En HTML imprímela con esc():
  *   <a href="<?= esc(urlAccion('compra', 'crear')) ?>">
  */
-function urlAccion(string $controlador, string $accion, array $parametros = []): string
-{
-    // El operador + conserva las claves de la izquierda: un parámetro extra
-    // nunca puede pisar 'controller' ni 'action'.
-    return 'index.php?' . http_build_query(
-        ['controller' => $controlador, 'action' => $accion] + $parametros
-    );
+function urlAccion(string $controlador, string $accion, array $parametros = []): string{
+    $controlador = strtolower(trim($controlador));
+    $accion      = strtolower(trim($accion));
+
+    // La pantalla inicial (login) apunta a la raíz limpia
+    if ($controlador === 'sistema' && $accion === 'index') {
+        $ruta = URL_LOGIN;
+    } else {
+        $ruta = URL_BASE . '/' . rawurlencode($controlador) . '/' . rawurlencode($accion);
+    }
+
+    if (!empty($parametros)) {
+        $ruta .= '?' . http_build_query($parametros);
+    }
+
+    return $ruta;
 }
 
 /**

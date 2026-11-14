@@ -1,0 +1,12 @@
+<IfModule mod_rewrite.c>
+    # Evita que Apache intente adivinar nombres de archivos antes que el router
+    Options -MultiViews
+    RewriteEngine On
+
+    # Si la ruta NO corresponde a un archivo real (CSS, JS, imágenes) ni a una carpeta...
+    RewriteCond %{REQUEST_FILENAME} !-f
+    RewriteCond %{REQUEST_FILENAME} !-d
+
+    # ...envíala silenciosamente a index.php en el parámetro interno 'ruta'
+    RewriteRule ^(.*)$ index.php?ruta=$1 [QSA,L]
+</IfModule>
