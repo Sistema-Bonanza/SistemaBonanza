@@ -4,8 +4,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php");
-    exit();
+    redirigir(URL_LOGIN);
 }
 
 // Configuración de etiquetas según la situación del precio[cite: 15]
@@ -163,7 +162,7 @@ $situaciones = [
 
                         <div id="ajax-precios" data-ajax-lista>
                         <!-- Barra de Filtros Backend[cite: 15] -->
-                        <form method="GET" action="index.php" data-ajax-filtro="#ajax-precios" class="mb-5 p-3 has-background-white-bis" style="border: 1px solid #e2e8f0; border-radius: 10px;">
+                        <form method="GET" action="<?= esc(urlAccion('precio', 'tablaprecios')) ?>" data-ajax-filtro="#ajax-precios" class="mb-5 p-3 has-background-white-bis" style="border: 1px solid #e2e8f0; border-radius: 10px;">
                             <input type="hidden" name="controller" value="precio">
                             <input type="hidden" name="action" value="tablaPrecios">
 
@@ -215,7 +214,7 @@ $situaciones = [
                                 </div>
 
                                 <div class="column is-12 mt-2 pt-0 is-flex is-justify-content-flex-end" style="gap: 8px;">
-                                    <a href="<?= esc(urlAccion('precio', 'tablaPrecios')) ?>" class="button is-small is-white border" style="border-color: #e2e8f0;">Limpiar</a>
+                                    <form method="GET" action="<?= esc(urlAccion('precio', 'tablaprecios')) ?>" data-ajax-filtro="#ajax-precios" class="mb-5 p-3 has-background-white-bis" style="border: 1px solid #e2e8f0; border-radius: 10px;">
                                     <button type="submit" class="button is-small is-link">Filtrar Base de Datos</button>
                                 </div>
                             </div>
@@ -339,7 +338,8 @@ $situaciones = [
         </div>
     </main>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/tablaPrecio.js?v=<?= time() ?>"></script>
     <script>
         // Interceptor para el mensaje Flash
         document.addEventListener('DOMContentLoaded', () => {

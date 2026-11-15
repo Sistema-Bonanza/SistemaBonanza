@@ -85,8 +85,9 @@
 
 
                         <?= mostrarFlash() ?>
-                    <form action="index.php?controller=sistema&action=procesarLogin" method="POST" id="loginForm" onsubmit="return handleLogin();">
+                    <form action="<?= esc(urlAccion('sistema', 'procesarlogin')) ?>" method="POST" id="loginForm" onsubmit="return handleLogin();">
                         <input type="hidden" name="login_form" value="1">
+                        <?= campoCsrf() ?>
 
                         <div class="field mb-4">
                             <label class="label has-text-dark is-size-7 has-text-weight-bold">Usuario o Correo <span class="has-text-danger">*</span></label>
@@ -142,12 +143,12 @@
      <!-- CDN de SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <script>
-        // Puente seguro: Pasamos el error de PHP a una variable global de JS
-        const errorMessage = "<?= isset($errorLogin) && !empty($errorLogin) ? htmlspecialchars($errorLogin) : '' ?>";
-    </script>
+    <<script>
+    // Puente seguro: Pasamos el error de PHP a una variable global de JS
+    const errorMessage = <?= json_encode($errorLogin ?? '') ?>;
+</script>
 
-    <!-- Archivo JavaScript externo y desacoplado -->
-    <script src="assets/js/login.js"></script>
+<!-- Archivo JavaScript externo y desacoplado -->
+<script src="<?= esc(URL_BASE) ?>/assets/js/login.js?v=<?= time() ?>"></script>
 </body>
 </html>

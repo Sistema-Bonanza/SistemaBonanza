@@ -282,7 +282,7 @@ $usuarios = $usuarios ?? [];
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
-    <script src="assets/js/usuario.js"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/usuario.js"></script>
 </body>
 </html>

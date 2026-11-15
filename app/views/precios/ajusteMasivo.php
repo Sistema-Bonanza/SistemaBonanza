@@ -26,8 +26,8 @@ $etiquetaTipo = (($entrada['tipo'] ?? 'aumento') === 'descuento') ? 'descuento' 
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
 
     <!-- Hojas de estilo del sistema -->
-    <link rel="stylesheet" href="assets/css/sidebar.css" />
-    <link rel="stylesheet" href="assets/css/tablas.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/sidebar.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/tablas.css" />
 </head>
 
 <body class="is-flex" style="background-color: #f1f5f9; height: 100vh; overflow: hidden; width: 100%;">
@@ -331,7 +331,7 @@ $etiquetaTipo = (($entrada['tipo'] ?? 'aumento') === 'descuento') ? 'descuento' 
 
     <!-- Librerías de JavaScript del Sistema -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
-    <script src="assets/js/precioMasivo.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/precioMasivo.js?v=<?= time() ?>"></script>
 </body>
 </html>

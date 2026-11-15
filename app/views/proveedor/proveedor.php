@@ -62,7 +62,7 @@ $countInactivos = $totalProveedores - $countActivos;
                         </div>
                     </div>
                     <div class="buttons mb-0">
-                        <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="index.php?controller=proveedor&action=formcrearproveedor">
+                        <a class="button is-white has-text-link has-text-weight-bold" style="border-radius: 8px;" href="<?= esc(urlAccion('proveedor', 'formcrearproveedor')) ?>">
                             <span class="icon"><span class="material-symbols-outlined">add</span></span>
                             <span>Añadir Proveedor</span>
                         </a>
@@ -247,23 +247,25 @@ $countInactivos = $totalProveedores - $countActivos;
                                         <!-- Acciones -->
                                         <td class="is-vcentered text-right" style="text-align: right;">
                                             <div class="buttons is-right mb-0" style="gap: 6px; justify-content: flex-end;">
-                                                
+
                                                 <!-- Editar -->
-                                                <a href="<?= urlAccion('proveedor', 'formedit') ?>&id=<?= $idProv ?>" class="button is-small is-link is-light" title="Editar proveedor">
+                                                <a href="<?= esc(urlAccion('proveedor', 'formedit', ['id' => (int) $idProv])) ?>" class="button is-small is-link is-light" title="Editar proveedor">
                                                     <span class="icon"><span class="material-symbols-outlined">edit</span></span>
                                                 </a>
 
-                                                <!-- Soft Delete / Reactivación en 1 Clic -->
-                                                <button type="button" 
-                                                        class="button is-small <?= $esActivo ? 'is-danger' : 'is-success' ?> is-light btn-toggle-estado" 
-                                                        data-nombre="<?= htmlspecialchars($razonSocial) ?>" 
-                                                        data-activo="<?= $esActivo ? '1' : '0' ?>"
-                                                        data-url="<?= urlAccion('proveedor', 'cambiarEstado') ?>&id=<?= $idProv ?>"
-                                                        title="<?= $esActivo ? 'Inactivar proveedor' : 'Reactivar proveedor' ?>">
-                                                    <span class="icon">
-                                                        <span class="material-symbols-outlined"><?= $esActivo ? 'block' : 'check_circle' ?></span>
-                                                    </span>
-                                                </button>
+                                                <!-- Soft Delete / Reactivación con ajax.js y CSRF -->
+                                                <form action="<?= esc(urlAccion('proveedor', 'cambiarestado')) ?>" method="POST" style="display: inline-block;" data-ajax>
+                                                    <?= campoCsrf() ?>
+                                                    <input type="hidden" name="id" value="<?= (int) $idProv ?>">
+                                                    <button type="button"
+                                                            class="button is-small <?= $esActivo ? 'is-danger' : 'is-success' ?> is-light"
+                                                            title="<?= $esActivo ? 'Inactivar proveedor' : 'Reactivar proveedor' ?>"
+                                                            data-confirmar="¿Seguro que deseas <?= $esActivo ? 'inactivar' : 'reactivar' ?> al proveedor <?= esc($razonSocial) ?>?">
+                                                        <span class="icon">
+                                                            <span class="material-symbols-outlined"><?= $esActivo ? 'block' : 'check_circle' ?></span>
+                                                        </span>
+                                                    </button>
+                                                </form>
 
                                             </div>
                                         </td>
@@ -287,7 +289,7 @@ $countInactivos = $totalProveedores - $countActivos;
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
-    <script src="assets/js/proveedor.js"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/proveedor.js"></script>
 </body>
 </html>

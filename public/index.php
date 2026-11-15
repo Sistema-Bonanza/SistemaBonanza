@@ -26,7 +26,8 @@
  *   4. Sesión endurecida       8. Despacho
  */
 
-
+        // Para iniciar sesion tiene que ser desde la siguiente ruta: http://localhost/SistemaBonanza/public/
+        
 // ============================================================
 // 1. ARCHIVOS ESTÁTICOS (solo con el servidor interno: php -S)
 // Bajo Apache/XAMPP no hace nada: Apache sirve el CSS por su cuenta.
@@ -138,7 +139,7 @@ $rutas = [
         'clase'    => 'SistemaController',
         'acciones' => [
             'index'         => ruta('GET',  null),                    // pantalla de login
-            'procesarlogin' => ruta('POST', null, false),             // login: aún sin token (mejora pendiente)
+            'procesarlogin' => ruta('POST', null, true),             // login: aún sin token (mejora pendiente)
             'dashboard'     => ruta('GET',  ROLES_AUTENTICADOS),
             'logout'        => ruta('GET',  ROLES_AUTENTICADOS),      // ideal: pasarlo a POST con token
         ],
