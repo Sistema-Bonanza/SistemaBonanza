@@ -60,3 +60,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
 });
+
+// Función global para los botones de preajustes rápidos (+3%, +5%, etc.)
+window.setPorcentaje = function (val) {
+    const input = document.getElementById('porcentaje');
+    if (input) {
+        input.value = Number(val).toFixed(2);
+        input.focus();
+    }
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    const formAplicar = document.getElementById('form-aplicar');
+    if (!formAplicar) {
+        return;
+    }
+
+    formAplicar.addEventListener('submit', function (e) {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+
+        const totalProductos = formAplicar.dataset.total || '0';
+
+        Swal.fire({
+            title: '¿Confirmar actualización masiva?',
+            text: `Se modificará el precio de venta de ${totalProductos} producto(s). Esta acción quedará registrada en el historial de auditoría.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#10b981',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Sí, aplicar cambios',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        }).then((result) => {
+            if (!result.isConfirmed) {
+                return;
+            }
+
+            if (window.BonanzaAjax && typeof window.BonanzaAjax.enviarFormulario === 'function') {
+                window.BonanzaAjax.enviarFormulario(formAplicar);
+            } else {
+                const botonSubmit = formAplicar.querySelector('button[type="submit"]');
+                if (botonSubmit) {
+                    botonSubmit.classList.add('is-loading');
+                    botonSubmit.disabled = true;
+                }
+                formAplicar.submit();
+            }
+        });
+    });
+});

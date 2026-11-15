@@ -257,7 +257,7 @@ $iniciales = strtoupper(substr(htmlspecialchars($razonVal), 0, 2));
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
-    <script src="assets/js/editarProveedor.js"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/editarProveedor.js"></script>
 </body>
 </html>

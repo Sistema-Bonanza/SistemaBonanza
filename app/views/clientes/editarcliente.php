@@ -299,7 +299,7 @@ $iniciales = !empty($nombre) ? strtoupper(substr($nombre, 0, 2)) : 'CL';
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
-    <script src="assets/js/modulos/editar_cliente.js"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/editarCliente.js"></script>
 </body>
 </html> 

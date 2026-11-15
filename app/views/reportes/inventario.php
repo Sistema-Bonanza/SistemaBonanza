@@ -114,15 +114,13 @@ $urlCsv = $linkCsv;
 <!-- ========================================== -->
 <!-- 2. FILTROS DE CONSULTA -->
 <!-- ========================================== -->
-<form method="get" action="index.php" data-ajax-filtro="#ajax-reporte" class="box is-shadowless p-4 mb-5 no-print" style="background: white; border: 1px solid #cbd5e1; border-radius: 12px;">
-    <input type="hidden" name="controller" value="reporte">
-    <input type="hidden" name="action" value="inventario">
+<form method="get" action="<?= esc(urlAccion('reporte', 'inventario')) ?>" data-ajax-filtro="#ajax-reporte" class="box is-shadowless p-4 mb-5 no-print" style="background: white; border: 1px solid #cbd5e1; border-radius: 12px;">
 
     <div class="columns is-vcentered is-multiline mb-2">
         <div class="column is-4-desktop is-12-tablet">
             <label class="label is-size-7 is-uppercase has-text-grey-dark" for="filtroBuscar">Buscar por código o nombre</label>
             <div class="control has-icons-left">
-                <input class="input" type="search" id="filtroBuscar" name="q" maxlength="60" placeholder="Ej: tornillo o 006" value="<?= esc($filtros['q']) ?>" style="border-radius: 8px; border-color: #cbd5e1;">
+                <input class="input" type="search" id="filtroBuscar" name="q" data-ajax-vivo maxlength="60" placeholder="Ej: tornillo o 006" value="<?= esc($filtros['q']) ?>" style="border-radius: 8px; border-color: #cbd5e1;">
                 <span class="icon is-small is-left has-text-grey"><i class="fas fa-search"></i></span>
             </div>
         </div>
@@ -165,7 +163,7 @@ $urlCsv = $linkCsv;
             <span>Aplicar filtros</span>
         </button>
         <?php if ($hayFiltros): ?>
-            <a href="<?= esc(urlAccion('reporte', 'inventario')) ?>" class="button is-light font-weight-bold" style="border-radius: 8px;">Quitar filtros</a>
+            <a href="<?= esc(urlAccion('reporte', 'inventario')) ?>" data-ajax-link="#ajax-reporte" class="button is-light font-weight-bold" style="border-radius: 8px;">Quitar filtros</a>
         <?php endif; ?>
     </div>
 </form>

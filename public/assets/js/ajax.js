@@ -182,6 +182,10 @@
     var navegoConAjax = false;
 
     function cargarLista(url, contenedor, empujar) {
+        var activo = document.activeElement;
+        var idFoco = (activo && activo.id && contenedor.contains(activo)) ? activo.id : null;
+        var posCursor = (idFoco && typeof activo.selectionStart === 'number') ? activo.selectionStart : null;
+
         contenedor.style.opacity = '0.5';
         contenedor.style.pointerEvents = 'none';
 
@@ -189,7 +193,6 @@
             .then(function (r) {
                 var tipo = r.headers.get('Content-Type') || '';
                 if (tipo.indexOf('application/json') !== -1) {
-                    // Respuesta JSON en un GET: sesión vencida o error. Se navega normalmente.
                     window.location.href = url;
                     return null;
                 }
@@ -201,6 +204,15 @@
                 var nuevo = doc.getElementById(contenedor.id);
                 if (!nuevo) { window.location.href = url; return; }
                 contenedor.innerHTML = nuevo.innerHTML;
+                if (idFoco) {
+                    var nuevoCampo = document.getElementById(idFoco);
+                    if (nuevoCampo) {
+                        nuevoCampo.focus();
+                        if (posCursor !== null && typeof nuevoCampo.setSelectionRange === 'function') {
+                            nuevoCampo.setSelectionRange(posCursor, posCursor);
+                        }
+                    }
+                }
                 if (empujar) {
                     window.history.pushState({ ajaxLista: true }, '', url);
                     navegoConAjax = true;
@@ -208,7 +220,7 @@
                 contenedor.dispatchEvent(new CustomEvent('ajax:lista', { bubbles: true }));
             })
             .catch(function () {
-                window.location.href = url;   // sin AJAX, la navegación normal sigue funcionando
+                window.location.href = url;
             })
             .then(function () {
                 contenedor.style.opacity = '';
@@ -243,9 +255,9 @@
         var campo = evento.target;
         var form = campo && campo.form;
         if (!form || !form.hasAttribute('data-ajax-filtro')) { return; }
-        if (campo.tagName === 'SELECT' || campo.type === 'date') {
-            var cont = contenedorDe(form.getAttribute('data-ajax-filtro'));
-            if (cont) { cargarLista(urlDeFiltro(form), cont, true); }
+        if (campo.tagName === 'SELECT' || campo.type === 'date' || campo.type === 'checkbox') {
+        var cont = contenedorDe(form.getAttribute('data-ajax-filtro'));
+        if (cont) { cargarLista(urlDeFiltro(form), cont, true); }
         }
     });
 
@@ -285,5 +297,209 @@
         if (navegoConAjax || (evento.state && evento.state.ajaxLista)) { window.location.reload(); }
     });
 
+    // ------------------------------------------------------------------
+    // 3. ALERTAS FLASH GLOBALES (#caja-flash-oculta)
+    // ------------------------------------------------------------------
+    document.addEventListener('DOMContentLoaded', function () {
+        var cajaFlash = document.getElementById('caja-flash-oculta');
+        if (cajaFlash && cajaFlash.innerText.trim() !== '') {
+            var textoMensaje = cajaFlash.innerText.trim();
+            var textoLower = textoMensaje.toLowerCase();
+            var aviso = cajaFlash.querySelector('.mensaje');
+            var tipo = 'success';
+
+            if ((aviso && aviso.classList.contains('mensaje-error')) ||
+                textoLower.includes('error') ||
+                textoLower.includes('obligatorio') ||
+                textoLower.includes('ya existe') ||
+                textoLower.includes('falló')) {
+                tipo = 'error';
+            } else if (aviso && aviso.classList.contains('mensaje-aviso')) {
+                tipo = 'warning';
+            }
+
+            var titulos = {
+                success: '¡Éxito!',
+                error: 'Atención',
+                warning: 'Aviso'
+            };
+
+            alertar({
+                icon: tipo,
+                title: titulos[tipo],
+                text: textoMensaje,
+                confirmButtonColor: tipo === 'error' ? '#ef4444' : '#2563eb',
+                timer: tipo === 'error' ? undefined : 3000,
+                timerProgressBar: tipo !== 'error'
+            });
+
+            cajaFlash.innerHTML = '';
+        }
+
+        // ------------------------------------------------------------------
+        // 4. BUSCADOR EN VIVO DE CATEGORÍAS (#buscadorCategorias)
+        // ------------------------------------------------------------------
+        var inputBuscador = document.getElementById('buscadorCategorias');
+        if (inputBuscador) {
+            inputBuscador.addEventListener('input', function () {
+                var texto = this.value.toLowerCase().trim();
+                var filas = document.querySelectorAll('.fila-busqueda');
+                var count = 0;
+
+                filas.forEach(function (fila) {
+                    var celdaNombre = fila.querySelector('.nombre-cat');
+                    var nombreCat = celdaNombre ? celdaNombre.textContent.toLowerCase() : '';
+                    if (nombreCat.includes(texto)) {
+                        fila.style.display = '';
+                        count++;
+                    } else {
+                        fila.style.display = 'none';
+                    }
+                });
+
+                var contadorTag = document.getElementById('contadorFilas');
+                if (contadorTag) {
+                    contadorTag.textContent = count + ' registros';
+                }
+            });
+        }
+
+        // ------------------------------------------------------------------
+        // 5. CONTADOR DE CARACTERES Y RESTAURAR CAMPOS EN FORMULARIOS
+        // ------------------------------------------------------------------
+        var textarea = document.getElementById('descripcion');
+        var counter = document.getElementById('char-counter');
+        var resetBtn = document.getElementById('reset-btn');
+        var inputName = document.getElementById('nombre');
+
+        var originalName = inputName ? inputName.value : '';
+        var originalDesc = textarea ? textarea.value : '';
+
+        function updateCounter() {
+            if (textarea && counter) {
+                var max = textarea.getAttribute('maxlength') || 250;
+                counter.textContent = textarea.value.length + ' / ' + max;
+            }
+        }
+
+        if (textarea) {
+            updateCounter();
+            textarea.addEventListener('input', updateCounter);
+        }
+
+        if (resetBtn) {
+            resetBtn.addEventListener('click', function () {
+                if (inputName) { inputName.value = originalName; }
+                if (textarea) {
+                    textarea.value = originalDesc;
+                    updateCounter();
+                }
+                alertar({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'info',
+                    title: 'Campos restaurados',
+                    showConfirmButton: false,
+                    timer: 1500
+                });
+            });
+        }
+    });
+
     window.BonanzaAjax = { enviarFormulario: enviarFormulario, cargarLista: cargarLista };
-})();
+})()
+// ------------------------------------------------------------------
+    // 6. ARQUEO Y CIERRE DE CAJA (#efectivoContado y #formCierre)
+    // ------------------------------------------------------------------
+    var formatoArqueo = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    var clasesArqueo  = ['has-text-grey-dark', 'has-text-success', 'has-text-warning-dark', 'has-text-danger'];
+
+    function dineroArqueo(centavos) {
+        return (centavos < 0 ? '-' : '') + '$' + formatoArqueo.format(Math.abs(centavos) / 100);
+    }
+
+    function calcularArqueoCaja() {
+        var entrada = document.getElementById('efectivoContado');
+        var sistema = document.getElementById('efectivoSistemaTexto');
+        var salida  = document.getElementById('diferenciaCaja');
+        var estado  = document.getElementById('diferenciaEstado');
+        if (!entrada || !sistema || !salida) { return null; }
+
+        var centavosSistema = parseInt(sistema.getAttribute('data-centavos'), 10) || 0;
+
+        function pintar(clase, texto, nota) {
+            clasesArqueo.forEach(function (c) { salida.classList.remove(c); });
+            salida.classList.add(clase);
+            salida.textContent = texto;
+            if (estado) {
+                estado.textContent = nota;
+                estado.className = 'is-size-7 mt-1 mb-0 ' + (clase === 'has-text-grey-dark' ? 'has-text-grey' : clase + ' has-text-weight-bold');
+            }
+        }
+
+        var texto = entrada.value.trim().replace(',', '.');
+        if (texto === '' || isNaN(Number(texto))) {
+            pintar('has-text-grey-dark', '$0,00', 'Escribe el efectivo contado para calcularla.');
+            return null;
+        }
+
+        var diferencia = Math.round(Number(texto) * 100) - centavosSistema;
+        if (diferencia === 0) {
+            pintar('has-text-success', dineroArqueo(0), 'La caja cuadra');
+        } else if (diferencia > 0) {
+            pintar('has-text-warning-dark', '+' + dineroArqueo(diferencia), 'Sobrante: hay más efectivo del que registra el sistema');
+        } else {
+            pintar('has-text-danger', dineroArqueo(diferencia), 'Faltante: hay menos efectivo del que registra el sistema');
+        }
+        return diferencia;
+    }
+
+    document.addEventListener('input', function (evento) {
+        if (evento.target && evento.target.id === 'efectivoContado') {
+            calcularArqueoCaja();
+        }
+    });
+
+    document.addEventListener('change', function (evento) {
+        if (evento.target && evento.target.id === 'efectivoContado') {
+            calcularArqueoCaja();
+        }
+    });
+
+    document.addEventListener('submit', function (evento) {
+        var form = evento.target;
+        if (!form || form.id !== 'formCierre') { return; }
+        if (form.__cierreConfirmado) { return; }
+        evento.preventDefault();
+
+        var dif = calcularArqueoCaja();
+        var aviso = 'Vas a realizar el cierre de caja de este día. ';
+        if (dif !== null && dif !== 0) {
+            aviso += 'La caja NO cuadra (' + (dif > 0 ? '+' : '') + dineroArqueo(dif) + '). ';
+        }
+        aviso += 'El cierre no se podrá modificar y tu sesión se cerrará.';
+
+        alertar({
+            icon: 'warning',
+            title: '¿Realizar cierre de caja?',
+            text: aviso,
+            showCancelButton: true,
+            confirmButtonColor: '#2563eb',
+            cancelButtonColor: '#64748b',
+            confirmButtonText: 'Sí, cerrar caja',
+            cancelButtonText: 'Cancelar'
+        }).then(function (r) {
+            if (r && r.isConfirmed) {
+                form.__cierreConfirmado = true;
+                var boton = document.getElementById('btnRealizarCierre');
+                if (boton) {
+                    boton.classList.add('is-loading');
+                    boton.disabled = true;
+                }
+                envioNativo.call(form);
+            }
+        });
+    });
+
+    document.addEventListener('DOMContentLoaded', calcularArqueoCaja);
+    document.addEventListener('ajax:lista', calcularArqueoCaja);

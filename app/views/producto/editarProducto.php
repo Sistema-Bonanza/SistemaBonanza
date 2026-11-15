@@ -279,8 +279,8 @@
         
         <!-- Cargar script desacoplado -->
         <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-        <script src="assets/js/ajax.js"></script>
-        <script src="assets/js/editar-producto.js"></script>
+        <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js"></script>
+        <script src="<?= esc(URL_BASE) ?>/assets/js/editar-producto.js"></script>
     </main>
 
 </body>

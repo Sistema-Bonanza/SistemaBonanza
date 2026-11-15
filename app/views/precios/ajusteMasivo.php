@@ -6,7 +6,7 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 if (!isset($_SESSION['user_id'])) {
-    header("Location: index.php");
+   header('Location: ' . URL_BASE . '/');
     exit();
 }
 
@@ -277,40 +277,6 @@ $etiquetaTipo = (($entrada['tipo'] ?? 'aumento') === 'descuento') ? 'descuento' 
                                 </button>
                             </form>
                         </div>
-
-                        <script>
-                        document.addEventListener('DOMContentLoaded', function () {
-                            const formAplicar = document.getElementById('form-aplicar');
-                            if (formAplicar) {
-                                formAplicar.addEventListener('submit', function (e) {
-                                    e.preventDefault();
-                                    
-                                    const totalProductos = <?= count($cambios) ?>;
-
-                                    Swal.fire({
-                                        title: '¿Confirmar actualización masiva?',
-                                        text: `Se modificará el precio de ${totalProductos} producto(s). ¿Continuar?`,
-                                        icon: 'warning',
-                                        showCancelButton: true,
-                                        confirmButtonColor: '#10b981',
-                                        cancelButtonColor: '#64748b',
-                                        confirmButtonText: 'Sí, aplicar cambios',
-                                        cancelButtonText: 'Cancelar',
-                                        reverseButtons: true
-                                    }).then((result) => {
-                                        if (result.isConfirmed) {
-                                            const boton = formAplicar.querySelector('button[type="submit"]');
-                                            if (boton) {
-                                                boton.classList.add('is-loading');
-                                                boton.disabled = true;
-                                            }
-                                            formAplicar.submit();
-                                        }
-                                    });
-                                });
-                            }
-                        });
-                        </script>
                     <?php endif; ?>
 
                 </div>
@@ -319,19 +285,10 @@ $etiquetaTipo = (($entrada['tipo'] ?? 'aumento') === 'descuento') ? 'descuento' 
         </div>
     </main>
 
-    <!-- Script auxiliar para presets rápidos -->
-    <script>
-    function setPorcentaje(val) {
-        const input = document.getElementById('porcentaje');
-        if (input) {
-            input.value = val.toFixed(2);
-        }
-    }
-    </script>
 
     <!-- Librerías de JavaScript del Sistema -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
-    <script src="<?= esc(URL_BASE) ?>/assets/js/precioMasivo.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajusteMasivo.js?v=<?= time() ?>"></script>
 </body>
 </html>

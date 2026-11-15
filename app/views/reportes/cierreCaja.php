@@ -11,10 +11,11 @@ $textoFecha = 'Fecha: ' . formatoFecha($dia) . ($esHoy ? ' (hoy)' : '');
 // 2. Apagamos los "gatillos" para que _inicio.php NO genere su barra de botones
 $urlCsv             = null;  // Oculta el botón "Exportar CSV" de arriba
 $subtituloImpresion = 'Cierre de caja del ' . formatoFecha($dia)
-    . ($cerrado ? ' · Cierre efectuado el ' . formatoFecha($guardado['creado_en'], true) . ' por ' . $guardado['username'] : '');  // texto del papel al imprimir
-$esMenu             = true;  // Oculta el botón "<- Todos los reportes" de arriba
+    . ($cerrado ? ' · Cierre efectuado el ' . formatoFecha($guardado['creado_en'], true) . ' por ' . $guardado['username'] : '');
+$esMenu             = true;
 $tituloPagina       = '';
 $descripcionPagina  = '';
+$ocultarCabecera    = true;  // <-- Evita que _inicio.php duplique el botón "Historial de cierres"
 
 // 3. Cargamos la plantilla base limpia
 require __DIR__ . '/_inicio.php';
@@ -45,6 +46,7 @@ $urlCsv = $linkCsv;
 <!-- ========================================== -->
 <!-- BANNER HERO ESTANDARIZADO (REPORTE CAJA) -->
 <!-- ========================================== -->
+ <div id="ajax-reporte" data-ajax-lista>
 <div class="box mb-5 no-print" style="background: linear-gradient(90deg, #1e3a8a 0%, #2563eb 50%, #4338ca 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
     <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
         <div class="is-flex is-align-items-center" style="gap: 1rem;">
@@ -98,9 +100,7 @@ $urlCsv = $linkCsv;
 <!-- ========================================== -->
 <?php if (!$cerrado): ?>
 <div class="box is-shadowless p-4 mb-5 no-print" style="background: white; border: 1px solid #cbd5e1; border-radius: 12px;">
-    <form method="get" action="index.php" class="is-flex is-justify-content-space-between is-align-items-center is-flex-wrap-wrap" style="gap: 1rem;">
-        <input type="hidden" name="controller" value="reporte">
-        <input type="hidden" name="action" value="cierreCaja">
+    <form method="get" action="<?= esc(urlAccion('reporte', 'cierreCaja')) ?>" data-ajax-filtro="#ajax-reporte" class="is-flex is-justify-content-space-between is-align-items-center is-flex-wrap-wrap" style="gap: 1rem;">
 
         <div class="is-flex is-align-items-center" style="gap: 0.75rem;">
             <label for="filtroFecha" class="is-size-7 has-text-weight-bold is-uppercase has-text-grey-dark">Día del cierre:</label>
@@ -114,18 +114,18 @@ $urlCsv = $linkCsv;
         </div>
 
         <div class="buttons are-small mb-0">
-            <a href="<?= esc(urlAccion('reporte', 'cierreCaja', ['fecha' => $diaAnterior])) ?>" class="button is-light">
+            <a href="<?= esc(urlAccion('reporte', 'cierreCaja', ['fecha' => $diaAnterior])) ?>" data-ajax-link="#ajax-reporte" class="button is-light">
                 <span class="icon"><i class="fas fa-chevron-left"></i></span>
                 <span>Día anterior</span>
             </a>
             <?php if ($diaSiguiente !== null): ?>
-                <a href="<?= esc(urlAccion('reporte', 'cierreCaja', ['fecha' => $diaSiguiente])) ?>" class="button is-light">
+                <a href="<?= esc(urlAccion('reporte', 'cierreCaja', ['fecha' => $diaSiguiente])) ?>" data-ajax-link="#ajax-reporte" class="button is-light">
                     <span>Día siguiente</span>
                     <span class="icon"><i class="fas fa-chevron-right"></i></span>
                 </a>
             <?php endif; ?>
             <?php if (!$esHoy): ?>
-                <a href="<?= esc(urlAccion('reporte', 'cierreCaja')) ?>" class="button is-link is-light font-weight-bold">Ir a hoy</a>
+                <a href="<?= esc(urlAccion('reporte', 'cierreCaja')) ?>" data-ajax-link="#ajax-reporte" class="button is-link is-light font-weight-bold">Ir a hoy</a>
             <?php endif; ?>
         </div>
     </form>
@@ -441,7 +441,7 @@ $urlCsv = $linkCsv;
     <p class="is-size-7 has-text-grey mb-4">Verificación cruzada entre el dinero físico auditado en gaveta y el total reportado en el sistema.</p>
 
     <?php if (!$cerrado && $hayVentas): ?>
-    <form method="post" action="index.php?controller=reporte&amp;action=registrarCierre" id="formCierre">
+    <form method="post" action="<?= esc(urlAccion('reporte', 'registrarCierre')) ?>" id="formCierre">
         <?= campoCsrf() ?>
         <input type="hidden" name="fecha" value="<?= esc($dia) ?>">
     <?php endif; ?>
@@ -528,71 +528,11 @@ $urlCsv = $linkCsv;
             </div>
         </div>
     </div>
-
+</div>
     <?php if (!$cerrado && $hayVentas): ?>
     </form>
     <?php endif; ?>
-</div>
-
-<?php if (!$cerrado && $hayVentas): ?>
-<script>
-// Ecuación automática: Diferencia = Efectivo contado - Efectivo cobrado según el sistema.
-// Se calcula en centavos enteros (evita errores de decimales como 0.1 + 0.2) y se actualiza al escribir.
-(function () {
-    var entrada  = document.getElementById('efectivoContado');
-    var sistema  = document.getElementById('efectivoSistemaTexto');
-    var salida   = document.getElementById('diferenciaCaja');
-    var estado   = document.getElementById('diferenciaEstado');
-    var formCierre = document.getElementById('formCierre');
-    if (!entrada || !sistema || !salida) { return; }
-
-    var centavosSistema = parseInt(sistema.getAttribute('data-centavos'), 10) || 0;
-    var formato = new Intl.NumberFormat('de-DE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    var clases = ['has-text-grey-dark', 'has-text-success', 'has-text-warning-dark', 'has-text-danger'];
-
-    function dinero(centavos) {
-        return (centavos < 0 ? '-' : '') + '$' + formato.format(Math.abs(centavos) / 100);
-    }
-    function pintar(clase, texto, nota) {
-        clases.forEach(function (c) { salida.classList.remove(c); });
-        salida.classList.add(clase);
-        salida.textContent = texto;
-        if (estado) { estado.textContent = nota; estado.className = 'is-size-7 mt-1 mb-0 ' + (clase === 'has-text-grey-dark' ? 'has-text-grey' : clase + ' has-text-weight-bold'); }
-    }
-    function calcular() {
-        var texto = entrada.value.trim().replace(',', '.');
-        if (texto === '' || isNaN(Number(texto))) {
-            pintar('has-text-grey-dark', '$0,00', 'Escribe el efectivo contado para calcularla.');
-            return null;
-        }
-        var diferencia = Math.round(Number(texto) * 100) - centavosSistema;
-        if (diferencia === 0)      { pintar('has-text-success', dinero(0), 'La caja cuadra'); }
-        else if (diferencia > 0)   { pintar('has-text-warning-dark', '+' + dinero(diferencia), 'Sobrante: hay más efectivo del que registra el sistema'); }
-        else                       { pintar('has-text-danger', dinero(diferencia), 'Faltante: hay menos efectivo del que registra el sistema'); }
-        return diferencia;
-    }
-
-    entrada.addEventListener('input', calcular);
-    entrada.addEventListener('change', calcular);
-    calcular();   // por si el navegador conserva el valor al recargar
-
-    // Confirmación antes de cerrar (el cierre no se puede deshacer y termina la sesión).
-    if (formCierre) {
-        var enviando = false;
-        formCierre.addEventListener('submit', function (e) {
-            if (enviando) { e.preventDefault(); return; }
-            var dif = calcular();
-            var aviso = 'Vas a realizar el cierre de caja de este día.\n\n';
-            if (dif !== null && dif !== 0) { aviso += 'La caja NO cuadra (' + (dif > 0 ? '+' : '') + dinero(dif) + ').\n\n'; }
-            aviso += 'El cierre no se podrá modificar y tu sesión se cerrará. ¿Continuar?';
-            if (!window.confirm(aviso)) { e.preventDefault(); return; }
-            enviando = true;   // evita el doble envío (doble clic)
-            var boton = document.getElementById('btnRealizarCierre');
-            if (boton) { boton.classList.add('is-loading'); }
-        });
-    }
-})();
-</script>
-<?php endif; ?>
+</div><!-- cierra .box del arqueo -->
+</div><!-- cierra #ajax-reporte -->
 
 <?php require __DIR__ . '/_fin.php'; ?>

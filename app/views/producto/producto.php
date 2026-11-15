@@ -351,10 +351,10 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
         <script>
             window.productosBajoMinimo = <?= json_encode($bajoMinimoLista, JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) ?>;
         </script>
-        <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
+        <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
 
         <!-- 3. Tu archivo JS (Asegúrate de que la ruta absoluta o relativa sea la correcta según lo vimos) -->
-        <script src="assets/js/productos.js?v=<?= time() ?>"></script>
+        <script src="<?= esc(URL_BASE) ?>/assets/js/productos.js?v=<?= time() ?>"></script>
     
     </main>
 

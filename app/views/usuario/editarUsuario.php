@@ -210,6 +210,6 @@ $rol = ucfirst(strtolower($usuario['rol'] ?? 'Operador'));
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
-    <script src="<?= esc(URL_BASE) ?>/assets/js/modulos/editarUsuario.js"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/editarUsuario.js"></script>
 </body>
 </html>

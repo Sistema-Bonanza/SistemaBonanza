@@ -40,7 +40,7 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
 
     <!-- Hojas de estilo del sistema -->
     <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/sidebar.css">
-    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/estilos.css">
+    <!-- <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/estilos.css"> -->
 </head>
 
 <body class="is-flex" style="background-color: #f1f5f9; height: 100vh; overflow: hidden; width: 100%;">
@@ -370,6 +370,6 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
 
     <!-- Librerías de JavaScript y SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/dashboard.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/dashboard.js?v=<?= time() ?>"></script>
 </body>
 </html>

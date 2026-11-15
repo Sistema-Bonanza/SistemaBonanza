@@ -267,60 +267,16 @@
                 </div>
             </div>
 
-        </div> <!-- Fin de contenedor p-5 -->
+        </div> 
 
-        <!-- Inyectar Token de Seguridad -->
-        <script>
-            window.csrfToken = "<?= esc(tokenCsrf()) ?>";
-        </script>
-        
-       <!-- 1. Inyectar variables globales para JS -->
-        <script>
-            const URL_BASE = <?= json_encode(URL_BASE) ?>;
-            window.csrfToken = "<?= esc(tokenCsrf()) ?>";
-        </script>
-
-        <!-- 2. Cargamos SweetAlert2 una sola vez -->
-        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-        <!-- 3. Cargamos tu archivo JavaScript de la tabla -->
-        <script src="<?= esc(URL_BASE) ?>/assets/js/movimiento.js?v=<?= time() ?>"></script>
-
-    <!-- 4. El interceptor inteligente de alertas -->
+       <!-- 1. Variables globales para JS -->
     <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // Buscamos directamente la caja oculta por su ID exacto
-            const cajaFlash = document.getElementById('caja-flash-oculta');
-            
-            // Si la caja existe y tiene algún texto adentro (PHP imprimió un mensaje)
-            if (cajaFlash && cajaFlash.innerText.trim() !== '') {
-                
-                // Capturamos el mensaje exacto
-                let textoMensaje = cajaFlash.innerText.trim();
-
-                // El tipo viene en la clase del mensaje que genera mostrarFlash():
-                // mensaje-exito, mensaje-error o mensaje-aviso
-                const aviso = cajaFlash.querySelector('.mensaje');
-                let tipo = 'success';
-                if (aviso && aviso.classList.contains('mensaje-error')) tipo = 'error';
-                else if (aviso && aviso.classList.contains('mensaje-aviso')) tipo = 'warning';
-                const titulos = { success: '¡Operación exitosa!', error: 'No se pudo completar', warning: 'Aviso' };
-
-                // Disparamos el SweetAlert moderno
-                Swal.fire({
-                    icon: tipo,
-                    title: titulos[tipo],
-                    text: textoMensaje,
-                    confirmButtonColor: '#2563eb',
-                    timer: tipo === 'error' ? undefined : 4000,
-                    timerProgressBar: tipo !== 'error'
-                });
-                
-                // Vaciamos la caja por precaución
-                cajaFlash.innerHTML = '';
-            }
-        });
+        const URL_BASE = <?= json_encode(URL_BASE) ?>;
+        window.csrfToken = <?= json_encode(tokenCsrf()) ?>;
     </script>
-    </main>
+
+    <!-- 2. SweetAlert2 y lógica del módulo -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/movimiento.js?v=<?= time() ?>"></script>
 </body>
 </html>

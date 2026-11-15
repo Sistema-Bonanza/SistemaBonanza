@@ -179,24 +179,6 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            // SweetAlert para errores/éxitos de PHP
-            const cajaFlash = document.getElementById('caja-flash-oculta');
-            if (cajaFlash && cajaFlash.innerText.trim() !== '') {
-                const mensaje = cajaFlash.innerText.trim();
-                const esError = mensaje.toLowerCase().includes('error') || mensaje.toLowerCase().includes('obligatorio') || mensaje.toLowerCase().includes('ya existe');
-                
-                Swal.fire({
-                    icon: esError ? 'error' : 'success',
-                    title: esError ? 'Atención' : '¡Éxito!',
-                    text: mensaje,
-                    confirmButtonColor: esError ? '#ef4444' : '#2563eb',
-                });
-                cajaFlash.innerHTML = '';
-            }
-        });
-    </script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
 </body>
 </html>

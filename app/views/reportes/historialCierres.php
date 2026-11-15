@@ -8,8 +8,9 @@
 $urlCsv             = null;
 $subtituloImpresion = 'Historial de cierres de caja';
 $esMenu             = true;
-$tituloPagina       = 'Historial de cierres de caja';
+$tituloPagina       = '';
 $descripcionPagina  = '';
+$ocultarCabecera    = true;
 
 require __DIR__ . '/_inicio.php';
 ?>
@@ -63,15 +64,13 @@ require __DIR__ . '/_inicio.php';
 <!-- BUSCADOR Y FILTROS -->
 <!-- ========================================== -->
 <div class="box is-shadowless p-4 mb-5 no-print" style="background: white; border: 1px solid #cbd5e1; border-radius: 12px;">
-    <form method="get" action="index.php" data-ajax-filtro="#ajax-reporte" class="is-flex is-flex-wrap-wrap is-align-items-flex-end" style="gap: 1rem;">
-        <input type="hidden" name="controller" value="reporte">
-        <input type="hidden" name="action" value="historialCierres">
+    <form method="get" action="<?= esc(urlAccion('reporte', 'historialCierres')) ?>" data-ajax-filtro="#ajax-reporte" class="is-flex is-flex-wrap-wrap is-align-items-flex-end" style="gap: 1rem;">
 
         <div class="field mb-0" style="flex: 1 1 300px;">
             <label for="buscarCierre" class="label is-size-7 is-uppercase">Buscar cierre</label>
             <div class="control has-icons-left">
-                <input class="input" type="search" id="buscarCierre" name="q" value="<?= esc($q) ?>" maxlength="60"
-                       placeholder="Fecha (15/10/2026 o 10/2026), factura, cliente o usuario..." style="border-radius: 8px; border-color: #cbd5e1;">
+                <input class="input" type="search" id="buscarCierre" name="q" data-ajax-vivo value="<?= esc($q) ?>" maxlength="60"
+       placeholder="Buscar por fecha (ej: 06/11/2026 o 11/2026)..." style="border-radius: 8px; border-color: #cbd5e1;">
                 <span class="icon is-left has-text-grey-light"><i class="fas fa-search"></i></span>
             </div>
         </div>
@@ -91,7 +90,7 @@ require __DIR__ . '/_inicio.php';
                 <span>Buscar</span>
             </button>
             <?php if ($hayFiltros): ?>
-                <a href="<?= esc(urlAccion('reporte', 'historialCierres')) ?>" class="button is-light" style="border-radius: 8px;">
+                <a href="<?= esc(urlAccion('reporte', 'historialCierres')) ?>" data-ajax-link="#ajax-reporte" class="button is-light" style="border-radius: 8px;">
                     <span class="icon"><i class="fas fa-xmark"></i></span>
                     <span>Limpiar</span>
                 </a>
@@ -190,7 +189,7 @@ require __DIR__ . '/_inicio.php';
                                 <?= $hayFiltros ? 'No se encontraron cierres con esa búsqueda.' : 'Todavía no hay ventas registradas, así que no hay cierres.' ?>
                             </p>
                             <?php if ($hayFiltros): ?>
-                                <p class="is-size-7 mt-1">Prueba con otra fecha (15/10/2026), un mes (10/2026), un número de factura o el nombre de un cliente.</p>
+                                <p class="is-size-7 mt-1">Prueba con una fecha completa (ej. 06/11/2026), un mes y año (ej. 11/2026) o usa los filtros Desde / Hasta.</p>
                             <?php endif; ?>
                         </td>
                     </tr>

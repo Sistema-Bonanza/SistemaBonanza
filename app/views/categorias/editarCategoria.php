@@ -322,60 +322,7 @@
 
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            
-            // 1. Manejo del contador de caracteres
-            const textarea = document.getElementById('descripcion');
-            const counter = document.getElementById('char-counter');
-            const resetBtn = document.getElementById('reset-btn');
-            const inputName = document.getElementById('nombre');
-
-            // Valores originales para el botón de reset
-            const originalName = inputName ? inputName.value : '';
-            const originalDesc = textarea ? textarea.value : '';
-
-            function updateCounter() {
-                if (textarea && counter) {
-                    counter.textContent = `${textarea.value.length} / 250`;
-                }
-            }
-
-            if (textarea) {
-                updateCounter(); // Contar al inicio
-                textarea.addEventListener('input', updateCounter);
-            }
-
-            if (resetBtn) {
-                resetBtn.addEventListener('click', function() {
-                    if (inputName) inputName.value = originalName;
-                    if (textarea) {
-                        textarea.value = originalDesc;
-                        updateCounter();
-                    }
-                    Swal.fire({
-                        toast: true, position: 'top-end', icon: 'info', 
-                        title: 'Campos restaurados', showConfirmButton: false, timer: 1500
-                    });
-                });
-            }
-
-            // 2. SweetAlert para errores/éxitos de PHP
-            const cajaFlash = document.getElementById('caja-flash-oculta');
-            if (cajaFlash && cajaFlash.innerText.trim() !== '') {
-                const mensaje = cajaFlash.innerText.trim();
-                const esError = mensaje.toLowerCase().includes('error') || mensaje.toLowerCase().includes('obligatorio') || mensaje.toLowerCase().includes('ya existe');
-                
-                Swal.fire({
-                    icon: esError ? 'error' : 'success',
-                    title: esError ? 'Atención' : '¡Éxito!',
-                    text: mensaje,
-                    confirmButtonColor: esError ? '#ef4444' : '#2563eb',
-                });
-                cajaFlash.innerHTML = '';
-            }
-        });
-    </script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
+   
 </body>
 </html>

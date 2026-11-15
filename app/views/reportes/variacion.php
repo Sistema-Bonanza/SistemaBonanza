@@ -115,9 +115,7 @@ require __DIR__ . '/_inicio.php';
 
 <!-- BEGIN: Panel de Filtros -->
 <div class="box is-shadowless mb-5 p-5 no-print" style="border: 1px solid #e2e8f0; border-radius: 12px; background-color: #ffffff;">
-    <form method="get" action="index.php" data-ajax-filtro="#ajax-reporte">
-        <input type="hidden" name="controller" value="reporte">
-        <input type="hidden" name="action" value="variacion">
+    <form method="get" action="<?= esc(urlAccion('reporte', 'variacion')) ?>" data-ajax-filtro="#ajax-reporte">
 
         <!-- Selección de Períodos: Actual vs Base -->
         <div class="columns is-multiline mb-3">
@@ -221,7 +219,8 @@ require __DIR__ . '/_inicio.php';
             <div class="is-flex is-align-items-center flex-wrap" style="gap: 0.5rem;">
                 <span class="is-size-7 has-text-weight-bold has-text-grey mr-2">Atajos (vs. período anterior):</span>
                 <?php foreach (rangosRapidos($hoy) as $etiqueta => [$d, $h]): ?>
-                    <a href="<?= esc(urlAccion('reporte', 'variacion', ['desde' => $d, 'hasta' => $h] + $conservar)) ?>" 
+                    <a href="<?= esc(urlAccion('reporte', 'variacion', ['desde' => $d, 'hasta' => $h] + $conservar)) ?>"
+                        data-ajax-link="#ajax-reporte" 
                        class="button is-small <?= (!$baseManual && $d === $desde && $h === $hasta) ? 'is-link' : 'is-light has-text-grey-dark' ?>">
                         <?= esc($etiqueta) ?>
                     </a>

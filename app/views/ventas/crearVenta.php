@@ -447,8 +447,8 @@ $catalogoJson = json_encode($catalogo, $flagsJson) ?: '[]';
     </main>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="assets/js/tasaBcv.js?v=<?= time() ?>"></script>
-    <script src="assets/js/ajax.js?v=<?= time() ?>"></script>
-    <script src="assets/js/crearVenta.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/tasaBcv.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/crearVenta.js?v=<?= time() ?>"></script>
 </body>
 </html>
