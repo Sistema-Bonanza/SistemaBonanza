@@ -19,9 +19,9 @@ if (!empty($productos)) {
                 'minimo' => $minP,
             ];
         }
-        if (($p['estado'] ?? 'activo') === 'activo') {
+        if ((int)($p['estado'] ?? 1) === 1) {
             $activos++;
-        }
+}
     }
 }
 $totalBajoMinimo = count($bajoMinimoLista);
@@ -216,7 +216,7 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                         $costo = number_format($p['precio_compra'] ?? 0, 2);
                                         $stock = (int)($p['stock_actual'] ?? 0);
                                         $stockMinimo = (int)($p['stock_minimo'] ?? 0);
-                                        $esActivo = (($p['estado'] ?? 'activo') === 'activo');
+                                        $esActivo = ((int)($p['estado'] ?? 1) === 1);
                                         $bajoMinimo = $stockMinimo > 0 && $stock < $stockMinimo;
                                         $precioVenta = number_format((float)($p['precio_venta'] ?? 0), 2);
                                         $escalasFila = [];
@@ -300,19 +300,29 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                         <?php if (esAdmin()): ?>
                                             <td class="py-3 px-4 has-text-centered align-middle">
                                                 <div class="buttons is-centered mb-0 are-small">
-                                                    <!-- BOTÓN EDITAR -->
-                                                    <a href="<?= esc(urlAccion('producto', 'formEditar', ['id' => $id])) ?>" class="button is-light has-text-link has-text-weight-bold" title="Editar">
-                                                        <span class="icon"><span class="material-symbols-outlined is-size-6">edit</span></span>
-                                                        <span>Editar</span>
-                                                    </a>
+                                                    <?php if ($esActivo): ?>
+                                                        <!-- BOTÓN EDITAR (Se oculta si el producto está inactivo) -->
+                                                        <a href="<?= esc(urlAccion('producto', 'formEditar', ['id' => $id])) ?>" class="button is-light has-text-link has-text-weight-bold" title="Editar">
+                                                            <span class="icon"><span class="material-symbols-outlined is-size-6">edit</span></span>
+                                                            <span>Editar</span>
+                                                        </a>
+                                                    <?php endif; ?>
 
-                                                    <!-- BOTÓN DESACTIVAR (Controlado por SweetAlert) -->
+                                                    <!-- BOTÓN ACTIVAR / DESACTIVAR -->
                                                     <form action="<?= esc(urlAccion('producto', 'eliminarproducto')) ?>" method="POST" style="display: inline-block;" data-ajax>
                                                         <?= campoCsrf() ?>
                                                         <input type="hidden" name="id" value="<?= esc($id) ?>">
 
-                                                        <button type="button" class="button is-warning is-small is-light" title="Desactivar Producto" onclick="confirmarDesactivacion(this.form)">
-                                                            <span class="icon"><span class="material-symbols-outlined is-size-6">block</span></span>
+                                                        <button type="button"
+                                                                class="button is-small <?= $esActivo ? 'is-warning' : 'is-success' ?> is-light has-text-weight-bold"
+                                                                title="<?= $esActivo ? 'Desactivar Producto' : 'Activar Producto' ?>"
+                                                                data-confirmar="<?= $esActivo
+                                                                    ? '¿Seguro que deseas desactivar el producto «' . $nombre . '»?'
+                                                                    : '¿Seguro que deseas activar el producto «' . $nombre . '»?' ?>">
+                                                            <span class="icon">
+                                                                <span class="material-symbols-outlined is-size-6"><?= $esActivo ? 'block' : 'check_circle' ?></span>
+                                                            </span>
+                                                            <span><?= $esActivo ? 'Desactivar' : 'Activar' ?></span>
                                                         </button>
                                                     </form>
                                                 </div>

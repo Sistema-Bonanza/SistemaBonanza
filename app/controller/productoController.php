@@ -31,11 +31,11 @@ Class productoController{
     public function TablaProductos(){
         exigirSesion();
         evitarCache();
-        $productos = $this->productoModel->obtenerProductos();
+        $productos = $this->productoModel->obtenerTodosLosProductos();
         require_once __DIR__.'/../views/producto/producto.php';
     }
     public function formproduct(){
-        exigirRol('admin');
+        exigirRol(['admin']);
         //Este metodo solo sirve para mostrar la vista de crear producto.
         require_once __DIR__.'/../../app/views/producto/producto.php';
     }
@@ -45,7 +45,7 @@ Class productoController{
         require_once __DIR__.'/../../app/views/crearCategoria.php';
     }
     public function formproveedor(){
-        exigirRol('admin');
+        exigirRol(['admin']);
         //Este metodo solo sirve para mostrar la vista de crear proveedor.
         require_once __DIR__.'/../../app/views/crearProveedor.php';
     }
@@ -159,7 +159,7 @@ Class productoController{
     }
 
     public function formEditar(){
-        exigirRol('admin');
+        exigirRol(['admin']);
         evitarCache();
 
         $id = validarEntero($_GET['id'] ?? null, 1);
@@ -185,7 +185,7 @@ Class productoController{
     }
 
     public function actualizarProducto(){
-        exigirRol('admin');
+        exigirRol(['admin']);
         exigirPost(urlAccion('producto', 'TablaProductos'));
 
         // 1. El producto debe existir y estar activo
@@ -227,44 +227,40 @@ Class productoController{
     }
 
     public function eliminarProducto() {
-        exigirRol('admin');
-        $urlLista = urlAccion('producto', 'tablaproductos'); // Ajusta a 'TablaProductos' si así se llama tu ruta
+        exigirRol(['admin']);
+        $urlLista = urlAccion('producto', 'tablaproductos');
 
-        // 1. Capturamos el ID de forma segura
         $idBruto = $_POST['id'] ?? $_POST['id_producto'] ?? null;
         $id = validarEntero($idBruto, 1);
-        
         $producto = ($id !== null) ? $this->productoModel->obtenerProductoPorId($id) : false;
 
-        // 2. Validaciones estrictas
-        if(!$producto) {
+        if (!$producto) {
             setFlash('error', 'Fallo de ID: No se recibió un ID válido o el producto no existe.');
             redirigir($urlLista);
         }
 
-        if(!isset($producto['estado'])) {
-            setFlash('error', 'Fallo de SQL: La función obtenerProductoPorId() en tu Modelo no está seleccionando la columna "estado".');
+        if (!isset($producto['estado'])) {
+            setFlash('error', 'Fallo de SQL: obtenerProductoPorId() no está seleccionando la columna "estado".');
             redirigir($urlLista);
         }
 
-        if((int) $producto['estado'] !== 1){
-            setFlash('error', 'El producto ya se encuentra desactivado en el sistema.');
-            redirigir($urlLista);
-        }
+        $estaActivo = ((int) $producto['estado'] === 1);
 
-        if((int) $producto['stock_actual'] > 0){
+        // Solo exigimos stock en 0 cuando se va a DESACTIVAR
+        if ($estaActivo && (int) $producto['stock_actual'] > 0) {
             setFlash('error', 'No se puede desactivar «' . $producto['nombre'] . '»: todavía tiene ' . (int) $producto['stock_actual'] . ' unidad(es) en almacén.');
             redirigir($urlLista);
         }
 
-        // 3. Ejecutamos el borrado lógico (UPDATE) en el modelo
-        if($this->productoModel->eliminarProducto($id)){
-            setFlash('exito', 'Producto «' . $producto['nombre'] . '» desactivado exitosamente.');
+        if ($this->productoModel->eliminarProducto($id)) {
+            $mensaje = $estaActivo
+                ? 'Producto «' . $producto['nombre'] . '» desactivado exitosamente.'
+                : 'Producto «' . $producto['nombre'] . '» reactivado exitosamente.';
+            setFlash('exito', $mensaje);
         } else {
-            setFlash('error', 'Ocurrió un problema en la base de datos al intentar desactivar el producto.');
+            setFlash('error', 'Ocurrió un problema en la base de datos al intentar cambiar el estado del producto.');
         }
-        
-        // 4. Redirigimos de vuelta a la tabla (Esto es lo que evita la pantalla en blanco)
+
         redirigir($urlLista);
     }
 

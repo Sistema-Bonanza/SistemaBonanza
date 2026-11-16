@@ -65,7 +65,8 @@
                 <!-- COLUMNA IZQUIERDA: FORMULARIO (8 Cols) -->
                 <!-- ========================================== -->
                 <div class="column is-8">
-                    <form action="index.php?controller=categoria&action=guardarCategoria" method="POST" class="box is-shadowless" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;" data-ajax>
+                    <form action="<?= esc(urlAccion('categoria', 'guardarCategoria')) ?>" method="POST" class="box is-shadowless" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;" data-ajax>
+                        <?= campoCsrf() ?>
                         
                         <div class="is-flex is-align-items-center justify-content-space-between mb-5" style="border-bottom: 1px solid #f1f5f9; padding-bottom: 1rem;">
                             <div class="is-flex is-align-items-center gap-3">
@@ -182,3 +183,4 @@
     <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
 </body>
 </html>
+

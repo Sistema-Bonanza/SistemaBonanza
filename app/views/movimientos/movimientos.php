@@ -280,3 +280,4 @@
     <script src="<?= esc(URL_BASE) ?>/assets/js/movimiento.js?v=<?= time() ?>"></script>
 </body>
 </html>
+

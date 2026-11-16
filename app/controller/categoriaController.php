@@ -141,21 +141,32 @@ class CategoriaController {
         return [['nombre' => $nombre, 'descripcion' => $desc['valor']], $errores];
     }
 
-    public function eliminarCategoria() {
+    public function desactivarCategoria() {
         exigirRol(['admin']);
-
-        // Llega por POST (con token CSRF, lo verifica el router); el id puede venir en el cuerpo o en la URL.
+        
         $id = validarEntero($_POST['id'] ?? $_GET['id'] ?? null, 1);
-        if ($id === null || !$this->categoriaModel->getById($id)) {
-            setFlash('error', 'La categoría no existe o ya fue procesada.');
+        $categoria = ($id !== null) ? $this->categoriaModel->getById($id) : false;
+
+        if (!$categoria) {
+            setFlash('error', 'La categoría no existe.');
             redirigir(urlAccion('categoria', 'formcategoria'));
         }
 
-        // Ejecutamos el borrado lógico
+        $estaActiva = ((int) ($categoria['estado'] ?? 1) === 1);
+
+        // Defensa en profundidad: impedir inactivar si aún tiene productos activos vinculados
+        if ($estaActiva && !empty($this->categoriaModel->getProductosByCategoria($id))) {
+            setFlash('error', 'No puedes inactivar esta categoría porque tiene productos activos vinculados.');
+            redirigir(urlAccion('categoria', 'formcategoria'));
+        }
+
         if ($this->categoriaModel->inactivarCategoria($id)) {
-            setFlash('exito', 'Categoría inactivada correctamente. Se conservará en el historial de Kardex.');
+            $mensaje = $estaActiva
+                ? 'Categoría inactivada correctamente. Se conservará en el historial de Kardex.'
+                : 'Categoría reactivada correctamente. Ya vuelve a estar disponible.';
+            setFlash('exito', $mensaje);
         } else {
-            setFlash('error', 'Error al intentar inactivar la categoría.');
+            setFlash('error', 'Error al intentar cambiar el estado de la categoría.');
         }
         
         redirigir(urlAccion('categoria', 'formcategoria'));

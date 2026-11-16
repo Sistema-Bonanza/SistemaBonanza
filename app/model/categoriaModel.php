@@ -56,7 +56,7 @@ class CategoriaModel {
     }
 
     public function getById($id) {
-        $sql = "SELECT id_categoria as id, nombre, descripcion FROM categorias WHERE id_categoria = :id";
+        $sql = "SELECT id_categoria as id, nombre, descripcion, estado FROM categorias WHERE id_categoria = :id";
         $stmt = $this->pdo->prepare($sql);
         $stmt->execute([':id' => $id]);
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -100,7 +100,9 @@ class CategoriaModel {
 
     // Realiza un borrado lógico (Soft Delete) cambiando el estado a 0
     public function inactivarCategoria($id) {
-        $sql = "UPDATE categorias SET estado = 0 WHERE id_categoria = :id";
+        $sql = "UPDATE categorias 
+                SET estado = CASE WHEN estado = 1 THEN 0 ELSE 1 END 
+                WHERE id_categoria = :id";
         $stmt = $this->pdo->prepare($sql);
         return $stmt->execute([':id' => $id]);
     }

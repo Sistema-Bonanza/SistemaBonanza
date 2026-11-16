@@ -246,38 +246,39 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
                                         </td>
 
                                         <?php if (esAdmin()): ?>
-                                        <td class="has-text-right">
-                                            <div class="buttons is-right mb-0">
-                                                <!-- Botón de Editar siempre disponible -->
-                                                <a href="<?= esc(urlAccion('categoria', 'formeditarcategoria', ['id' => $categoria['id_categoria'] ?? 0])) ?>" class="button is-small is-info is-light" title="Editar Categoría">
-                                                    <span class="icon"><span class="material-symbols-outlined">edit</span></span>
-                                                </a>
-                                                
-                                                <?php if ($totalArticulos > 0): ?>
-                                                    <!-- BLOQUEO 1: Tiene productos vinculados -->
-                                                    <button class="button is-small is-light has-text-grey-light" disabled title="Restringido: Primero debes reasignar o eliminar los <?= $totalArticulos ?> artículos vinculados">
-                                                        <span class="icon"><span class="material-symbols-outlined">lock</span></span>
-                                                    </button>
+                                    <td class="has-text-right">
+                                        <div class="buttons is-right mb-0">
+                                            <!-- Botón de Editar siempre disponible para Admin -->
+                                            <a href="<?= esc(urlAccion('categoria', 'formeditarcategoria', ['id' => $categoria['id_categoria'] ?? 0])) ?>" class="button is-small is-info is-light" title="Editar Categoría">
+                                                <span class="icon"><span class="material-symbols-outlined">edit</span></span>
+                                            </a>
+                                            
+                                            <?php if ($estadoActivo === 1 && $totalArticulos > 0): ?>
+                                                <!-- BLOQUEO: Está activa y tiene productos vinculados -->
+                                                <button class="button is-small is-light has-text-grey-light" disabled title="Restringido: Primero debes reasignar o eliminar los <?= $totalArticulos ?> artículos vinculados">
+                                                    <span class="icon"><span class="material-symbols-outlined">lock</span></span>
+                                                </button>
 
-                                                <?php elseif ($estadoActivo === 0): ?>
-                                                    <!-- BLOQUEO 2: Ya fue inactivada (borrado lógico aplicado) -->
-                                                    <button class="button is-small is-light has-text-grey-light" disabled title="Esta categoría ya se encuentra inactiva">
-                                                        <span class="icon"><span class="material-symbols-outlined">lock</span></span>
+                                            <?php else: ?>
+                                                <!-- ACCIÓN PERMITIDA: Inactivar (si está activa y vacía) o Reactivar (si está inactiva) -->
+                                                <form action="<?= esc(urlAccion('categoria', 'desactivarCategoria')) ?>" method="POST" style="display: inline-block;" data-ajax>
+                                                    <?= campoCsrf() ?>
+                                                    <input type="hidden" name="id" value="<?= (int) ($categoria['id_categoria'] ?? 0) ?>">
+                                                    <button type="button"
+                                                            class="button is-small <?= $estadoActivo === 1 ? 'is-danger' : 'is-success' ?> is-light"
+                                                            title="<?= $estadoActivo === 1 ? 'Inactivar Categoría' : 'Reactivar Categoría' ?>"
+                                                            data-confirmar="<?= $estadoActivo === 1
+                                                                ? 'La categoría está vacía. ¿Seguro que deseas inactivarla?'
+                                                                : '¿Seguro que deseas reactivar la categoría ' . esc($categoria['nombre'] ?? '') . '?' ?>">
+                                                        <span class="icon">
+                                                            <span class="material-symbols-outlined"><?= $estadoActivo === 1 ? 'delete' : 'check_circle' ?></span>
+                                                        </span>
                                                     </button>
-
-                                                <?php else: ?>
-                                                    <!-- ACCIÓN PERMITIDA: Tiene 0 artículos y está Activa -->
-                                                    <form action="<?= esc(urlAccion('categoria', 'eliminarCategoria')) ?>" method="POST" style="display: inline-block;" data-ajax>
-                                                        <?= campoCsrf() ?>
-                                                        <input type="hidden" name="id" value="<?= (int) ($categoria['id_categoria'] ?? 0) ?>">
-                                                        <button type="button" class="button is-small is-danger is-light" title="Inactivar Categoría (Borrado Lógico)" data-confirmar="La categoría está vacía. ¿Seguro que deseas inactivarla?">
-                                                            <span class="icon"><span class="material-symbols-outlined">delete</span></span>
-                                                        </button>
-                                                    </form>
-                                                <?php endif; ?>
-                                            </div>
-                                        </td>
-                                        <?php endif; ?>
+                                                </form>
+                                            <?php endif; ?>
+                                        </div>
+                                    </td>
+                                    <?php endif; ?>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
@@ -323,43 +324,5 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
     <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const cajaFlash = document.getElementById('caja-flash-oculta');
-            if (cajaFlash && cajaFlash.innerText.trim() !== '') {
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Éxito!',
-                    text: cajaFlash.innerText.trim(),
-                    confirmButtonColor: '#2563eb',
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-                cajaFlash.innerHTML = ''; 
-            }
-
-            const inputBuscador = document.getElementById('buscadorCategorias');
-            if (inputBuscador) {
-                inputBuscador.addEventListener('keyup', function() {
-                    const texto = this.value.toLowerCase();
-                    const filas = document.querySelectorAll('.fila-busqueda');
-                    let count = 0;
-                    
-                    filas.forEach(fila => {
-                        const nombreCat = fila.querySelector('.nombre-cat').textContent.toLowerCase();
-                        if (nombreCat.includes(texto)) {
-                            fila.style.display = '';
-                            count++;
-                        } else {
-                            fila.style.display = 'none';
-                        }
-                    });
-                    
-                    const contadorTag = document.getElementById('contadorFilas');
-                    if(contadorTag) contadorTag.textContent = `${count} registros`;
-                });
-            }
-        });
-    </script>
 </body>
 </html>

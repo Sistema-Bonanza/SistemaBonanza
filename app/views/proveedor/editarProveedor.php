@@ -79,7 +79,7 @@ $iniciales = strtoupper(substr(htmlspecialchars($razonVal), 0, 2));
             <div class="columns is-variable is-5">
                 <!-- COLUMNA IZQUIERDA: FORMULARIO (8 Cols) -->
                 <div class="column is-8">
-                    <form action="index.php?controller=proveedor&action=actualizar" method="POST" id="formEditarProveedor" class="box is-shadowless" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;" data-ajax>
+                    <form action="<?= esc(urlAccion('proveedor', 'actualizar')) ?>" method="POST" id="formEditarProveedor" class="box is-shadowless" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;" data-ajax>
                         
                         <!-- ID Oculto para la actualización -->
                         <input type="hidden" name="id_proveedor" value="<?= htmlspecialchars($idProv) ?>">

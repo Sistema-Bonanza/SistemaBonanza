@@ -187,7 +187,7 @@ $rutas = [
             'formeditarcategoria' => ruta('GET',  ROLES_ADMIN),
             'guardarcategoria'    => ruta('POST', ROLES_TODOS, false),  // LEGADO: sin token
             'actualizarcategoria' => ruta('POST', ROLES_ADMIN, false),  // LEGADO: sin token
-            'eliminarcategoria'   => ruta('POST', ROLES_ADMIN),         // inactivar (AJAX, con token). Antes era un enlace GET sin ruta
+            'desactivarcategoria'   => ruta('POST', ROLES_ADMIN),         // inactivar (AJAX, con token). Antes era un enlace GET sin ruta
         ],
     ],
 

@@ -82,7 +82,7 @@ $iniciales = !empty($nombre) ? strtoupper(substr($nombre, 0, 2)) : 'CL';
                 <!-- COLUMNA IZQUIERDA: FORMULARIO (8 Cols) -->
                 <!-- ========================================== -->
                 <div class="column is-8">
-                    <form action="index.php?controller=cliente&action=actualizar" method="POST" id="formEditarCliente" class="box is-shadowless" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;" data-ajax>
+                    <form action="<?= esc(urlAccion('cliente', 'actualizar')) ?>" method="POST" id="formEditarCliente" class="box is-shadowless" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;" data-ajax>
                         
                         <!-- CAMPOS OCULTOS -->
                         <input type="hidden" name="id" value="<?= htmlspecialchars($id) ?>">

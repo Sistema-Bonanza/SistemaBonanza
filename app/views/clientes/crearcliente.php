@@ -66,7 +66,7 @@
                 <!-- COLUMNA IZQUIERDA: FORMULARIO (8 Cols) -->
                 <!-- ========================================== -->
                 <div class="column is-8">
-                    <form action="index.php?controller=cliente&action=guardar" method="POST" id="formCrearCliente" class="box is-shadowless" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;" data-ajax>
+                    <form action="<?= esc(urlAccion('cliente', 'guardar')) ?>" method="POST" id="formCrearCliente" class="box is-shadowless" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;" data-ajax>
                         
                         <!-- Header del Formulario -->
                         <div class="is-flex is-align-items-center is-justify-content-space-between mb-5" style="border-bottom: 1px solid #f1f5f9; padding-bottom: 1rem;">

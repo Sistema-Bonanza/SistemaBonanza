@@ -6,6 +6,16 @@ class productoModel {
         $this->pdo = $pdo;
     }
 
+    public function obtenerTodosLosProductos() {
+    $sql = "SELECT p.*, c.nombre AS nombre_categoria
+            FROM productos p
+            LEFT JOIN categorias c ON p.id_categoria = c.id_categoria
+            ORDER BY p.nombre ASC";
+        $stmt = $this->pdo->query($sql);
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    
     // ==================================================================================
     // OBTENER TODOS LOS PRODUCTOS ACTIVOS
     // ==================================================================================
@@ -154,15 +164,11 @@ class productoModel {
     // ELIMINAR PRODUCTO (BORRADO LÓGICO)
     // ==================================================================================
     public function eliminarProducto($id_producto){
-        try {
-            $sql = "UPDATE productos SET estado = 0 WHERE id_producto = :id_producto";
+        $sql = "UPDATE productos 
+            SET estado = CASE WHEN estado = 1 THEN 0 ELSE 1 END 
+            WHERE id_producto = :id";
             $stmt = $this->pdo->prepare($sql);
-            $stmt->execute([':id_producto' => $id_producto]);
-            return true;
-        } catch (PDOException $e){
-            error_log("Error al eliminar el producto: " . $e->getMessage());
-            return false;
-        }
+            return $stmt->execute([':id' => $id_producto]);
     }
 
     // ==================================================================================

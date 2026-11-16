@@ -82,7 +82,7 @@
                             </div>
 
                             <!-- Formulario Principal -->
-                            <form action="index.php?controller=producto&action=actualizarProducto" method="POST" id="editProductForm" data-ajax>
+                            <form action="<?= esc(urlAccion('producto', 'actualizarProducto')) ?>" method="POST" id="editProductForm" data-ajax>
 
                                 <!-- ID Oculto -->
                                 <input type="hidden" name="id_producto" value="<?= htmlspecialchars($producto['id_producto'] ?? '') ?>">

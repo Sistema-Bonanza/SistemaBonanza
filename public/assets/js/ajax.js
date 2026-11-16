@@ -407,7 +407,6 @@
     });
 
     window.BonanzaAjax = { enviarFormulario: enviarFormulario, cargarLista: cargarLista };
-})()
 // ------------------------------------------------------------------
     // 6. ARQUEO Y CIERRE DE CAJA (#efectivoContado y #formCierre)
     // ------------------------------------------------------------------
@@ -503,3 +502,6 @@
 
     document.addEventListener('DOMContentLoaded', calcularArqueoCaja);
     document.addEventListener('ajax:lista', calcularArqueoCaja);
+    
+     window.BonanzaAjax = { enviarFormulario: enviarFormulario, cargarLista: cargarLista };
+})()

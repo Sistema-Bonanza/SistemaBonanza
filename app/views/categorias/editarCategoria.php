@@ -65,8 +65,9 @@
                 <!-- COLUMNA IZQUIERDA: FORMULARIO (8 Cols) -->
                 <!-- ========================================== -->
                 <div class="column is-8">
-                    <form action="index.php?controller=categoria&action=actualizarCategoria" method="POST" class="box is-shadowless" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;" data-ajax>
-                        
+                    <form action="<?= esc(urlAccion('categoria', 'actualizarCategoria')) ?>" method="POST" class="box is-shadowless" style="border: 1px solid #e2e8f0; border-radius: 12px; padding: 2rem;" data-ajax>
+                        <?= campoCsrf() ?>
+
                         <!-- CAMPO OCULTO IMPORTANTE PARA EL CONTROLADOR -->
                         <input type="hidden" name="id" value="<?= htmlspecialchars($categoria['id'] ?? '') ?>">
 
