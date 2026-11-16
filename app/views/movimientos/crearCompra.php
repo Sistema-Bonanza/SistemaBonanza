@@ -481,24 +481,28 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="column is-12-mobile is-4-tablet">
-                            <div class="field">
-                                <label class="label is-size-7">Stock mínimo</label>
-                                <div class="control"><input class="input" type="number" name="stock_minimo" min="0" max="1000000" step="1" value="0"></div>
+                       <?php if (esAdmin()): ?>
+                            <div class="column is-12-mobile is-4-tablet">
+                                <div class="field">
+                                    <label class="label is-size-7">Stock mínimo</label>
+                                    <div class="control"><input class="input" type="number" name="stock_minimo" min="0" max="1000000" step="1" value="0"></div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="column is-12-mobile is-4-tablet">
-                            <div class="field">
-                                <label class="label is-size-7">Unidad de manejo</label>
-                                <div class="control"><input class="input" type="text" name="unidad_manejo" maxlength="30" value="UNIDAD"></div>
+                            <?php endif; ?>
+
+                            <div class="column is-12-mobile <?= esAdmin() ? 'is-4-tablet' : 'is-6-tablet' ?>">
+                                <div class="field">
+                                    <label class="label is-size-7">Unidad de manejo</label>
+                                    <div class="control"><input class="input" type="text" name="unidad_manejo" maxlength="30" value="UNIDAD"></div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="column is-12-mobile is-4-tablet">
-                            <div class="field">
-                                <label class="label is-size-7">Unid. por empaque</label>
-                                <div class="control"><input class="input" type="number" name="unidades_por_empaque" min="1" max="100000" step="1" value="1"></div>
+
+                            <div class="column is-12-mobile <?= esAdmin() ? 'is-4-tablet' : 'is-6-tablet' ?>">
+                                <div class="field">
+                                    <label class="label is-size-7">Unid. por empaque</label>
+                                    <div class="control"><input class="input" type="number" name="unidades_por_empaque" min="1" max="100000" step="1" value="1"></div>
+                                </div>
                             </div>
-                        </div>
                         <div class="column is-12">
                             <label class="checkbox">
                                 <input type="checkbox" name="aplica_iva" value="1" checked>

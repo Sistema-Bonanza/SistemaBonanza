@@ -163,15 +163,17 @@
                                     <h3 class="title is-6 mb-0" style="font-size: 15px; text-transform: uppercase;">3. Inventario</h3>
                                 </div>
                                 <div class="columns is-multiline">
-                                    <div class="column is-12-mobile is-4-tablet">
-                                        <div class="field">
-                                            <label class="label is-small" for="stock_minimo">Stock mínimo</label>
-                                            <div class="control">
-                                                <input class="input" type="number" id="stock_minimo" name="stock_minimo" min="0" max="1000000" step="1" value="0" inputmode="numeric">
+                                    <?php if (esAdmin()): ?>
+                                        <div class="column is-12-mobile is-4-tablet">
+                                            <div class="field">
+                                                <label class="label is-small" for="stock_minimo">Stock mínimo</label>
+                                                <div class="control">
+                                                    <input class="input" type="number" id="stock_minimo" name="stock_minimo" min="0" max="1000000" step="1" value="0" inputmode="numeric">
+                                                </div>
+                                                <p class="help">Por debajo de esta cantidad el producto se marca en rojo. 0 = sin alerta.</p>
                                             </div>
-                                            <p class="help">Por debajo de esta cantidad el producto se marca en rojo. 0 = sin alerta.</p>
                                         </div>
-                                    </div>
+                                        <?php endif; ?>
                                     <div class="column is-12-mobile is-4-tablet">
                                         <div class="field">
                                             <label class="label is-small" for="unidad_manejo">Unidad de manejo</label>

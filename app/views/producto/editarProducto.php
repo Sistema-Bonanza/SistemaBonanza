@@ -154,29 +154,31 @@
                                     </div>
                                 </div>
 
-                                <!-- Stock mínimo (alerta de reposición) -->
-                                <div class="box is-shadowless mt-4" style="background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px;">
-                                    <div class="columns is-vcentered is-mobile is-multiline">
-                                        <div class="column is-12-mobile is-7-tablet">
-                                            <strong>Stock mínimo</strong>
-                                            <p class="is-size-7 has-text-grey mt-1">
-                                                Si las existencias bajan de esta cantidad, la tabla de productos marca el artículo en rojo y avisa con una alerta.
-                                                Usa 0 para no recibir alerta.
-                                            </p>
-                                        </div>
-                                        <div class="column is-12-mobile is-5-tablet">
-                                            <div class="field has-addons">
-                                                <div class="control is-expanded">
-                                                    <input class="input has-text-right" type="number" id="stock_minimo" name="stock_minimo"
-                                                           min="0" max="1000000" step="1" inputmode="numeric"
-                                                           value="<?= (int) ($producto['stock_minimo'] ?? 0) ?>">
-                                                </div>
-                                                <div class="control"><span class="button is-static">unidades</span></div>
+                                <?php if (esAdmin()): ?>
+                                    <!-- Stock mínimo (alerta de reposición) -->
+                                    <div class="box is-shadowless mt-4" style="background-color: #fff7ed; border: 1px solid #fed7aa; border-radius: 8px;">
+                                        <div class="columns is-vcentered is-mobile is-multiline">
+                                            <div class="column is-12-mobile is-7-tablet">
+                                                <strong>Stock mínimo</strong>
+                                                <p class="is-size-7 has-text-grey mt-1">
+                                                    Si las existencias bajan de esta cantidad, la tabla de productos marca el artículo en rojo y avisa con una alerta.
+                                                    Usa 0 para no recibir alerta.
+                                                </p>
                                             </div>
-                                            <p class="help">Existencias actuales: <strong><?= (int) ($producto['stock_actual'] ?? 0) ?></strong></p>
+                                            <div class="column is-12-mobile is-5-tablet">
+                                                <div class="field has-addons">
+                                                    <div class="control is-expanded">
+                                                        <input class="input has-text-right" type="number" id="stock_minimo" name="stock_minimo"
+                                                            min="0" max="1000000" step="1" inputmode="numeric"
+                                                            value="<?= (int) ($producto['stock_minimo'] ?? 0) ?>">
+                                                    </div>
+                                                    <div class="control"><span class="button is-static">unidades</span></div>
+                                                </div>
+                                                <p class="help">Existencias actuales: <strong><?= (int) ($producto['stock_actual'] ?? 0) ?></strong></p>
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
+                                    <?php endif; ?>
 
                                 <!-- Unidades del producto (cómo viene empacado) -->
                                 <div class="box is-shadowless mt-4" style="background-color: #f8f9ff; border: 1px solid #e2e8f0; border-radius: 8px;">

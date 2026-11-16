@@ -23,6 +23,8 @@ public function tablaClientes(){
     require_once __DIR__ . '/../views/clientes/clientes.php';
 }
 public function formcrearcliente(){
+    exigirSesion();
+    evitarCache();
     $clientes = $this->clienteModel->getAll();
     require_once __DIR__ . '/../views/clientes/crearcliente.php';
 
@@ -84,36 +86,74 @@ public function actualizar(){
     }
 
     $urlFormulario = urlAccion('cliente', 'formeditarcliente', ['id' => $id]);
+    $errores = [];
 
-    list($datos, $errores) = $this->validarDatos($id);
+    // Solo se validan los campos editables (contacto y dirección)
+    $tel = opcional($_POST['telefono'] ?? '', 'validarTelefono');
+    if (!$tel['ok']) {
+        $errores[] = 'El teléfono debe tener entre 7 y 15 dígitos. Ejemplo: 0412-1234567.';
+    }
+
+    $correo = opcional($_POST['email'] ?? '', 'validarEmail');
+    if (!$correo['ok']) {
+        $errores[] = 'El correo electrónico no es válido (máximo 100 caracteres).';
+    }
+
+    $dir = opcional($_POST['direccion'] ?? '', function ($v) {
+        return validarTextoLibre($v, 3, 255);
+    });
+    if (!$dir['ok']) {
+        $errores[] = 'La dirección debe tener entre 3 y 255 caracteres y no puede contener < ni >.';
+    }
+
     if (!empty($errores)) {
         setFlash('error', $errores);
         redirigir($urlFormulario);
     }
 
-    // 'estado' y 'creado_en' NO se toman del formulario: viajaban como campos ocultos y
-    // cualquiera podía alterarlos (reactivar un cliente o falsear su fecha de registro).
-    // Se conserva lo que ya hay en la BD.
+    // Identificación y nombre se toman de $actual (inmutables desde el servidor)
     $exito = $this->clienteModel->updatecliente(
         $id,
-        $datos['tipo_documento'],
-        $datos['nombre_razon_social'],
-        $datos['num_documento'],
-        $datos['telefono'],
-        $datos['email'],
-        $datos['direccion'],
+        $actual['tipo_documento'],
+        $actual['nombre_razon_social'],
+        $actual['num_documento'],
+        $tel['valor'],
+        $correo['valor'],
+        $dir['valor'],
         $actual['estado'],
         $actual['creado_en']
     );
 
     if ($exito) {
-        setFlash('exito', 'Cliente «' . $datos['nombre_razon_social'] . '» actualizado correctamente.');
+        setFlash('exito', 'Cliente «' . $actual['nombre_razon_social'] . '» actualizado correctamente.');
         redirigir(urlAccion('cliente', 'tablaClientes'));
     }
 
     setFlash('error', 'No se pudo actualizar el cliente. Inténtalo de nuevo.');
     redirigir($urlFormulario);
 }
+
+public function cambiarestado() {
+        exigirRol(['admin']);
+        evitarCache();
+
+        $id = validarEntero($_POST['id'] ?? null, 1);
+        $cliente = ($id !== null) ? $this->clienteModel->getById($id) : false;
+
+        if (!$cliente) {
+            setFlash('error', 'El cliente no existe.');
+            redirigir(urlAccion('cliente', 'tablaClientes'));
+        }
+
+        if ($this->clienteModel->cambiarEstado($id)) {
+            $nuevoEstado = ((int) $cliente['estado'] === 1) ? 'inactivado' : 'reactivado';
+            setFlash('exito', 'Cliente «' . $cliente['nombre_razon_social'] . '» ' . $nuevoEstado . ' correctamente.');
+        } else {
+            setFlash('error', 'No se pudo cambiar el estado del cliente.');
+        }
+
+        redirigir(urlAccion('cliente', 'tablaClientes'));
+    }
 
 /**
  * Validación común de crear y editar.

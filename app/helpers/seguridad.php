@@ -227,6 +227,12 @@ function tieneRol(array $rolesPermitidos): bool
     return is_string($rol) && in_array($rol, $rolesPermitidos, true);
 }
 
+/** Atajo para verificar si el usuario autenticado es administrador. */
+function esAdmin(): bool
+{
+    return tieneRol(['admin']);
+}
+
 /**
  * Exige sesión Y uno de los roles indicados. Si no cumple, deja registro
  * en el log, avisa al usuario y lo manda al dashboard.

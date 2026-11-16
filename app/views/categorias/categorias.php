@@ -195,7 +195,9 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
                                 <th class="py-3 px-4">Descripción Oficial</th>
                                 <th class="py-3 px-4 has-text-centered" style="width: 140px;">Artículos Vinculados</th>
                                 <th class="py-3 px-4 has-text-centered" style="width: 100px;">Estado</th>
-                                <th class="py-3 px-4 has-text-right" style="width: 120px;">Acciones</th>
+                                <?php if (esAdmin()): ?>
+                                    <th class="py-3 px-4 has-text-right" style="width: 120px;">Acciones</th>
+                                <?php endif; ?>
                             </tr>
                         </thead>
                         <tbody class="is-size-6">
@@ -204,7 +206,6 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
                                 <?php foreach ($categorias as $categoria): ?>
                                     <?php 
                                         $inicial = strtoupper(substr(htmlspecialchars($categoria['nombre'] ?? 'C'), 0, 2)); 
-                                        // Datos dinámicos esperados del modelo (Si no existen, usamos default)
                                         $totalArticulos = $categoria['total_articulos'] ?? 0;
                                         $estadoActivo = isset($categoria['estado']) ? (int)$categoria['estado'] : 1; 
                                     ?>
@@ -244,6 +245,7 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
                                             <?php endif; ?>
                                         </td>
 
+                                        <?php if (esAdmin()): ?>
                                         <td class="has-text-right">
                                             <div class="buttons is-right mb-0">
                                                 <!-- Botón de Editar siempre disponible -->
@@ -275,11 +277,12 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
                                                 <?php endif; ?>
                                             </div>
                                         </td>
+                                        <?php endif; ?>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>
                                 <tr>
-                                    <td colspan="6" class="has-text-centered py-6">
+                                    <td colspan="<?= esAdmin() ? 6 : 5 ?>" class="has-text-centered py-6">
                                         <span class="material-symbols-outlined is-size-1 has-text-grey-light mb-3">folder_off</span>
                                         <h4 class="title is-6 has-text-grey mb-1">No hay categorías registradas</h4>
                                         <p class="is-size-7 has-text-grey-light">Haz clic en "Nueva Categoría" para crear la primera familia de productos.</p>

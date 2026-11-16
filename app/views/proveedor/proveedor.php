@@ -248,12 +248,13 @@ $countInactivos = $totalProveedores - $countActivos;
                                         <td class="is-vcentered text-right" style="text-align: right;">
                                             <div class="buttons is-right mb-0" style="gap: 6px; justify-content: flex-end;">
 
-                                                <!-- Editar -->
+                                                <!-- Editar (Disponible para Admin y Operador) -->
                                                 <a href="<?= esc(urlAccion('proveedor', 'formedit', ['id' => (int) $idProv])) ?>" class="button is-small is-link is-light" title="Editar proveedor">
                                                     <span class="icon"><span class="material-symbols-outlined">edit</span></span>
                                                 </a>
 
-                                                <!-- Soft Delete / Reactivación con ajax.js y CSRF -->
+                                                <?php if (esAdmin()): ?>
+                                                <!-- Soft Delete / Reactivación (Exclusivo Admin) -->
                                                 <form action="<?= esc(urlAccion('proveedor', 'cambiarestado')) ?>" method="POST" style="display: inline-block;" data-ajax>
                                                     <?= campoCsrf() ?>
                                                     <input type="hidden" name="id" value="<?= (int) $idProv ?>">
@@ -266,6 +267,7 @@ $countInactivos = $totalProveedores - $countActivos;
                                                         </span>
                                                     </button>
                                                 </form>
+                                                <?php endif; ?>
 
                                             </div>
                                         </td>

@@ -35,7 +35,7 @@ Class productoController{
         require_once __DIR__.'/../views/producto/producto.php';
     }
     public function formproduct(){
-        exigirSesion();
+        exigirRol('admin');
         //Este metodo solo sirve para mostrar la vista de crear producto.
         require_once __DIR__.'/../../app/views/producto/producto.php';
     }
@@ -45,7 +45,7 @@ Class productoController{
         require_once __DIR__.'/../../app/views/crearCategoria.php';
     }
     public function formproveedor(){
-        exigirSesion();
+        exigirRol('admin');
         //Este metodo solo sirve para mostrar la vista de crear proveedor.
         require_once __DIR__.'/../../app/views/crearProveedor.php';
     }
@@ -81,7 +81,7 @@ Class productoController{
         // 2. DATOS QUE NO VIENEN DEL FORMULARIO (valores fijos al crear)
         $precio_compra = 0;
         $precio_venta  = 0; // Se gestiona en el módulo de Control de Precios
-        $stock_minimo  = $datos['stock_minimo'];   // lo define el administrador (0 = sin alerta)
+        $stock_minimo  = esAdmin() ? $datos['stock_minimo'] : 0;   // lo define el administrador (0 = sin alerta)
         $stock_actual  = 0; // El stock solo sube con compras (módulo de Movimientos)
 
         // 3. GUARDAR
@@ -126,7 +126,7 @@ Class productoController{
             $datos['nombre'],
             $datos['id_categoria'],
             $datos['aplica_iva'],
-            $datos['stock_minimo'],
+            esAdmin() ? $datos['stock_minimo'] : 0, //Solo el admin define el stock minimo.
             0,      // stock: sube con la compra que se está registrando
             0,      // precio de compra: lo define la compra
             0,      // precio de venta: se gestiona en el módulo de Precios
@@ -159,7 +159,7 @@ Class productoController{
     }
 
     public function formEditar(){
-        exigirSesion();
+        exigirRol('admin');
         evitarCache();
 
         $id = validarEntero($_GET['id'] ?? null, 1);
@@ -185,7 +185,7 @@ Class productoController{
     }
 
     public function actualizarProducto(){
-        exigirSesion();
+        exigirRol('admin');
         exigirPost(urlAccion('producto', 'TablaProductos'));
 
         // 1. El producto debe existir y estar activo
@@ -227,7 +227,7 @@ Class productoController{
     }
 
     public function eliminarProducto() {
-        exigirSesion();
+        exigirRol('admin');
         $urlLista = urlAccion('producto', 'tablaproductos'); // Ajusta a 'TablaProductos' si así se llama tu ruta
 
         // 1. Capturamos el ID de forma segura

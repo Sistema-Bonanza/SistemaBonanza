@@ -91,5 +91,13 @@ public function existeDocumento($num_documento, $excluirId = null){
     $stmt->execute($params);
     return (int) $stmt->fetchColumn() > 0;
 }
+
+public function cambiarEstado(int $id): bool {
+        $sql = "UPDATE clientes 
+                SET estado = CASE WHEN estado = 1 THEN 0 ELSE 1 END 
+                WHERE id_cliente = :id";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute([':id' => $id]);
+    }
 }
 ?>

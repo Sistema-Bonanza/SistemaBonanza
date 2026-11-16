@@ -199,7 +199,9 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                 <th class="py-3 px-4">Precio por Cantidad</th>
                                 <th class="py-3 px-4 has-text-centered">Stock Disponible</th>
                                 <th class="py-3 px-4 has-text-centered">Estado</th>
-                                <th class="py-3 px-4 has-text-centered">Acciones</th>
+                                <?php if (esAdmin()): ?>
+                                    <th class="py-3 px-4 has-text-centered">Acciones</th>
+                                <?php endif; ?>
                             </tr>
                         </thead>
                         <tbody id="inventory-tbody">
@@ -295,26 +297,27 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                                             <?php endif; ?>
                                         </td>
                                         
-                                        <td class="py-3 px-4 has-text-centered align-middle">
-                                            <div class="buttons is-centered mb-0 are-small">
-                                                <!-- BOTÓN EDITAR -->
-                                                <a href="<?= esc(urlAccion('producto', 'formEditar', ['id' => $id])) ?>" class="button is-light has-text-link has-text-weight-bold" title="Editar">
-                                                    <span class="icon"><span class="material-symbols-outlined is-size-6">edit</span></span>
-                                                    <span>Editar</span>
-                                                </a>
-                                                
-                                                <!-- BOTÓN DESACTIVAR (Controlado por SweetAlert) -->
-                                            <form action="<?= esc(urlAccion('producto', 'eliminarproducto')) ?>" method="POST" style="display: inline-block;" data-ajax>
-                                                <?= campoCsrf() ?>
-                                                <input type="hidden" name="id" value="<?= esc($id) ?>">
+                                        <?php if (esAdmin()): ?>
+                                            <td class="py-3 px-4 has-text-centered align-middle">
+                                                <div class="buttons is-centered mb-0 are-small">
+                                                    <!-- BOTÓN EDITAR -->
+                                                    <a href="<?= esc(urlAccion('producto', 'formEditar', ['id' => $id])) ?>" class="button is-light has-text-link has-text-weight-bold" title="Editar">
+                                                        <span class="icon"><span class="material-symbols-outlined is-size-6">edit</span></span>
+                                                        <span>Editar</span>
+                                                    </a>
 
-                                                <!-- Nota que cambiamos type="submit" a type="button" y agregamos el onclick -->
-                                                <button type="button" class="button is-warning is-small is-light" title="Desactivar Producto" onclick="confirmarDesactivacion(this.form)">
-                                                    <span class="icon"><span class="material-symbols-outlined is-size-6">block</span></span>
-                                                </button>
-                                            </form>
-                                            </div>
-                                        </td>
+                                                    <!-- BOTÓN DESACTIVAR (Controlado por SweetAlert) -->
+                                                    <form action="<?= esc(urlAccion('producto', 'eliminarproducto')) ?>" method="POST" style="display: inline-block;" data-ajax>
+                                                        <?= campoCsrf() ?>
+                                                        <input type="hidden" name="id" value="<?= esc($id) ?>">
+
+                                                        <button type="button" class="button is-warning is-small is-light" title="Desactivar Producto" onclick="confirmarDesactivacion(this.form)">
+                                                            <span class="icon"><span class="material-symbols-outlined is-size-6">block</span></span>
+                                                        </button>
+                                                    </form>
+                                                </div>
+                                            </td>
+                                        <?php endif; ?>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>

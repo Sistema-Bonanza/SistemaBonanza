@@ -402,6 +402,7 @@ class MovimientoController {
     // PETICIÓN AJAX: GUARDAR PRESENTACIÓN DESDE MODAL
     // ============================================================================================================
     public function guardarPresentacionAjax() {
+        exigirSesion();
         header('Content-Type: application/json');
 
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {

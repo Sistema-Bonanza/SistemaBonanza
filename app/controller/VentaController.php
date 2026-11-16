@@ -44,7 +44,7 @@ class VentaController
     private const ROLES_VENDER = ['admin', 'operador'];
 
     /** Roles que pueden ANULAR una venta (devuelve stock): solo administración. */
-    private const ROLES_ANULAR = ['admin'];
+    private const ROLES_ANULAR = ['admin', 'operador'];
 
     /**
      * NO es un límite de negocio: una venta puede llevar tantos productos como existan (la BD

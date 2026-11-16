@@ -260,13 +260,15 @@ $countConSaldo     = $countConSaldo ?? 0;
                                         </td>
                                         <td class="has-text-right">
                                             <div class="buttons is-right mb-0">
-                                                <!-- Botón Editar (Tradicional) -->
+                                                <!-- Botón Editar (Disponible para Admin y Operador) -->
                                                 <a href="<?= esc(urlAccion('cliente', 'formeditarcliente', ['id' => (int) ($c['id_cliente'] ?? 0)])) ?>" class="button is-small is-info is-light" title="Editar Cliente">
                                                     <span class="icon"><span class="material-symbols-outlined">edit</span></span>
                                                 </a>
-                                                <!-- Botón Eliminar/Inactivar (Estandarizado para ajax.js) -->
+
+                                                <?php if (esAdmin()): ?>
+                                                    <!-- Cambiar estado / Inactivar (Exclusivo Admin) -->
                                                     <?php if ((int) ($c['estado'] ?? 1) === 1): ?>
-                                                        <form action="<?= esc(urlAccion('cliente', 'eliminarcliente')) ?>" method="POST" style="display: inline-block;" data-ajax>
+                                                        <form action="<?= esc(urlAccion('cliente', 'cambiarestado')) ?>" method="POST" style="display: inline-block;" data-ajax>
                                                             <?= campoCsrf() ?>
                                                             <input type="hidden" name="id" value="<?= (int) ($c['id_cliente'] ?? 0) ?>">
                                                             <button type="button"
@@ -281,6 +283,7 @@ $countConSaldo     = $countConSaldo ?? 0;
                                                             <span class="icon"><span class="material-symbols-outlined">lock</span></span>
                                                         </button>
                                                     <?php endif; ?>
+                                                <?php endif; ?>
                                             </div>
                                         </td>
                                     </tr>

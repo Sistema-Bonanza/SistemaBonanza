@@ -30,6 +30,7 @@ class ProveedorController {
 
     // Acción para mostrar el formulario de creación
     public function formcrearproveedor() {
+        exigirSesion();
         $proveedores = $this->proveedorModel->getAll();
 
         // Aquí simplemente cargamos la vista del formulario HTML
@@ -56,7 +57,7 @@ class ProveedorController {
 
 
     public function cambiarestado() {
-        exigirSesion();
+        exigirRol(['admin']);
         evitarCache();
 
         // Llega por POST (con token CSRF, lo verifica el router); el id puede venir en el cuerpo o en la URL.
@@ -116,15 +117,14 @@ class ProveedorController {
 
 
     public function actualizar(){
-        exigirSesion();
-        //COMPROBAMOS QUE LOS DATOS VENGAN POR EL METODO POST.
+       exigirSesion();
         exigirPost(urlAccion('proveedor', 'tablaProveedores'));
 
         $id = validarEntero($_POST['id_proveedor'] ?? null, 1);
-        if ($id === null || !$this->proveedorModel->cambiarEstado($id)) {
+        if ($id === null || !$this->proveedorModel->obtenerPorId($id)) {
             setFlash('error', 'El proveedor que intentas editar no existe.');
             redirigir(urlAccion('proveedor', 'tablaProveedores'));
-        }
+    }
 
         $urlFormulario = urlAccion('proveedor', 'formEdit', ['id' => $id]);
 

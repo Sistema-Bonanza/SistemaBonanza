@@ -41,7 +41,7 @@ class CategoriaController {
     }
 
     public function formeditarCategoria() {
-        exigirSesion();
+        exigirRol(['admin']);
         evitarCache();
 
         $id = validarEntero($_GET['id'] ?? null, 1);
@@ -85,7 +85,7 @@ class CategoriaController {
     }
 
     public function actualizarCategoria() {
-        exigirSesion();
+        exigirRol(['admin']);
         exigirPost(urlAccion('categoria', 'formcategoria'));
 
         $id = validarEntero($_POST['id'] ?? null, 1);
@@ -142,8 +142,8 @@ class CategoriaController {
     }
 
     public function eliminarCategoria() {
-        exigirSesion();
-        
+        exigirRol(['admin']);
+
         // Llega por POST (con token CSRF, lo verifica el router); el id puede venir en el cuerpo o en la URL.
         $id = validarEntero($_POST['id'] ?? $_GET['id'] ?? null, 1);
         if ($id === null || !$this->categoriaModel->getById($id)) {

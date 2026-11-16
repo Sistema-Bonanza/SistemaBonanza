@@ -166,9 +166,9 @@ $rutas = [
             'formproduct'        => ruta('GET',  ROLES_ADMIN),
             'formcategoria'      => ruta('GET',  ROLES_ADMIN),
             'formproveedor'      => ruta('GET',  ROLES_ADMIN),
-            'formcrear'          => ruta('GET',  ROLES_ADMIN),
+            'formcrear'          => ruta('GET',  ROLES_TODOS),
             'formeditar'         => ruta('GET',  ROLES_ADMIN),
-            'guardarproducto'    => ruta('POST', ROLES_ADMIN, false), // LEGADO: sin token
+            'guardarproducto'    => ruta('POST', ROLES_TODOS, false), // LEGADO: sin token
             // AJAX: crear un producto desde "Registrar compra" sin salir del formulario.
             // Decisión de negocio: se deja a ROLES_TODOS porque quien registra compras (operador)
             // necesita poder dar de alta el producto que acaba de llegar. Cámbialo a ROLES_ADMIN si no.
@@ -182,10 +182,10 @@ $rutas = [
         'archivo'  => 'categoriaController.php',
         'clase'    => 'CategoriaController',
         'acciones' => [
-            'formcategoria'       => ruta('GET',  ROLES_ADMIN),
-            'formcrearcategoria'  => ruta('GET',  ROLES_ADMIN),
+            'formcategoria'       => ruta('GET',  ROLES_TODOS),
+            'formcrearcategoria'  => ruta('GET',  ROLES_TODOS),
             'formeditarcategoria' => ruta('GET',  ROLES_ADMIN),
-            'guardarcategoria'    => ruta('POST', ROLES_ADMIN, false),  // LEGADO: sin token
+            'guardarcategoria'    => ruta('POST', ROLES_TODOS, false),  // LEGADO: sin token
             'actualizarcategoria' => ruta('POST', ROLES_ADMIN, false),  // LEGADO: sin token
             'eliminarcategoria'   => ruta('POST', ROLES_ADMIN),         // inactivar (AJAX, con token). Antes era un enlace GET sin ruta
         ],
@@ -195,11 +195,11 @@ $rutas = [
         'archivo'  => 'proveedorController.php',
         'clase'    => 'ProveedorController',
         'acciones' => [
-            'tablaproveedores'   => ruta('GET',  ROLES_ADMIN),
-            'formcrearproveedor' => ruta('GET',  ROLES_ADMIN),
-            'formedit'           => ruta('GET',  ROLES_ADMIN),
-            'guardar'            => ruta('POST', ROLES_ADMIN, false), // LEGADO: sin token
-            'actualizar'         => ruta('POST', ROLES_ADMIN, false), // LEGADO: sin token
+            'tablaproveedores'   => ruta('GET',  ROLES_TODOS),
+            'formcrearproveedor' => ruta('GET',  ROLES_TODOS),
+            'formedit'           => ruta('GET',  ROLES_TODOS),
+            'guardar'            => ruta('POST', ROLES_TODOS, false), // LEGADO: sin token
+            'actualizar'         => ruta('POST', ROLES_TODOS, false), // LEGADO: sin token
             'cambiarestado'      => ruta('POST', ROLES_ADMIN),        // inactivar / reactivar (AJAX, con token). Antes era un enlace GET sin ruta
         ],
     ],
@@ -213,6 +213,7 @@ $rutas = [
             'formeditarcliente' => ruta('GET',  ROLES_TODOS),
             'guardar'           => ruta('POST', ROLES_TODOS, false),  // LEGADO: sin token
             'actualizar'        => ruta('POST', ROLES_TODOS, false),  // LEGADO: sin token
+            'cambiarestado'     => ruta('POST', ROLES_ADMIN),         // Exclusivo Admin (POST + CSRF)
         ],
     ],
 
@@ -245,11 +246,11 @@ $rutas = [
         'archivo'  => 'presentacionController.php',
         'clase'    => 'PresentacionController',
         'acciones' => [
-            'menuconfig' => ruta('GET',  ROLES_ADMIN),
-            'index'      => ruta('GET',  ROLES_ADMIN),
-            'crear'      => ruta('GET',  ROLES_ADMIN),
-            'guardar'    => ruta('POST', ROLES_ADMIN),
-            'desactivar' => ruta('POST', ROLES_ADMIN),
+            'menuconfig' => ruta('GET',  ROLES_TODOS),
+            'index'      => ruta('GET',  ROLES_TODOS),
+            'crear'      => ruta('GET',  ROLES_TODOS),
+            'guardar'    => ruta('POST', ROLES_TODOS),
+            'desactivar' => ruta('POST', ROLES_TODOS),
         ],
     ],
 
@@ -276,7 +277,7 @@ $rutas = [
              'verdetalleventa'   => ruta('GET',  ROLES_TODOS),
              'crearventa' => ruta('GET', ROLES_TODOS),
              'guardarventa' => ruta('POST', ROLES_TODOS), 
-             'anularventa' => ruta('POST', ROLES_ADMIN),
+             'anularventa' => ruta('POST', ROLES_TODOS),
          ],
      ],
 
@@ -284,11 +285,11 @@ $rutas = [
         'archivo'  => 'ReporteController.php',
         'clase'    => 'ReporteController',
         'acciones' => [
-            'index'      => ruta('GET', ROLES_AUTENTICADOS),   // menu: cada rol ve solo sus reportes
-            'historialcierres' => ruta('GET', ROLES_TODOS),    // listado de cierres anteriores (vista previa del cierre)
-            'cierrecaja' => ruta('GET', ROLES_TODOS),          // cierre de caja diario
-            'registrarcierre' => ruta('POST', ROLES_TODOS),    // efectúa el cierre (guarda, cierra sesión)
-            'inventario' => ruta('GET', ROLES_TODOS),          // existencias (el costo solo lo ve el admin)
+            'index'      => ruta('GET', ROLES_ADMIN),   // menu: cada rol ve solo sus reportes
+            'historialcierres' => ruta('GET', ROLES_ADMIN),    // listado de cierres anteriores (vista previa del cierre)
+            'cierrecaja' => ruta('GET', ROLES_ADMIN),          // cierre de caja diario
+            'registrarcierre' => ruta('POST', ROLES_ADMIN),    // efectúa el cierre (guarda, cierra sesión)
+            'inventario' => ruta('GET', ROLES_ADMIN),          // existencias (el costo solo lo ve el admin)
             'ganancias'  => ruta('GET', ROLES_ADMIN),          // ganancia por producto
             'variacion'  => ruta('GET', ROLES_ADMIN),          // aumento / disminucion de ventas
         ],
