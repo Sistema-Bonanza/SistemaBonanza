@@ -3,6 +3,7 @@ require_once __DIR__ . '/../helpers/seguridad.php';
 require_once __DIR__ . '/../helpers/validaciones.php';
 require_once __DIR__ . '/../model/clienteModel.php';
 require_once __DIR__ . '/../../config/database.php';
+require_once __DIR__ . '/../helpers/formato.php';
 
 Class clienteController{
 private $clienteModel;
@@ -38,6 +39,7 @@ public function formeditarcliente(){
     if ($id !== null) {
         $clientes = $this->clienteModel->getById($id);
         if ($clientes) {
+            $resumenVentas = $this->clienteModel->obtenerResumenVentas($id);
             require_once __DIR__ . '/../../app/views/clientes/editarcliente.php';
             return;
         }

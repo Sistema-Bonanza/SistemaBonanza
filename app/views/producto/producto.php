@@ -159,7 +159,31 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                             </div>
                         </div>
                         
-                        <!-- Botones de Filtro (JS) -->
+                        <!-- <div class="is-flex is-flex-direction-column is-align-items-flex-end" style="gap: 6px;">
+    <span class="tag is-medium has-text-weight-bold" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.25);">
+        <span class="material-symbols-outlined is-size-5 has-text-success mr-2">paid</span>
+        Divisa Base: USD ($)
+    </span>
+
+    <div class="is-flex is-align-items-center" style="gap: 6px;">
+        <span id="badge-tasa-bcv" class="tag is-medium has-text-weight-bold"
+              style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.25);"
+              title="Consultando tasa oficial del BCV...">
+            <span class="material-symbols-outlined is-size-5 has-text-warning mr-2">currency_exchange</span>
+            <span id="texto-tasa-bcv">Tasa BCV: Cargando...</span>
+        </span>
+
+        <?php if (esAdmin()): ?>
+            <button type="button" id="btn-editar-tasa-bcv" class="button is-small has-text-white"
+                    title="Fijar tasa BCV manualmente"
+                    style="background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 6px;">
+                <span class="icon is-small">
+                    <span class="material-symbols-outlined is-size-6">edit</span>
+                </span>
+            </button>
+        <?php endif; ?>
+    </div>
+</div>   de Filtro (JS) -->
                         <div class="buttons has-addons mb-0 is-flex-wrap-nowrap" style="overflow-x: auto;">
                             <button class="button is-link filter-tab" data-filter="all">Todos</button>
                             <button class="button is-light filter-tab" data-filter="General">General</button>
@@ -168,10 +192,10 @@ $porcentajeActivos = $totalProductos > 0 ? round(($activos / $totalProductos) * 
                     </div>
 
                     <div class="buttons mb-0">
-                        <button class="button is-light has-text-weight-bold" id="btn-export-csv">
-                            <span class="icon"><span class="material-symbols-outlined">file_download</span></span>
-                            <span>Exportar</span>
-                        </button>
+                        <a href="<?= esc(urlAccion('producto', 'exportarExcel')) ?>" class="button is-success is-light has-text-weight-semibold" style="border-radius: 8px;">
+                            <span class="icon"><span class="material-symbols-outlined">table_view</span></span>
+                            <span>Exportar Excel</span>
+                        </a>
                     </div>
                 </div>
             </div>

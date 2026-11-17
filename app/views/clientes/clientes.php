@@ -190,10 +190,6 @@ $countConSaldo     = $countConSaldo ?? 0;
                         </button>
                     </div>
                     
-                    <button class="button is-small is-white" style="border: 1px solid #e2e8f0; border-radius: 8px; padding-left: 1rem; padding-right: 1rem;">
-                        <span class="icon has-text-grey"><span class="material-symbols-outlined">download</span></span>
-                        <span class="has-text-weight-semibold has-text-dark">Exportar Padrón</span>
-                    </button>
                 </div>
             </div>
 
@@ -215,7 +211,7 @@ $countConSaldo     = $countConSaldo ?? 0;
                                 <th class="py-3 px-4">Teléfono</th>
                                 <th class="py-3 px-4">Email</th>
                                 <th class="py-3 px-4">Dirección</th>
-                                <th class="py-3 px-4 has-text-right">Acciones</th>
+                                <th class="py-3 px-4 has-text-centered">Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="is-size-6">
@@ -258,31 +254,35 @@ $countConSaldo     = $countConSaldo ?? 0;
                                                 <?= htmlspecialchars($c['direccion'] ?? 'N/A') ?>
                                             </div>
                                         </td>
-                                        <td class="has-text-right">
-                                            <div class="buttons is-right mb-0">
+                                        <td class="py-3 px-4 has-text-centered align-middle" style="white-space: nowrap;">
+                                            <div class="buttons is-centered is-flex-wrap-nowrap mb-0 are-small">
                                                 <!-- Botón Editar (Disponible para Admin y Operador) -->
-                                                <a href="<?= esc(urlAccion('cliente', 'formeditarcliente', ['id' => (int) ($c['id_cliente'] ?? 0)])) ?>" class="button is-small is-info is-light" title="Editar Cliente">
-                                                    <span class="icon"><span class="material-symbols-outlined">edit</span></span>
+                                                <a href="<?= esc(urlAccion('cliente', 'formeditarcliente', ['id' => (int) ($c['id_cliente'] ?? 0)])) ?>"
+                                                class="button is-light has-text-link has-text-weight-bold mb-0"
+                                                title="Editar Cliente">
+                                                    <span class="icon"><span class="material-symbols-outlined is-size-6">edit</span></span>
+                                                    <span>Editar</span>
                                                 </a>
 
                                                 <?php if (esAdmin()): ?>
-                                                    <!-- Cambiar estado / Inactivar (Exclusivo Admin) -->
-                                                    <?php if ((int) ($c['estado'] ?? 1) === 1): ?>
-                                                        <form action="<?= esc(urlAccion('cliente', 'cambiarestado')) ?>" method="POST" style="display: inline-block;" data-ajax>
-                                                            <?= campoCsrf() ?>
-                                                            <input type="hidden" name="id" value="<?= (int) ($c['id_cliente'] ?? 0) ?>">
-                                                            <button type="button"
-                                                                    class="button is-small is-danger is-light"
-                                                                    title="Inactivar Cliente"
-                                                                    data-confirmar="¿Seguro que deseas inactivar al cliente <?= esc($c['nombre_razon_social'] ?? '') ?>?">
-                                                                <span class="icon"><span class="material-symbols-outlined">delete</span></span>
-                                                            </button>
-                                                        </form>
-                                                    <?php else: ?>
-                                                        <button type="button" class="button is-small is-light has-text-grey-light" disabled title="Este cliente ya se encuentra inactivo">
-                                                            <span class="icon"><span class="material-symbols-outlined">lock</span></span>
+                                                    <?php $cliActivo = ((int) ($c['estado'] ?? 1) === 1); ?>
+                                                    <!-- Cambiar estado / Activar o Desactivar (Exclusivo Admin) -->
+                                                    <form action="<?= esc(urlAccion('cliente', 'cambiarestado')) ?>" method="POST" style="display: inline-flex; margin: 0;" data-ajax>
+                                                        <?= campoCsrf() ?>
+                                                        <input type="hidden" name="id" value="<?= (int) ($c['id_cliente'] ?? 0) ?>">
+
+                                                        <button type="button"
+                                                                class="button is-small <?= $cliActivo ? 'is-warning' : 'is-success' ?> is-light has-text-weight-bold mb-0"
+                                                                title="<?= $cliActivo ? 'Inactivar Cliente' : 'Activar Cliente' ?>"
+                                                                data-confirmar="<?= $cliActivo
+                                                                    ? '¿Seguro que deseas inactivar al cliente ' . esc($c['nombre_razon_social'] ?? '') . '?'
+                                                                    : '¿Seguro que deseas activar al cliente ' . esc($c['nombre_razon_social'] ?? '') . '?' ?>">
+                                                            <span class="icon">
+                                                                <span class="material-symbols-outlined is-size-6"><?= $cliActivo ? 'block' : 'check_circle' ?></span>
+                                                            </span>
+                                                            <span><?= $cliActivo ? 'Desactivar' : 'Activar' ?></span>
                                                         </button>
-                                                    <?php endif; ?>
+                                                    </form>
                                                 <?php endif; ?>
                                             </div>
                                         </td>

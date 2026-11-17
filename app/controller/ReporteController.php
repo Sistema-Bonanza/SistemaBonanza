@@ -523,7 +523,7 @@ class ReporteController
      * usuario con un mensaje claro y se vuelve al menú, en lugar de mostrar un error técnico.
      */
     private function generar(callable $consulta): array
-    {
+{
         try {
             return $consulta();
         } catch (PDOException $e) {
@@ -533,152 +533,70 @@ class ReporteController
         }
     }
 
+   // =====================================================================
+    // EXPORTACIÓN A EXCEL (.xls estilizado con patrón visual Bonanza)
     // =====================================================================
-    // EXPORTACIÓN A CSV (una función por reporte: reutilizan los mismos datos de la pantalla)
-    // =====================================================================
+
+    private function enviarExcel(string $nombreArchivo, string $vistaPlantilla, array $datos): void
+    {
+        $rutaVista = __DIR__ . '/../views/reportes/excel/' . $vistaPlantilla;
+        if (!file_exists($rutaVista)) {
+            setFlash('error', 'No se encontró la plantilla de Excel: ' . $vistaPlantilla);
+            redirigir(urlAccion('reporte', 'index'));
+        }
+
+        extract($datos, EXTR_SKIP);
+
+        ob_start();
+        require $rutaVista;
+        $htmlExcel = ob_get_clean();
+
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
+        header('Pragma: no-cache');
+        header('Expires: 0');
+
+        echo "\xEF\xBB\xBF" . $htmlExcel;
+        exit;
+    }
 
     private function csvCierreCaja(array $c): void
     {
-        $filasPago = [];
-        foreach (METODOS_PAGO as $clave => $etiqueta) {
-            $p = $c['pagos'][$clave] ?? ['facturas' => 0, 'monto' => 0.0];
-            $filasPago[] = [$etiqueta, $p['facturas'], $p['monto']];
-        }
-        $filasPago[] = ['TOTAL COBRADO', null, $c['cobrado']];
-        $filasPago[] = ['TOTAL VENDIDO (con IVA)', $c['facturas'], $c['total']];
-
-        $filasVentas = [];
-        foreach ($c['ventas'] as $v) {
-            $filasVentas[] = [
-                $v['numero_factura'],
-                formatoFecha($v['fecha_venta'], true),
-                $v['cliente'],
-                $v['usuario'],
-                TIPOS_PAGO_VENTA[$v['tipo_pago']] ?? $v['tipo_pago'],
-                ((int) $v['estado'] === 1) ? 'Registrada' : 'Anulada',
-                (float) $v['total'],
-            ];
-        }
-
-        enviarCsv('cierre_caja_' . $c['dia'] . '.csv', [
-            [
-                'titulo'      => 'Cierre de caja del ' . formatoFecha($c['dia']),
-                'encabezados' => ['Forma de pago', 'Facturas', 'Monto'],
-                'filas'       => $filasPago,
-            ],
-            [
-                'titulo'      => 'Ventas del día',
-                'encabezados' => ['Factura', 'Fecha y hora', 'Cliente', 'Usuario', 'Forma de pago', 'Estado', 'Total'],
-                'filas'       => $filasVentas,
-            ],
+        $this->enviarExcel('Cierre_Caja_' . $c['dia'] . '.xls', 'cierreCajaExcel.php', [
+            'c' => $c,
         ]);
     }
 
     private function csvInventario(array $filas, array $totales, bool $verCostos): void
     {
-        $encabezados = ['Código', 'Producto', 'Categoría', 'Stock', 'Stock mínimo', 'Situación'];
-        if ($verCostos) {
-            $encabezados[] = 'Costo unitario';
-        }
-        $encabezados[] = 'Precio de venta';
-        if ($verCostos) {
-            $encabezados[] = 'Valor al costo';
-        }
-        $encabezados[] = 'Valor a precio de venta';
-
-        $nombresSituacion = ['agotado' => 'Agotado', 'bajo' => 'Stock bajo', 'ok' => 'Disponible'];
-
-        $datos = [];
-        foreach ($filas as $f) {
-            $fila = [$f['codigo'], $f['nombre'], $f['nombre_categoria'], $f['stock'], $f['minimo'], $nombresSituacion[$f['situacion']]];
-            if ($verCostos) {
-                $fila[] = $f['costo_unitario'];
-            }
-            $fila[] = $f['precio_venta'] > 0 ? (float) $f['precio_venta'] : null;
-            if ($verCostos) {
-                $fila[] = $f['valor_costo'];
-            }
-            $fila[] = $f['valor_venta'];
-            $datos[] = $fila;
-        }
-
-        $total = ['TOTAL', null, null, $totales['unidades'], null, null];
-        if ($verCostos) {
-            $total[] = null;
-        }
-        $total[] = null;
-        if ($verCostos) {
-            $total[] = $totales['valor_costo'];
-        }
-        $total[] = $totales['valor_venta'];
-        $datos[] = $total;
-
-        enviarCsv('inventario_' . date('Y-m-d') . '.csv', [
-            ['titulo' => 'Inventario al ' . date('d/m/Y H:i'), 'encabezados' => $encabezados, 'filas' => $datos],
+        $this->enviarExcel('Inventario_Bonanza_' . date('Y-m-d') . '.xls', 'inventarioExcel.php', [
+            'filas'     => $filas,
+            'totales'   => $totales,
+            'verCostos' => $verCostos,
         ]);
     }
 
     private function csvGanancias(array $filas, array $t, string $desde, string $hasta): void
     {
-        $datos = [];
-        foreach ($filas as $f) {
-            $datos[] = [
-                $f['codigo'], $f['nombre'], $f['nombre_categoria'], $f['unidades'],
-                $f['ingresos'], $f['costo'], $f['ganancia'],
-                $f['margen'] !== null ? round($f['margen'], 2) : null,
-                $f['unidades_sin_costo'],
-            ];
-        }
-        $datos[] = [
-            'TOTAL', null, null, $t['unidades'], $t['ingresos'], $t['costo'], $t['ganancia'],
-            $t['margen'] !== null ? round($t['margen'], 2) : null, $t['unidades_sin_costo'],
-        ];
-
-        enviarCsv('ganancias_' . $desde . '_a_' . $hasta . '.csv', [[
-            'titulo'      => 'Ganancia por producto del ' . formatoFecha($desde) . ' al ' . formatoFecha($hasta) . ' (valores sin IVA)',
-            'encabezados' => ['Código', 'Producto', 'Categoría', 'Unidades', 'Ingresos', 'Costo', 'Ganancia', 'Margen %', 'Unidades sin costo registrado'],
-            'filas'       => $datos,
-        ]]);
+        $this->enviarExcel('Ganancias_' . $desde . '_a_' . $hasta . '.xls', 'gananciasExcel.php', [
+            'filas'   => $filas,
+            'totales' => $t,
+            'desde'   => $desde,
+            'hasta'   => $hasta,
+        ]);
     }
 
     private function csvVariacion(array $filas, array $t, array $actual, array $base): void
     {
-        $nombresTendencia = [
-            'aumento' => 'Aumento', 'disminucion' => 'Disminución', 'igual' => 'Sin cambio',
-            'nuevo' => 'Nuevo en el período', 'sin_ventas' => 'Sin ventas en el período',
-        ];
-
-        $datos = [];
-        foreach ($filas as $f) {
-            $datos[] = [
-                $f['codigo'], $f['nombre'], $f['nombre_categoria'],
-                $f['unidades_base'], $f['unidades_actual'], $f['dif_unidades'],
-                $f['pct_unidades'] !== null ? round($f['pct_unidades'], 2) : null,
-                $f['monto_base'], $f['monto_actual'], $f['dif_monto'],
-                $f['pct_monto'] !== null ? round($f['pct_monto'], 2) : null,
-                $nombresTendencia[$f['tendencia']],
-            ];
-        }
-        $datos[] = [
-            'TOTAL', null, null,
-            $t['unidades_base'], $t['unidades_actual'], $t['dif_unidades'],
-            $t['pct_unidades'] !== null ? round($t['pct_unidades'], 2) : null,
-            $t['monto_base'], $t['monto_actual'], $t['dif_monto'],
-            $t['pct_monto'] !== null ? round($t['pct_monto'], 2) : null,
-            null,
-        ];
-
-        $titulo = 'Variación de ventas. Actual: ' . formatoFecha($actual['desde']) . ' al ' . formatoFecha($actual['hasta'])
-                . ' | Base: ' . formatoFecha($base['desde']) . ' al ' . formatoFecha($base['hasta']) . ' (montos sin IVA)';
-
-        enviarCsv('variacion_ventas_' . $actual['desde'] . '_a_' . $actual['hasta'] . '.csv', [[
-            'titulo'      => $titulo,
-            'encabezados' => [
-                'Código', 'Producto', 'Categoría',
-                'Unidades base', 'Unidades actual', 'Diferencia unidades', 'Variación unidades %',
-                'Monto base', 'Monto actual', 'Diferencia monto', 'Variación monto %', 'Tendencia',
-            ],
-            'filas'       => $datos,
-        ]]);
+        $this->enviarExcel('Variacion_Ventas_' . $actual['desde'] . '_a_' . $actual['hasta'] . '.xls', 'variacionExcel.php', [
+            'filas'   => $filas,
+            'totales' => $t,
+            'actual'  => $actual,
+            'base'    => $base,
+        ]);
     }
 }

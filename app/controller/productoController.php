@@ -34,6 +34,49 @@ Class productoController{
         $productos = $this->productoModel->obtenerTodosLosProductos();
         require_once __DIR__.'/../views/producto/producto.php';
     }
+    // Metodo para exportar los productos a un archivo Excel
+    public function exportarExcel() {
+        exigirSesion();
+        evitarCache();
+
+        $productos = $this->productoModel->obtenerProductos();
+
+        $totalUnidades     = 0;
+        $totalValorCosto   = 0.0;
+        $totalValorVenta   = 0.0;
+        $productosCriticos = 0;
+
+        foreach ($productos as $p) {
+            $stock  = (int) ($p['stock_actual'] ?? 0);
+            $minimo = (int) ($p['stock_minimo'] ?? 0);
+            $costo  = (float) ($p['precio_compra'] ?? 0);
+            $venta  = (float) ($p['precio_venta'] ?? 0);
+
+            $totalUnidades   += $stock;
+            $totalValorCosto += ($stock * $costo);
+            $totalValorVenta += ($stock * $venta);
+
+            if ($stock === 0 || ($minimo > 0 && $stock <= $minimo)) {
+                $productosCriticos++;
+            }
+        }
+
+        // Limpiar cualquier salida previa en buffer antes de enviar el archivo
+        while (ob_get_level() > 0) {
+            ob_end_clean();
+        }
+
+        $nombreArchivo = 'Inventario_Productos_Bonanza_' . date('Y-m-d_His') . '.xls';
+
+        header('Content-Type: application/vnd.ms-excel; charset=utf-8');
+        header('Content-Disposition: attachment; filename="' . $nombreArchivo . '"');
+
+        echo "\xEF\xBB\xBF"; // BOM UTF-8 para que Excel respete tildes y ñ
+        require_once __DIR__ . '/../views/producto/productosExcel.php';
+        exit;
+    }
+
+
     public function formproduct(){
         exigirRol(['admin']);
         //Este metodo solo sirve para mostrar la vista de crear producto.

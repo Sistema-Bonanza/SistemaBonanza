@@ -4,24 +4,41 @@ document.addEventListener('DOMContentLoaded', () => {
         window.history.replaceState(null, null, window.location.href);
     }
 
-    // 1b. Aviso de éxito que llega por flash (por ejemplo "Cierre exitoso" al terminar un cierre de caja).
-    // mostrarFlash() imprime <div class="mensaje mensaje-exito">; se muestra como alerta y se oculta el div.
-    var avisoExito = document.querySelector('.mensaje.mensaje-exito');
-    if (avisoExito && typeof Swal !== 'undefined') {
-        var textoExito = avisoExito.textContent.trim();
-        avisoExito.style.display = 'none';
-        Swal.fire({
-            icon: 'success',
-            title: 'Cierre Exitoso',
-            text: textoExito,
-            confirmButtonColor: '#2563eb',
-            confirmButtonText: 'Entendido',
-            customClass: { popup: 'rounded-xl shadow-lg' }
-        });
+    // 1b. Interceptar cualquier aviso flash (cierre de caja, inactividad, errores de sesión)
+    const flashEl = document.querySelector('#flash-wrapper .mensaje, .mensaje');
+    if (flashEl && typeof Swal !== 'undefined') {
+        const textoFlash = flashEl.textContent.trim();
+        flashEl.remove();
+
+        if (textoFlash !== '') {
+            let icono = 'warning';
+            let titulo = 'Atención';
+
+            if (flashEl.classList.contains('mensaje-exito') || flashEl.classList.contains('is-success')) {
+                icono = 'success';
+                titulo = 'Cierre Exitoso';
+            } else if (flashEl.classList.contains('mensaje-error') || flashEl.classList.contains('is-danger')) {
+                icono = 'error';
+                titulo = 'Acceso Denegado';
+            } else if (/inactividad|expir/i.test(textoFlash)) {
+                icono = 'warning';
+                titulo = 'Sesión Cerrada por Inactividad';
+            }
+
+            Swal.fire({
+                icon: icono,
+                title: titulo,
+                text: textoFlash,
+                confirmButtonColor: '#2563eb',
+                confirmButtonText: 'Entendido',
+                customClass: { popup: 'rounded-xl shadow-lg' }
+            });
+            return;
+        }
     }
 
     // 2. Mostrar la alerta de SweetAlert2 si existe un mensaje de error global
-    if (typeof errorMessage !== 'undefined' && errorMessage.trim() !== '') {
+    if (typeof errorMessage !== 'undefined' && errorMessage.trim() !== '' && typeof Swal !== 'undefined') {
         Swal.fire({
             icon: 'error',
             title: 'Acceso Denegado',

@@ -12,6 +12,7 @@ require_once __DIR__ . '/../model/proveedorModel.php';
 require_once __DIR__ . '/../model/productoModel.php';
 require_once __DIR__ . '/../model/categoriaModel.php';
 require_once __DIR__ . '/../model/tasaModel.php';
+require_once __DIR__ . '/../model/clienteModel.php';
 
 class MovimientoController {
     
@@ -20,6 +21,7 @@ class MovimientoController {
     private $productoModel;
     private $categoriaModel;
     private $tasaModel;
+    private $clienteModel;
 
     public function __construct() {
         $database = new Database();
@@ -31,51 +33,64 @@ class MovimientoController {
         $this->productoModel = new ProductoModel($pdo);
         $this->categoriaModel = new CategoriaModel($pdo);
         $this->tasaModel = new TasaModel($pdo);
+        $this->clienteModel = new ClienteModel($pdo);
     }
 
     // =======================================================
     // 1. MÉTODO PARA MOSTRAR LA VISTA DE LA TABLA PRINCIPAL
     // =======================================================
     public function tablaMovimientos() {
-        exigirSesion();
-        evitarCache();
+    exigirSesion();
+    evitarCache();
 
-        // 1. Obtener la lista de movimientos para la tabla
-        //    (compras + ventas juntas, ordenadas por fecha)
-        $movimientos      = $this->movimientoModel->obtenerMovimientosPaginados('', 'todas', 0, 10);
-        $totalMovimientos = $this->movimientoModel->contarMovimientosPaginados('', 'todas');
+    // 1. Capturar filtros de la URL
+    $busqueda    = $_GET['busqueda'] ?? '';
+    $filtro      = $_GET['filtro'] ?? 'todas';
+    $idProveedor = isset($_GET['proveedor']) ? (int)$_GET['proveedor'] : null;
+    $idCliente   = isset($_GET['cliente']) ? (int)$_GET['cliente'] : null;
 
-        // 2. Obtener las métricas reales para las tarjetas KPI
-        $metricas = $this->movimientoModel->obtenerMetricasMovimientos();
+    $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+    if ($pagina < 1) $pagina = 1;
+    $limitePorPagina = 10;
+    $offset = ($pagina - 1) * $limitePorPagina;
 
-        // 3. Cargar la vista (recibe $movimientos, $totalMovimientos y $metricas)
-        require_once __DIR__ . '/../views/movimientos/movimientos.php';
-    }
+    // 2. Obtener movimientos aplicando todos los filtros
+    $movimientos      = $this->movimientoModel->obtenerMovimientosPaginados($busqueda, $filtro, $offset, $limitePorPagina, $idProveedor, $idCliente);
+    $totalMovimientos = $this->movimientoModel->contarMovimientosPaginados($busqueda, $filtro, $idProveedor, $idCliente);
+
+    // 3. Métricas y catálogos para los selectores
+    $metricas           = $this->movimientoModel->obtenerMetricasMovimientos();
+    $proveedoresActivos = $this->proveedorModel->getActivos();
+    $clientesActivos    = $this->clienteModel->getAll();
+    $filtroActual       = $filtro; // Para mantener activo el botón correspondiente en la vista
+
+    require_once __DIR__ . '/../views/movimientos/movimientos.php';
+}
 
     // =======================================================
     // 2. PETICIÓN AJAX: BÚSQUEDA, FILTRO Y PAGINACIÓN DINÁMICA
     // =======================================================
     public function buscarajax() {
-        // Limpiamos cualquier rastro previo de búfer para evitar espacios o HTML accidental
-        if (ob_get_length()) {
-            ob_clean();
-        }
+    if (ob_get_length()) {
+        ob_clean();
+    }
 
-        exigirSesion();
+    exigirSesion();
+    
+    try {
+        $busqueda    = $_GET['busqueda'] ?? '';
+        $filtro      = $_GET['filtro'] ?? 'todas';
+        $idProveedor = isset($_GET['proveedor']) ? (int)$_GET['proveedor'] : null;
+        $idCliente   = isset($_GET['cliente']) ? (int)$_GET['cliente'] : null;
         
-        try {
-            // Capturamos los parámetros por GET
-            $busqueda = $_GET['busqueda'] ?? '';
-            $filtro = $_GET['filtro'] ?? 'todas';
-            $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
-            if ($pagina < 1) $pagina = 1;
-            
-            $limitePorPagina = 10;
-            $offset = ($pagina - 1) * $limitePorPagina;
+        $pagina = isset($_GET['pagina']) ? (int)$_GET['pagina'] : 1;
+        if ($pagina < 1) $pagina = 1;
+        
+        $limitePorPagina = 10;
+        $offset = ($pagina - 1) * $limitePorPagina;
 
-            $resultados = $this->movimientoModel->obtenerMovimientosPaginados($busqueda, $filtro, $offset, $limitePorPagina);
-            $totalRegistros = $this->movimientoModel->contarMovimientosPaginados($busqueda, $filtro);
-
+        $resultados     = $this->movimientoModel->obtenerMovimientosPaginados($busqueda, $filtro, $offset, $limitePorPagina, $idProveedor, $idCliente);
+        $totalRegistros = $this->movimientoModel->contarMovimientosPaginados($busqueda, $filtro, $idProveedor, $idCliente);
             $filasHTML = '';
             if (!empty($resultados)) {
                 foreach ($resultados as $mov) {
@@ -148,9 +163,11 @@ class MovimientoController {
 
         $detalles        = $this->movimientoModel->obtenerDetalleCompra($id);
         $numeroOperacion = numeroOperacion('COMP', $compra['id_compra']);
+        $puedeAnular     = esAdmin() && ((int) $compra['estado'] === 1);
 
         require __DIR__ . '/../views/movimientos/detalleCompra.php';
     }
+
 
     // Método que carga la vista de crear compra (formulario)
     public function crearcompra(){
@@ -359,7 +376,7 @@ class MovimientoController {
 
         if ($resultado['ok'] === true) {
             setFlash('exito', '¡Factura registrada exitosamente en el inventario!');
-            redirigir(urlAccion('movimiento', 'tablaMovimientos'));
+            redirigir(urlAccion('movimiento', 'verDetalleCompra', ['id' => (int) $resultado['id']]));
         } else {
             if ($resultado['motivo'] === 'factura_duplicada') {
                 setFlash('error', 'Esa factura ya está registrada para este proveedor. Verifica el número.');
@@ -369,6 +386,39 @@ class MovimientoController {
             guardarFormulario($_POST);
             redirigir(urlAccion('movimiento', 'crearcompra'));
         }
+    }
+
+    public function anularCompra() {
+        exigirRol(['admin']);
+        exigirPostConCsrf(urlAccion('movimiento', 'tablaMovimientos'));
+
+        $idCompra = validarEntero($_POST['id_compra'] ?? null, 1);
+        if ($idCompra === null) {
+            setFlash('error', 'Compra no válida.');
+            redirigir(urlAccion('movimiento', 'tablaMovimientos'));
+        }
+
+        $urlDetalle = urlAccion('movimiento', 'verDetalleCompra', ['id' => $idCompra]);
+        $motivo     = validarTextoLibre($_POST['motivo_anulacion'] ?? null, 5, 255);
+
+        if ($motivo === null) {
+            setFlash('error', 'El motivo de anulación debe tener entre 5 y 255 caracteres (sin < ni >).');
+            redirigir($urlDetalle);
+        }
+
+        renovarCsrf();
+        $idUsuario = isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : 1;
+        $resultado = $this->movimientoModel->anularCompra($idCompra, $idUsuario, $motivo);
+
+        if ($resultado['ok']) {
+            setFlash('exito', 'Compra anulada y stock descontado del inventario.');
+        } elseif (($resultado['motivo'] ?? '') === 'stock_insuficiente') {
+            setFlash('error', 'No se puede anular: el producto «' . ($resultado['producto'] ?? '') . '» ya no tiene stock suficiente para revertir esta entrada.');
+        } else {
+            setFlash('error', 'No se pudo anular la compra o ya se encontraba anulada.');
+        }
+
+        redirigir($urlDetalle);
     }
 
     /** Tasa BCV de hoy (texto con 4 decimales) o null si no hay; la compra se registra igual. */
@@ -441,5 +491,54 @@ class MovimientoController {
                 : 'Error interno en la base de datos.';
             echo json_encode(['ok' => false, 'error' => $msjError]);
         }
+    }
+
+    public function exportarPdf() {
+        exigirSesion();
+        evitarCache();
+
+        $busqueda    = trim($_GET['busqueda'] ?? '');
+        $filtro      = $_GET['filtro'] ?? 'todas';
+        $idProveedor = isset($_GET['proveedor']) && $_GET['proveedor'] !== '' ? (int) $_GET['proveedor'] : null;
+        $idCliente   = isset($_GET['cliente']) && $_GET['cliente'] !== '' ? (int) $_GET['cliente'] : null;
+
+        // Validar formato YYYY-MM-DD en fechas
+        $fechaDesde = (!empty($_GET['desde']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['desde'])) ? $_GET['desde'] : null;
+        $fechaHasta = (!empty($_GET['hasta']) && preg_match('/^\d{4}-\d{2}-\d{2}$/', $_GET['hasta'])) ? $_GET['hasta'] : null;
+
+        $movimientos = $this->movimientoModel->obtenerMovimientosReporte(
+            $busqueda,
+            $filtro,
+            $idProveedor,
+            $idCliente,
+            $fechaDesde,
+            $fechaHasta
+        );
+
+        // Calcular totales solo sobre operaciones asentadas (estado = 1)
+        $totalComprasUsd = 0.0;
+        $totalComprasBs  = 0.0;
+        $totalVentasUsd  = 0.0;
+        $totalVentasBs   = 0.0;
+        $cantidadAnuladas = 0;
+
+        foreach ($movimientos as $m) {
+            if ((int) ($m['estado'] ?? 1) === 0) {
+                $cantidadAnuladas++;
+                continue;
+            }
+            $monto = (float) ($m['total'] ?? 0);
+            $tasa  = (float) ($m['tasa_cambio'] ?? 0);
+
+            if (($m['tipo'] ?? '') === 'compra') {
+                $totalComprasUsd += $monto;
+                $totalComprasBs  += ($tasa > 0) ? ($monto * $tasa) : 0;
+            } else {
+                $totalVentasUsd += $monto;
+                $totalVentasBs  += ($tasa > 0) ? ($monto * $tasa) : 0;
+            }
+        }
+
+        require_once __DIR__ . '/../views/movimientos/reportePdf.php';
     }
 }

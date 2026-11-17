@@ -5,7 +5,7 @@
 
         public function __construct($pdo){
             $this->pdo = $pdo;
-    }
+        }
 
         public function getAll(){  //Funcion para obtener todos los proveedores..
             $stmt = $this->pdo->query("SELECT * FROM proveedores ORDER BY razon_social ASC");
@@ -98,6 +98,26 @@
             $stmt->execute($params);
             return (int) $stmt->fetchColumn() > 0;
         }
-}
+
+        // Obtiene el total histórico de recepciones (compras) y la fecha de la última entrega
+        public function obtenerResumenRecepciones($id) {
+            $sql = "SELECT COUNT(c.id_compra) AS total_recepciones,
+                           MAX(c.fecha_factura) AS ultima_entrada
+                    FROM proveedores p
+                    LEFT JOIN compras c
+                           ON p.id_proveedor = c.id_proveedor
+                          AND c.estado = 1
+                    WHERE p.id_proveedor = :id";
+            $stmt = $this->pdo->prepare($sql);
+            $stmt->bindValue(':id', (int) $id, PDO::PARAM_INT);
+            $stmt->execute();
+
+            $resumen = $stmt->fetch(PDO::FETCH_ASSOC);
+            return [
+                'total_recepciones' => (int) ($resumen['total_recepciones'] ?? 0),
+                'ultima_entrada'    => $resumen['ultima_entrada'] ?? null,
+            ];
+        }
+    }
 
     ?>

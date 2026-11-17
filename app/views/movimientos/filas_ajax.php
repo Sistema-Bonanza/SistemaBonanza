@@ -1,8 +1,8 @@
 <?php 
 /**
  * Una fila del listado de Movimientos. Sirve para los dos orígenes:
- *   $mov['tipo'] = 'compra'  -> entrada al inventario (módulo de Compras)
- *   $mov['tipo'] = 'venta'   -> salida del inventario  (módulo de Ventas)
+ *   $mov['tipo'] = 'compra'  -> entrada al inventario (módulo de Compras - Azul)
+ *   $mov['tipo'] = 'venta'   -> salida del inventario  (módulo de Ventas - Verde)
  * Columnas que entrega movimientoModel: tipo, id, documento, fecha, total, estado,
  * entidad, identificacion, nombre_usuario, tasa_cambio (BCV usada, puede ser null).
  *
@@ -24,20 +24,26 @@ $horaFormat = $fecha->format('h:i A');
 $nombreEntidad = $mov['entidad'] ?? ($esVenta ? 'Cliente' : 'Proveedor');
 $iniciales = strtoupper(substr($nombreEntidad, 0, 2));
 
-// Código de la operación y enlace al detalle según el origen
+// Código de la operación, enlaces y paleta unificada (Verde = Ventas | Azul = Compras)
 $idOperacion = (int) ($mov['id'] ?? 0);
 if ($esVenta) {
     $codigoOperacion = $mov['documento'] ?? numeroOperacion('FAC', $idOperacion);
     $refOperacion    = 'Venta ' . numeroOperacion('VEN', $idOperacion);
     $urlDetalle      = urlAccion('venta', 'verDetalleVenta', ['id' => $idOperacion]);
-    $colorDoc        = 'has-text-link';
-    $colorAvatar     = 'has-background-success-light has-text-success';
+    $colorTag        = 'is-success is-light';
+    $colorDoc        = 'has-text-success-dark';
+    $colorAvatar     = 'has-background-success-light has-text-success-dark';
+    $colorUsuario    = 'has-text-success-dark';
+    $colorAccion     = 'has-text-success-dark';
 } else {
     $codigoOperacion = numeroOperacion('COMP', $idOperacion);
     $refOperacion    = 'Ref: Factura ' . ($mov['documento'] ?? 'S/N');
     $urlDetalle      = urlAccion('movimiento', 'verDetalleCompra', ['id' => $idOperacion]);
-    $colorDoc        = 'has-text-success';
+    $colorTag        = 'is-link is-light';
+    $colorDoc        = 'has-text-link';
     $colorAvatar     = 'has-background-link-light has-text-link';
+    $colorUsuario    = 'has-text-link';
+    $colorAccion     = 'has-text-link';
 }
 ?>
 <tr>
@@ -52,11 +58,11 @@ if ($esVenta) {
     <!-- Col 2: Operación -->
     <td class="is-vcentered px-4">
         <?php if ($esVenta): ?>
-            <span class="tag is-success is-light has-text-weight-bold">
+            <span class="tag <?= $colorTag ?> has-text-weight-bold">
                 <span class="material-symbols-outlined is-size-6 mr-1">north_east</span> VENTA
             </span>
         <?php else: ?>
-            <span class="tag is-info is-light has-text-weight-bold">
+            <span class="tag <?= $colorTag ?> has-text-weight-bold">
                 <span class="material-symbols-outlined is-size-6 mr-1">south_east</span> COMPRA
             </span>
         <?php endif; ?>
@@ -84,7 +90,7 @@ if ($esVenta) {
                 <p class="is-size-7 has-text-grey is-flex is-align-items-center mt-1">
                     <?= esc($mov['identificacion'] ?? ($esVenta ? 'SIN DOCUMENTO' : 'SIN RIF')) ?> 
                     <span class="mx-1">•</span> 
-                    <span class="has-text-link is-flex is-align-items-center">
+                    <span class="<?= $colorUsuario ?> is-flex is-align-items-center">
                         <span class="material-symbols-outlined is-size-7 mr-1">person</span> 
                         <?= esc($mov['nombre_usuario'] ?? 'Sistema') ?>
                     </span>
@@ -120,13 +126,16 @@ if ($esVenta) {
 
     <!-- Col 7: Acciones -->
     <td class="is-vcentered px-4 has-text-right">
-        <div class="buttons is-right mb-0">
-            <a href="<?= esc($urlDetalle) ?>" class="button is-small is-light" title="Ver Detalle">
-                <span class="icon has-text-grey"><span class="material-symbols-outlined">visibility</span></span>
-            </a>
-            <button class="button is-small is-light" title="Descargar Comprobante" disabled>
-                <span class="icon has-text-grey-light"><span class="material-symbols-outlined">description</span></span>
-            </button>
-        </div>
+        <?php
+            $urlDescargar = $esVenta
+                ? urlAccion('venta', 'verDetalleVenta', ['id' => $idOperacion, 'imprimir' => 1])
+                : urlAccion('movimiento', 'verDetalleCompra', ['id' => $idOperacion, 'imprimir' => 1]);
+            $colorBoton = $esVenta ? 'has-text-success-dark' : 'has-text-link';
+        ?>
+        <a href="<?= esc($urlDescargar) ?>" class="button is-small is-light" title="Descargar / Imprimir comprobante PDF" target="_blank">
+            <span class="icon <?= $colorBoton ?>">
+                <span class="material-symbols-outlined">download</span>
+            </span>
+        </a>
     </td>
 </tr>

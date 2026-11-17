@@ -10,6 +10,14 @@ $email = $c['email'] ?? '';
 $direccion = $c['direccion'] ?? '';
 $estado = $c['estado'] ?? 1;
 $creadoEn = $c['creado_en'] ?? '';
+$fechaRegistroFormateada = !empty($creadoEn) ? formatoFecha($creadoEn, false) : 'Sin registro';
+
+// Métricas comerciales del cliente desde ventas
+$resumenVentas    = $resumenVentas ?? [];
+$totalCompras     = (int) ($resumenVentas['total_compras'] ?? 0);
+$ultimaCompraRaw  = $resumenVentas['ultima_compra'] ?? null;
+$ultimaCompra     = !empty($ultimaCompraRaw) ? formatoFecha($ultimaCompraRaw, false) : 'Sin compras';
+$totalFacturado   = (float) ($resumenVentas['total_facturado'] ?? 0);
 
 // Iniciales para el avatar del panel lateral
 $iniciales = !empty($nombre) ? strtoupper(substr($nombre, 0, 2)) : 'CL';
@@ -261,16 +269,45 @@ $iniciales = !empty($nombre) ? strtoupper(substr($nombre, 0, 2)) : 'CL';
                         </div>
 
                         <!-- Micro Métricas -->
-                        <div class="p-3 mb-2 has-background-white-ter" style="border-radius: 8px; border: 1px solid #e2e8f0;">
-                            <span class="is-size-7 is-uppercase has-text-grey has-text-weight-bold is-block">Código Interno</span>
-                            <span class="is-size-6 font-mono has-text-weight-bold has-text-dark">CLI-<?= htmlspecialchars($id ?: '---') ?></span>
-                        </div>
-                        <?php if ($creadoEn): ?>
+                        <div class="is-flex is-flex-direction-column" style="gap: 8px;">
                             <div class="p-3 has-background-white-ter" style="border-radius: 8px; border: 1px solid #e2e8f0;">
-                                <span class="is-size-7 is-uppercase has-text-grey has-text-weight-bold is-block">Fecha de Registro</span>
-                                <span class="is-size-7 font-mono has-text-dark"><?= htmlspecialchars($creadoEn) ?></span>
+                                <span class="is-size-7 is-uppercase has-text-grey has-text-weight-bold is-block">Código Interno</span>
+                                <span class="is-size-6 font-mono has-text-weight-bold has-text-dark">CLI-<?= htmlspecialchars($id ?: '---') ?></span>
                             </div>
-                        <?php endif; ?>
+
+                            <?php if ($creadoEn): ?>
+                                <div class="p-3 has-background-white-ter" style="border-radius: 8px; border: 1px solid #e2e8f0;">
+                                    <span class="is-size-7 is-uppercase has-text-grey has-text-weight-bold is-block">Fecha de Registro</span>
+                                    <span class="is-size-7 font-mono has-text-dark"><?= esc($fechaRegistroFormateada) ?></span>
+                                </div>
+                            <?php endif; ?>
+
+                            <div class="is-flex is-align-items-center is-justify-content-space-between p-3" style="background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div class="is-flex is-align-items-center" style="gap: 8px;">
+                                    <span class="material-symbols-outlined has-text-link is-size-6">shopping_bag</span>
+                                    <span class="is-size-7 has-text-dark font-medium">Total Compras</span>
+                                </div>
+                                <span class="is-size-7 font-semibold has-text-link">
+                                    <?= $totalCompras ?> <?= $totalCompras === 1 ? 'Pedido' : 'Pedidos' ?>
+                                </span>
+                            </div>
+
+                            <div class="is-flex is-align-items-center is-justify-content-space-between p-3" style="background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div class="is-flex is-align-items-center" style="gap: 8px;">
+                                    <span class="material-symbols-outlined has-text-grey is-size-6">event_available</span>
+                                    <span class="is-size-7 has-text-dark font-medium">Última Compra</span>
+                                </div>
+                                <span class="is-size-7 font-semibold has-text-grey"><?= esc($ultimaCompra) ?></span>
+                            </div>
+
+                            <div class="is-flex is-align-items-center is-justify-content-space-between p-3" style="background-color: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                <div class="is-flex is-align-items-center" style="gap: 8px;">
+                                    <span class="material-symbols-outlined has-text-success is-size-6">payments</span>
+                                    <span class="is-size-7 has-text-dark font-medium">Total Facturado</span>
+                                </div>
+                                <span class="is-size-7 font-semibold has-text-success-dark"><?= esc(dinero($totalFacturado)) ?></span>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Panel 2: Instrucciones Operativas -->

@@ -169,10 +169,12 @@ Class movimientoModel {
                         c.subtotal, c.tasa_iva, c.monto_iva, c.total, c.tasa_cambio,
                         c.observaciones, c.estado, c.fecha_anulacion, c.motivo_anulacion,
                         p.razon_social, p.rif, p.telefono AS telefono_proveedor, p.direccion AS direccion_proveedor,
-                        u.username AS nombre_usuario
+                        u.username AS nombre_usuario,
+                        u2.username AS nombre_usuario_anula
                    FROM compras c
                   INNER JOIN proveedores p ON p.id_proveedor = c.id_proveedor
                   INNER JOIN usuarios u ON u.id = c.id_usuario
+                   LEFT JOIN usuarios u2 ON u2.id = c.id_usuario_anula
                   WHERE c.id_compra = :id"
             );
             $stmt->bindValue(':id', (int) $idCompra, PDO::PARAM_INT);
@@ -206,6 +208,110 @@ Class movimientoModel {
         }
     }
 
+    /**
+     * Anula una compra vigente:
+     * - Verifica que cada producto conserve stock suficiente para revertir la entrada.
+     * - Descuenta las unidades de productos.stock_actual.
+     * - Registra la salida compensatoria en movimientos (kardex).
+     * - Marca compras.estado = 0 con usuario, fecha y motivo.
+     */
+    public function anularCompra(int $idCompra, int $idUsuario, string $motivo): array {
+        try {
+            $this->pdo->beginTransaction();
+
+            $stmtCompra = $this->pdo->prepare(
+                "SELECT id_compra, numero_factura, estado
+                   FROM compras
+                  WHERE id_compra = ? FOR UPDATE"
+            );
+            $stmtCompra->execute([$idCompra]);
+            $compra = $stmtCompra->fetch(PDO::FETCH_ASSOC);
+
+            if (!$compra) {
+                $this->pdo->rollBack();
+                return ['ok' => false, 'motivo' => 'no_existe'];
+            }
+
+            if ((int) $compra['estado'] === 0) {
+                $this->pdo->rollBack();
+                return ['ok' => false, 'motivo' => 'ya_anulada'];
+            }
+
+            $stmtDet = $this->pdo->prepare(
+                "SELECT id_producto, cantidad_unidades
+                   FROM detalle_compras
+                  WHERE id_compra = ?
+                  ORDER BY id_producto ASC"
+            );
+            $stmtDet->execute([$idCompra]);
+            $detalles = $stmtDet->fetchAll(PDO::FETCH_ASSOC);
+
+            $stmtProd = $this->pdo->prepare(
+                "SELECT nombre, stock_actual FROM productos WHERE id_producto = ? FOR UPDATE"
+            );
+            $stmtUpdStock = $this->pdo->prepare(
+                "UPDATE productos SET stock_actual = ? WHERE id_producto = ?"
+            );
+            $stmtKardex = $this->pdo->prepare(
+                "INSERT INTO movimientos
+                    (id_producto, tipo, cantidad, stock_antes, stock_despues, motivo, id_compra, id_usuario)
+                 VALUES (?, 'salida', ?, ?, ?, ?, ?, ?)"
+            );
+
+            foreach ($detalles as $det) {
+                $idProd   = (int) $det['id_producto'];
+                $cantRev  = (int) $det['cantidad_unidades'];
+
+                $stmtProd->execute([$idProd]);
+                $prod = $stmtProd->fetch(PDO::FETCH_ASSOC);
+
+                $stockAntes = (int) ($prod['stock_actual'] ?? 0);
+                if ($stockAntes < $cantRev) {
+                    $this->pdo->rollBack();
+                    return [
+                        'ok'       => false,
+                        'motivo'   => 'stock_insuficiente',
+                        'producto' => $prod['nombre'] ?? ('ID ' . $idProd)
+                    ];
+                }
+
+                $stockDespues = $stockAntes - $cantRev;
+                $stmtUpdStock->execute([$stockDespues, $idProd]);
+
+                $motivoKardex = "Anulación Compra Factura #" . $compra['numero_factura'] . " (" . $motivo . ")";
+                $stmtKardex->execute([
+                    $idProd,
+                    $cantRev,
+                    $stockAntes,
+                    $stockDespues,
+                    $motivoKardex,
+                    $idCompra,
+                    $idUsuario
+                ]);
+            }
+
+            $stmtAnular = $this->pdo->prepare(
+                "UPDATE compras
+                    SET estado = 0,
+                        fecha_anulacion = NOW(),
+                        id_usuario_anula = ?,
+                        motivo_anulacion = ?
+                  WHERE id_compra = ?"
+            );
+            $stmtAnular->execute([$idUsuario, $motivo, $idCompra]);
+
+            $this->pdo->commit();
+            return ['ok' => true];
+
+        } catch (PDOException $e) {
+            if ($this->pdo->inTransaction()) {
+                $this->pdo->rollBack();
+            }
+            error_log('MovimientoModel::anularCompra -> ' . $e->getMessage());
+            return ['ok' => false, 'motivo' => 'error'];
+        }
+    }
+
     // ==========================================================
     // FUNCIONES PARA LA BÚSQUEDA Y PAGINACIÓN AJAX
     // ----------------------------------------------------------
@@ -222,22 +328,36 @@ Class movimientoModel {
      * Arma el UNION (compras + ventas) según búsqueda y filtro.
      * Devuelve [sql_union, parametros]. El filtro 'entradas' deja solo compras y 'salidas' solo ventas.
      */
-    private function sqlUnionMovimientos($busqueda, $filtro) {
+    private function sqlUnionMovimientos($busqueda, $filtro, $idProveedor = null, $idCliente = null, $fechaDesde = null, $fechaHasta = null) {
         $params = [];
         $ramas  = [];
 
         $busqueda = trim((string) $busqueda);
         $like = '%' . addcslashes($busqueda, '%_\\') . '%';
 
-        // Un texto como "VEN-000015", "FAC-15", "COMP-3" o "15" también encuentra por id.
         $idBuscado = null;
         if ($busqueda !== '' && preg_match('/^(?:VEN|FAC|COMP)?-?0*(\d{1,10})\z/i', $busqueda, $m)) {
             $idBuscado = (int) $m[1];
         }
 
+        $incluirCompras = ($filtro !== 'salidas' && ($idCliente === null || $idCliente <= 0));
+        $incluirVentas  = ($filtro !== 'entradas' && ($idProveedor === null || $idProveedor <= 0));
+
         // ---------------- RAMA 1: COMPRAS (entradas) ----------------
-        if ($filtro !== 'salidas') {
+        if ($incluirCompras) {
             $where = '1=1';
+            if ($idProveedor !== null && $idProveedor > 0) {
+                $where .= " AND c.id_proveedor = :c_prov";
+                $params[':c_prov'] = (int) $idProveedor;
+            }
+            if (!empty($fechaDesde)) {
+                $where .= " AND c.fecha_registro >= :c_desde";
+                $params[':c_desde'] = $fechaDesde . ' 00:00:00';
+            }
+            if (!empty($fechaHasta)) {
+                $where .= " AND c.fecha_registro <= :c_hasta";
+                $params[':c_hasta'] = $fechaHasta . ' 23:59:59';
+            }
             if ($busqueda !== '') {
                 $where .= " AND (c.numero_factura LIKE :c_q1
                              OR p.razon_social LIKE :c_q2
@@ -271,8 +391,20 @@ Class movimientoModel {
         }
 
         // ---------------- RAMA 2: VENTAS (salidas) ----------------
-        if ($filtro !== 'entradas') {
+        if ($incluirVentas) {
             $where = '1=1';
+            if ($idCliente !== null && $idCliente > 0) {
+                $where .= " AND v.id_cliente = :v_cli";
+                $params[':v_cli'] = (int) $idCliente;
+            }
+            if (!empty($fechaDesde)) {
+                $where .= " AND v.fecha_venta >= :v_desde";
+                $params[':v_desde'] = $fechaDesde . ' 00:00:00';
+            }
+            if (!empty($fechaHasta)) {
+                $where .= " AND v.fecha_venta <= :v_hasta";
+                $params[':v_hasta'] = $fechaHasta . ' 23:59:59';
+            }
             if ($busqueda !== '') {
                 $where .= " AND (v.numero_factura LIKE :v_q1
                              OR cl.nombre_razon_social LIKE :v_q2
@@ -289,7 +421,6 @@ Class movimientoModel {
                 $where .= ")";
             }
 
-            // Ventas viejas pudieron no guardar numero_factura: se deriva FAC-000015 igual que en Ventas.
             $ramas[] = "SELECT 'venta' AS tipo,
                                v.id_venta AS id,
                                CONVERT(COALESCE(v.numero_factura, CONCAT('FAC-', LPAD(v.id_venta, 6, '0'))) USING utf8mb4) COLLATE utf8mb4_general_ci AS documento,
@@ -307,7 +438,6 @@ Class movimientoModel {
         }
 
         if (empty($ramas)) {
-            // Filtro desconocido: no se muestra nada.
             $ramas[] = "SELECT 'compra' AS tipo, 0 AS id, '' AS documento, NOW() AS fecha, 0 AS total,
                                1 AS estado, NULL AS tasa_cambio, '' AS entidad, '' AS identificacion, '' AS nombre_usuario
                          FROM DUAL WHERE 1=0";
@@ -323,9 +453,9 @@ Class movimientoModel {
         }
     }
 
-    public function obtenerMovimientosPaginados($busqueda, $filtro, $offset, $limite) {
+    public function obtenerMovimientosPaginados($busqueda, $filtro, $offset, $limite, $idProveedor = null, $idCliente = null) {
         try {
-            [$union, $params] = $this->sqlUnionMovimientos($busqueda, $filtro);
+            [$union, $params] = $this->sqlUnionMovimientos($busqueda, $filtro, $idProveedor, $idCliente);
 
             $sql = "SELECT * FROM ( $union ) AS mov
                     ORDER BY mov.fecha DESC, mov.id DESC
@@ -414,6 +544,22 @@ Class movimientoModel {
                 'salidas_unds'   => 0,
                 'stock_critico'  => 0
             ];
+        }
+    }
+
+    public function obtenerMovimientosReporte($busqueda = '', $filtro = 'todas', $idProveedor = null, $idCliente = null, $fechaDesde = null, $fechaHasta = null) {
+        try {
+            [$union, $params] = $this->sqlUnionMovimientos($busqueda, $filtro, $idProveedor, $idCliente, $fechaDesde, $fechaHasta);
+            $sql = "SELECT * FROM ($union) AS movs ORDER BY fecha DESC, id DESC";
+            $stmt = $this->pdo->prepare($sql);
+            foreach ($params as $clave => $valor) {
+                $stmt->bindValue($clave, $valor, is_int($valor) ? PDO::PARAM_INT : PDO::PARAM_STR);
+            }
+            $stmt->execute();
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (PDOException $e) {
+            error_log("Error en obtenerMovimientosReporte: " . $e->getMessage());
+            return [];
         }
     }
 }

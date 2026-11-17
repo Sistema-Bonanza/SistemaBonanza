@@ -4,6 +4,7 @@ require_once __DIR__ . '/../helpers/seguridad.php';
 require_once __DIR__ . '/../helpers/validaciones.php';
 require_once __DIR__ . '/../../config/database.php';
 require_once __DIR__ . '/../model/proveedorModel.php';
+require_once __DIR__ . '/../helpers/formato.php';
 
 class ProveedorController {
     private $proveedorModel;
@@ -47,6 +48,7 @@ class ProveedorController {
         $proveedor = ($id !== null) ? $this->proveedorModel->obtenerPorId($id) : false;
 
         if ($proveedor) {
+            $resumenRecepciones = $this->proveedorModel->obtenerResumenRecepciones($id);
             require_once __DIR__ . '/../views/proveedor/editarProveedor.php';
             return;
         }
@@ -54,7 +56,6 @@ class ProveedorController {
         setFlash('error', 'El proveedor no existe.');
         redirigir(urlAccion('proveedor', 'tablaproveedores'));
     }
-
 
     public function cambiarestado() {
         exigirRol(['admin']);

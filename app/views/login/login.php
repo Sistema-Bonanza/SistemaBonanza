@@ -1,3 +1,39 @@
+<?php
+// Captura silenciosa de alertas (flash de sesión, errores GET o cierre por inactividad)
+ob_start();
+if (function_exists('mostrarFlash')) {
+    echo mostrarFlash();
+}
+$flashHtml  = trim(ob_get_clean());
+$flashTexto = trim(html_entity_decode(strip_tags($flashHtml), ENT_QUOTES, 'UTF-8'));
+
+$alertaIcono  = 'warning';
+$alertaTitulo = 'Aviso del Sistema';
+$alertaTexto  = '';
+
+if (!empty($_GET['error'])) {
+    $alertaIcono  = 'error';
+    $alertaTitulo = 'Error de acceso';
+    $alertaTexto  = trim((string) $_GET['error']);
+} elseif ($flashTexto !== '') {
+    $alertaTexto = $flashTexto;
+
+    if (stripos($flashHtml, 'is-success') !== false || stripos($flashTexto, 'exitoso') !== false) {
+        $alertaIcono  = 'success';
+        $alertaTitulo = '¡Operación exitosa!';
+    } elseif (stripos($flashHtml, 'is-danger') !== false) {
+        $alertaIcono  = 'error';
+        $alertaTitulo = 'Acceso denegado';
+    } elseif (stripos($flashTexto, 'inactividad') !== false || stripos($flashTexto, 'expir') !== false) {
+        $alertaIcono  = 'warning';
+        $alertaTitulo = 'Sesión cerrada por inactividad';
+    }
+} elseif (!empty($_GET['inactividad']) || !empty($_GET['expirada']) || !empty($_GET['timeout'])) {
+    $alertaIcono  = 'warning';
+    $alertaTitulo = 'Sesión cerrada por inactividad';
+    $alertaTexto  = 'Tu sesión se cerró automáticamente por seguridad tras un período sin actividad. Inicia sesión nuevamente.';
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,7 +48,7 @@
     <!-- Typography Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-        <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/login.css" />
+    <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/login.css" />
 </head>
 <body class="is-flex is-align-items-center is-justify-content-center p-4">
 
@@ -23,9 +59,7 @@
         <section class="column is-5 bg-gradient-blue">
             <div class="blueprint-grid"></div>
             
-            <!-- Contenedor interno para recuperar el padding (p-6) -->
             <div class="is-flex is-flex-direction-column is-justify-content-space-between p-6" style="height: 100%; min-height: 600px; position: relative; z-index: 10;">
-                
                 <div>
                     <div class="is-flex is-align-items-center mb-6">
                         <div class="is-flex is-align-items-center is-justify-content-center mr-3" style="width: 48px; height: 48px; background: rgba(255,255,255,0.15); border: 1px solid rgba(255,255,255,0.25); border-radius: 0.75rem;">
@@ -48,23 +82,11 @@
                         Monitoreo integral de existencias, auditoría de despachos y administración de bodegas industriales con trazabilidad en tiempo real.
                     </p>
                 </div>
-
-                <div class="is-flex is-align-items-center is-justify-content-space-between pt-4 mt-6" style="border-top: 1px solid rgba(255,255,255,0.15);">
-                    <div class="is-flex is-align-items-center is-size-7" style="font-family: monospace; color: #bfdbfe;">
-                        <i class="fa-solid fa-terminal mr-2"></i>
-                        <span>v2.4.0 Build Corporativo</span>
-                    </div>
-                    <span class="px-2 py-1 has-text-weight-bold is-size-7 rounded" style="font-family: monospace; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); color: #dbeafe;">
-                        Nodo #01
-                    </span>
-                </div>
             </div>
         </section>
 
         <!-- Panel Derecho -->
         <section class="column is-7 has-background-white">
-            
-            <!-- Contenedor interno para recuperar el padding (p-6) -->
             <div class="is-flex is-flex-direction-column is-justify-content-space-between p-6" style="height: 100%; min-height: 600px;">
                 
                 <div>
@@ -76,21 +98,12 @@
                     <h2 class="title is-3 font-display has-text-dark mb-3">Bienvenido de nuevo</h2>
                     <p class="subtitle is-6 has-text-grey mb-6" style="margin-top: 0 !important;">Ingrese sus credenciales operativas para iniciar turno.</p>
 
-                    <?php if (isset($_GET['error'])): ?>
-                    <div class="notification is-danger is-light mb-5 is-flex is-align-items-center p-3" style="border-radius: 0.75rem;">
-                        <i class="fa-solid fa-circle-exclamation is-size-5 mr-3"></i>
-                        <span class="has-text-weight-medium is-size-6"><?php echo htmlspecialchars($_GET['error']); ?></span>
-                    </div>
-                    <?php endif; ?>
-
-
-                        <?= mostrarFlash() ?>
                     <form action="<?= esc(urlAccion('sistema', 'procesarlogin')) ?>" method="POST" id="loginForm" onsubmit="return handleLogin();">
                         <input type="hidden" name="login_form" value="1">
                         <?= campoCsrf() ?>
 
                         <div class="field mb-4">
-                            <label class="label has-text-dark is-size-7 has-text-weight-bold">Usuario o Correo <span class="has-text-danger">*</span></label>
+                            <label class="label has-text-dark is-size-7 has-text-weight-bold">Usuario <span class="has-text-danger">*</span></label>
                             <div class="control has-icons-left">
                                 <input class="input is-medium" style="border-radius: 0.75rem; box-shadow: none; border-color: #cbd5e1;" type="text" id="username" name="username" placeholder="Ej. usuario123" required autocomplete="username">
                                 <span class="icon is-left has-text-grey-light">
@@ -126,29 +139,24 @@
                 </div>
 
                 <footer class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap pt-4 mt-6" style="border-top: 1px solid #e2e8f0;">
-                     <p class="is-size-7 has-text-grey m-0">
-                            © <?php echo date('Y'); ?> <strong class="has-text-dark">Distribuidora de Alimentos Bonanza</strong> 
-                        </p>
-                        <div class="is-flex is-align-items-center is-size-7" style="gap: 12px;">
-                            <a href="javascript:void(0)" class="has-text-grey hover-link" style="text-decoration: none;">Soporte Técnico</a>
-                            <span class="has-text-grey-light">•</span>
-                            <a href="javascript:void(0)" class="has-text-grey hover-link" style="text-decoration: none;">Normativa Almacén</a>
-                        </div>
-                    </footer>
-                </div>
-            </section>
-        </div>
-    </main>
+                    <p class="is-size-7 has-text-grey m-0">
+                        © <?php echo date('Y'); ?> <strong class="has-text-dark">Distribuidora de Alimentos Bonanza</strong>
+                    </p>
+                </footer>
+            </div>
+        </section>
+    </div>
+</main>
 
-     <!-- CDN de SweetAlert2 -->
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- CDN de SweetAlert2 -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-    <<script>
-    // Puente seguro: Pasamos el error de PHP a una variable global de JS
-    const errorMessage = <?= json_encode($errorLogin ?? '') ?>;
-</script>
+<script>
+        // Puente seguro: Pasamos errores de PHP a una variable global de JS
+        const errorMessage = <?= json_encode($errorLogin ?? ($_GET['error'] ?? ''), JSON_UNESCAPED_UNICODE) ?>;
+    </script>
 
-<!-- Archivo JavaScript externo y desacoplado -->
-<script src="<?= esc(URL_BASE) ?>/assets/js/login.js?v=<?= time() ?>"></script>
+    <!-- Archivo JavaScript externo y desacoplado -->
+    <script src="<?= esc(URL_BASE) ?>/assets/js/login.js?v=<?= time() ?>"></script>
 </body>
 </html>

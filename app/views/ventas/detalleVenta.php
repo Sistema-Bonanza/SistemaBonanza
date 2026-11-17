@@ -3,6 +3,7 @@
 //   $venta, $detalles, $pagos, $numeroOperacion (VEN-), $numeroFactura (FAC-), $puedeAnular, $autoImprimir
 
 $anulada = ((int) $venta['estado'] === 0);
+$autoImprimir = !empty($autoImprimir) || (isset($_GET['imprimir']) && $_GET['imprimir'] === '1');
 
 $nombreEmpresa = defined('NOMBRE_EMPRESA') ? NOMBRE_EMPRESA : 'Distribuidora de Alimentos Bonanza';
 $rifEmpresa    = defined('RIF_EMPRESA') ? RIF_EMPRESA : '';
@@ -21,6 +22,7 @@ foreach ($detalles as $linea) {
     <title>Factura <?= esc($numeroFactura) ?> · Distribuidora de Alimentos Bonanza</title>
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
     <link href="https://cdn.jsdelivr.net/npm/bulma@0.9.4/css/bulma.min.css" rel="stylesheet">
 
     <link rel="stylesheet" href="<?= esc(URL_BASE) ?>/assets/css/sidebar.css" />
@@ -33,27 +35,37 @@ foreach ($detalles as $linea) {
     <main class="main-content">
         <div class="container is-max-desktop">
 
-            <!-- BARRA DE ACCIONES (no se imprime) -->
-            <div class="level mb-5 no-print">
-                <div class="level-left">
-                    <div>
-                        <h1 class="title is-4 mb-1">Factura</h1>
-                        <p class="has-text-grey mt-1">Documento de la venta, listo para imprimir.</p>
+            <!-- BANNER (no se imprime - Verde Esmeralda para Ventas/Salidas) -->
+            <div class="box mb-5 no-print" style="background: linear-gradient(90deg, #065f46 0%, #059669 50%, #047857 100%); border-radius: 12px; border: none; overflow: hidden; position: relative;">
+                <div class="is-flex is-align-items-center is-justify-content-space-between is-flex-wrap-wrap" style="gap: 1.5rem; position: relative; z-index: 2;">
+                    <div class="is-flex is-align-items-center" style="gap: 1rem;">
+                        <div class="is-flex is-align-items-center is-justify-content-center" style="width: 60px; height: 60px; background: rgba(255,255,255,0.12); border-radius: 12px; backdrop-filter: blur(4px);">
+                            <span class="material-symbols-outlined is-size-3 has-text-white">receipt</span>
+                        </div>
+                        <div>
+                            <div class="is-flex is-align-items-center" style="gap: 0.5rem;">
+                                <h1 class="title is-4 has-text-white mb-0">Factura de Venta</h1>
+                                <span class="tag is-success is-light is-rounded has-text-weight-bold is-small">
+                                    <span style="width: 6px; height: 6px; border-radius: 50%; background: #10b981; margin-right: 6px; box-shadow: 0 0 8px #10b981;"></span> Salida de Mercancía
+                                </span>
+                            </div>
+                            <p class="has-text-white-ter is-size-7 mt-1" style="max-width: 700px;">
+                                Documento de la venta registrada en el inventario, con el detalle de cada producto despachado.
+                            </p>
+                        </div>
                     </div>
-                </div>
-                <div class="level-right">
-                    <div class="buttons">
-                        <a href="<?= esc(urlAccion('movimiento', 'tablaMovimientos')) ?>" class="button is-light">
-                            <span class="icon is-small"><i class="fas fa-arrow-left"></i></span>
-                            <span>Volver al listado</span>
+                    <div class="buttons mb-0">
+                        <a href="<?= esc(urlAccion('movimiento', 'tablaMovimientos')) ?>" class="button is-white is-outlined has-text-weight-bold" style="border-radius: 8px; border-color: rgba(255,255,255,0.4);">
+                            <span class="icon"><span class="material-symbols-outlined">arrow_back</span></span>
+                            <span>Volver a Movimientos</span>
                         </a>
-                        <button type="button" class="button is-link" data-imprimir>
-                            <span class="icon is-small"><i class="fas fa-print"></i></span>
+                        <button type="button" class="button is-white has-text-success-dark has-text-weight-bold" style="border-radius: 8px;" data-imprimir>
+                            <span class="icon"><span class="material-symbols-outlined">print</span></span>
                             <span>Imprimir</span>
                         </button>
                         <?php if ($puedeAnular): ?>
-                            <button type="button" class="button is-danger is-light" data-modal-abrir="modalAnular">
-                                <span class="icon is-small"><i class="fas fa-ban"></i></span>
+                            <button type="button" class="button is-danger is-light has-text-weight-bold" style="border-radius: 8px;" data-modal-abrir="modalAnular">
+                                <span class="icon"><span class="material-symbols-outlined">block</span></span>
                                 <span>Anular factura</span>
                             </button>
                         <?php endif; ?>

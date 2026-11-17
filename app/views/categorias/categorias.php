@@ -196,7 +196,7 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
                                 <th class="py-3 px-4 has-text-centered" style="width: 140px;">Artículos Vinculados</th>
                                 <th class="py-3 px-4 has-text-centered" style="width: 100px;">Estado</th>
                                 <?php if (esAdmin()): ?>
-                                    <th class="py-3 px-4 has-text-right" style="width: 120px;">Acciones</th>
+                                    <th class="py-3 px-4 has-text-centered" style="width: 120px;">Acciones</th>
                                 <?php endif; ?>
                             </tr>
                         </thead>
@@ -246,39 +246,47 @@ if ($kpiTotalProductos > 0 && $kpiHuerfanos > 0) {
                                         </td>
 
                                         <?php if (esAdmin()): ?>
-                                    <td class="has-text-right">
-                                        <div class="buttons is-right mb-0">
-                                            <!-- Botón de Editar siempre disponible para Admin -->
-                                            <a href="<?= esc(urlAccion('categoria', 'formeditarcategoria', ['id' => $categoria['id_categoria'] ?? 0])) ?>" class="button is-small is-info is-light" title="Editar Categoría">
-                                                <span class="icon"><span class="material-symbols-outlined">edit</span></span>
-                                            </a>
-                                            
-                                            <?php if ($estadoActivo === 1 && $totalArticulos > 0): ?>
-                                                <!-- BLOQUEO: Está activa y tiene productos vinculados -->
-                                                <button class="button is-small is-light has-text-grey-light" disabled title="Restringido: Primero debes reasignar o eliminar los <?= $totalArticulos ?> artículos vinculados">
-                                                    <span class="icon"><span class="material-symbols-outlined">lock</span></span>
-                                                </button>
+                                            <td class="py-3 px-4 has-text-centered align-middle" style="white-space: nowrap;">
+                                                <div class="buttons is-centered is-flex-wrap-nowrap mb-0 are-small">
+                                                    <!-- BOTÓN EDITAR -->
+                                                    <a href="<?= esc(urlAccion('categoria', 'formeditarcategoria', ['id' => $categoria['id_categoria'] ?? 0])) ?>"
+                                                    class="button is-light has-text-link has-text-weight-bold mb-0"
+                                                    title="Editar Categoría">
+                                                        <span class="icon"><span class="material-symbols-outlined is-size-6">edit</span></span>
+                                                        <span>Editar</span>
+                                                    </a>
 
-                                            <?php else: ?>
-                                                <!-- ACCIÓN PERMITIDA: Inactivar (si está activa y vacía) o Reactivar (si está inactiva) -->
-                                                <form action="<?= esc(urlAccion('categoria', 'desactivarCategoria')) ?>" method="POST" style="display: inline-block;" data-ajax>
-                                                    <?= campoCsrf() ?>
-                                                    <input type="hidden" name="id" value="<?= (int) ($categoria['id_categoria'] ?? 0) ?>">
-                                                    <button type="button"
-                                                            class="button is-small <?= $estadoActivo === 1 ? 'is-danger' : 'is-success' ?> is-light"
-                                                            title="<?= $estadoActivo === 1 ? 'Inactivar Categoría' : 'Reactivar Categoría' ?>"
-                                                            data-confirmar="<?= $estadoActivo === 1
-                                                                ? 'La categoría está vacía. ¿Seguro que deseas inactivarla?'
-                                                                : '¿Seguro que deseas reactivar la categoría ' . esc($categoria['nombre'] ?? '') . '?' ?>">
-                                                        <span class="icon">
-                                                            <span class="material-symbols-outlined"><?= $estadoActivo === 1 ? 'delete' : 'check_circle' ?></span>
-                                                        </span>
-                                                    </button>
-                                                </form>
-                                            <?php endif; ?>
-                                        </div>
-                                    </td>
-                                    <?php endif; ?>
+                                                    <?php if ($estadoActivo === 1 && $totalArticulos > 0): ?>
+                                                        <!-- BLOQUEO: Está activa y tiene productos vinculados -->
+                                                        <button type="button"
+                                                                class="button is-small is-light has-text-grey has-text-weight-bold mb-0"
+                                                                disabled
+                                                                title="Restringido: Primero debes reasignar o eliminar los <?= $totalArticulos ?> artículos vinculados">
+                                                            <span class="icon"><span class="material-symbols-outlined is-size-6">lock</span></span>
+                                                            <span>Bloqueada</span>
+                                                        </button>
+                                                    <?php else: ?>
+                                                        <!-- ACCIÓN PERMITIDA: Desactivar o Activar -->
+                                                        <form action="<?= esc(urlAccion('categoria', 'desactivarCategoria')) ?>" method="POST" style="display: inline-flex; margin: 0;" data-ajax>
+                                                            <?= campoCsrf() ?>
+                                                            <input type="hidden" name="id" value="<?= (int) ($categoria['id_categoria'] ?? 0) ?>">
+
+                                                            <button type="button"
+                                                                    class="button is-small <?= $estadoActivo === 1 ? 'is-warning' : 'is-success' ?> is-light has-text-weight-bold mb-0"
+                                                                    title="<?= $estadoActivo === 1 ? 'Inactivar Categoría' : 'Reactivar Categoría' ?>"
+                                                                    data-confirmar="<?= $estadoActivo === 1
+                                                                        ? 'La categoría está vacía. ¿Seguro que deseas inactivarla?'
+                                                                        : '¿Seguro que deseas reactivar la categoría ' . esc($categoria['nombre'] ?? '') . '?' ?>">
+                                                                <span class="icon">
+                                                                    <span class="material-symbols-outlined is-size-6"><?= $estadoActivo === 1 ? 'block' : 'check_circle' ?></span>
+                                                                </span>
+                                                                <span><?= $estadoActivo === 1 ? 'Desactivar' : 'Activar' ?></span>
+                                                            </button>
+                                                        </form>
+                                                    <?php endif; ?>
+                                                </div>
+                                            </td>
+                                        <?php endif; ?>
                                     </tr>
                                 <?php endforeach; ?>
                             <?php else: ?>

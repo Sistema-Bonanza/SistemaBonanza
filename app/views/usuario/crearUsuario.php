@@ -106,7 +106,7 @@
                                     <label class="label is-size-7 mb-0 has-text-grey-dark" for="password">
                                         Contraseña <span class="has-text-danger">*</span>
                                     </label>
-                                    <span class="tag is-link is-light is-rounded is-small">Mínimo 6 caracteres</span>
+                                    <span class="tag is-link is-light is-rounded is-small">Mínimo 8 caracteres</span>
                                 </div>
                                 <div class="control has-icons-left has-icons-right">
                                     <input class="input" type="password" id="password" name="password" minlength="6" required placeholder="Ingrese una contraseña segura" style="border-radius: 8px; border-color: #cbd5e1;">

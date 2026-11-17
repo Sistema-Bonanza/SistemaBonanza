@@ -176,15 +176,15 @@ $countInactivos = $totalProveedores - $countActivos;
                 </div>
 
                 <div class="table-container mb-0">
-                    <table class="table is-fullwidth is-hoverable" id="tablaProveedores">
+                    <table class="table is-fullwidth is-hoverable is-vcentered mb-0" id="tablaProveedores">
                         <thead>
                             <tr style="background-color: #f8fafc; border-bottom: 2px solid #edf2f7;">
-                                <th class="is-size-7 has-text-grey is-uppercase py-3">Razón Social</th>
-                                <th class="is-size-7 has-text-grey is-uppercase py-3">RIF</th>
-                                <th class="is-size-7 has-text-grey is-uppercase py-3">Contacto</th>
-                                <th class="is-size-7 has-text-grey is-uppercase py-3">Teléfono</th>
-                                <th class="is-size-7 has-text-grey is-uppercase py-3 text-center">Estado</th>
-                                <th class="is-size-7 has-text-grey is-uppercase py-3 text-right" style="text-align: right;">Acciones</th>
+                                <th class="is-size-7 has-text-grey is-uppercase py-3 px-4">Razón Social</th>
+                                <th class="is-size-7 has-text-grey is-uppercase py-3 px-4">RIF</th>
+                                <th class="is-size-7 has-text-grey is-uppercase py-3 px-4">Contacto</th>
+                                <th class="is-size-7 has-text-grey is-uppercase py-3 px-4">Teléfono</th>
+                                <th class="is-size-7 has-text-grey is-uppercase py-3 px-4 has-text-centered">Estado</th>
+                                <th class="is-size-7 has-text-grey is-uppercase py-3 px-4 has-text-centered">Acciones</th>
                             </tr>
                         </thead>
                         <tbody class="is-size-6">
@@ -202,7 +202,7 @@ $countInactivos = $totalProveedores - $countActivos;
                                     ?>
                                     <tr class="fila-busqueda" data-estado="<?= $esActivo ? 'activo' : 'inactivo' ?>">
                                         <!-- Razón Social + Icono Avatar -->
-                                        <td>
+                                        <td class="py-3 px-4">
                                             <div class="is-flex is-align-items-center" style="gap: 14px;">
                                                 <div class="is-flex is-align-items-center is-justify-content-center has-background-link-dark has-text-white has-text-weight-bold flex-shrink-0" style="width: 36px; height: 36px; border-radius: 10px; font-size: 0.8rem;">
                                                     <?= $inicial ?>
@@ -215,14 +215,14 @@ $countInactivos = $totalProveedores - $countActivos;
                                         </td>
 
                                         <!-- RIF -->
-                                        <td class="is-vcentered">
+                                        <td class="py-3 px-4 is-vcentered">
                                             <span class="tag is-light has-text-weight-semibold font-mono doc-proveedor">
                                                 <?= htmlspecialchars($rif) ?>
                                             </span>
                                         </td>
 
                                         <!-- Contacto -->
-                                        <td class="is-vcentered">
+                                        <td class="py-3 px-4 is-vcentered">
                                             <div class="is-flex is-align-items-center" style="gap: 6px;">
                                                 <span class="material-symbols-outlined has-text-grey is-size-6">person</span>
                                                 <span class="is-size-7 has-text-dark contacto-proveedor"><?= htmlspecialchars($contacto) ?></span>
@@ -230,7 +230,7 @@ $countInactivos = $totalProveedores - $countActivos;
                                         </td>
 
                                         <!-- Teléfono -->
-                                        <td class="is-vcentered">
+                                        <td class="py-3 px-4 is-vcentered">
                                             <div class="is-flex is-align-items-center" style="gap: 6px;">
                                                 <span class="material-symbols-outlined has-text-grey is-size-6">call</span>
                                                 <span class="is-size-7 has-text-dark font-mono tlf-proveedor"><?= htmlspecialchars($telefono) ?></span>
@@ -238,35 +238,40 @@ $countInactivos = $totalProveedores - $countActivos;
                                         </td>
 
                                         <!-- Estado -->
-                                        <td class="is-vcentered text-center" style="text-align: center;">
+                                        <td class="py-3 px-4 is-vcentered has-text-centered">
                                             <span class="tag is-rounded <?= $esActivo ? 'is-success' : 'is-danger' ?> is-light has-text-weight-semibold">
                                                 <?= $esActivo ? 'Activo' : 'Inactivo' ?>
                                             </span>
                                         </td>
 
                                         <!-- Acciones -->
-                                        <td class="is-vcentered text-right" style="text-align: right;">
-                                            <div class="buttons is-right mb-0" style="gap: 6px; justify-content: flex-end;">
+                                        <td class="py-3 px-4 is-vcentered has-text-centered" style="white-space: nowrap;">
+                                            <div class="buttons is-centered is-flex-wrap-nowrap mb-0 are-small">
 
                                                 <!-- Editar (Disponible para Admin y Operador) -->
-                                                <a href="<?= esc(urlAccion('proveedor', 'formedit', ['id' => (int) $idProv])) ?>" class="button is-small is-link is-light" title="Editar proveedor">
-                                                    <span class="icon"><span class="material-symbols-outlined">edit</span></span>
+                                                <a href="<?= esc(urlAccion('proveedor', 'formedit', ['id' => (int) $idProv])) ?>"
+                                                class="button is-light has-text-link has-text-weight-bold mb-0"
+                                                title="Editar proveedor">
+                                                    <span class="icon"><span class="material-symbols-outlined is-size-6">edit</span></span>
+                                                    <span>Editar</span>
                                                 </a>
 
                                                 <?php if (esAdmin()): ?>
-                                                <!-- Soft Delete / Reactivación (Exclusivo Admin) -->
-                                                <form action="<?= esc(urlAccion('proveedor', 'cambiarestado')) ?>" method="POST" style="display: inline-block;" data-ajax>
-                                                    <?= campoCsrf() ?>
-                                                    <input type="hidden" name="id" value="<?= (int) $idProv ?>">
-                                                    <button type="button"
-                                                            class="button is-small <?= $esActivo ? 'is-danger' : 'is-success' ?> is-light"
-                                                            title="<?= $esActivo ? 'Inactivar proveedor' : 'Reactivar proveedor' ?>"
-                                                            data-confirmar="¿Seguro que deseas <?= $esActivo ? 'inactivar' : 'reactivar' ?> al proveedor <?= esc($razonSocial) ?>?">
-                                                        <span class="icon">
-                                                            <span class="material-symbols-outlined"><?= $esActivo ? 'block' : 'check_circle' ?></span>
-                                                        </span>
-                                                    </button>
-                                                </form>
+                                                    <!-- Soft Delete / Reactivación (Exclusivo Admin) -->
+                                                    <form action="<?= esc(urlAccion('proveedor', 'cambiarestado')) ?>" method="POST" style="display: inline-flex; margin: 0;" data-ajax>
+                                                        <?= campoCsrf() ?>
+                                                        <input type="hidden" name="id" value="<?= (int) $idProv ?>">
+
+                                                        <button type="button"
+                                                                class="button is-small <?= $esActivo ? 'is-warning' : 'is-success' ?> is-light has-text-weight-bold mb-0"
+                                                                title="<?= $esActivo ? 'Inactivar proveedor' : 'Reactivar proveedor' ?>"
+                                                                data-confirmar="¿Seguro que deseas <?= $esActivo ? 'inactivar' : 'reactivar' ?> al proveedor <?= esc($razonSocial) ?>?">
+                                                            <span class="icon">
+                                                                <span class="material-symbols-outlined is-size-6"><?= $esActivo ? 'block' : 'check_circle' ?></span>
+                                                            </span>
+                                                            <span><?= $esActivo ? 'Desactivar' : 'Activar' ?></span>
+                                                        </button>
+                                                    </form>
                                                 <?php endif; ?>
 
                                             </div>

@@ -15,6 +15,7 @@ foreach ($detalles as $linea) {
     $totalUnidades += (int) $linea['cantidad_unidades'];
 }
 $tasa = (float) ($compra['tasa_cambio'] ?? 0);
+$autoImprimir = isset($_GET['imprimir']) && $_GET['imprimir'] === '1';
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -65,6 +66,13 @@ $tasa = (float) ($compra['tasa_cambio'] ?? 0);
                             <span class="icon"><span class="material-symbols-outlined">print</span></span>
                             <span>Imprimir</span>
                         </button>
+
+                        <?php if (!empty($puedeAnular)): ?>
+                            <button type="button" class="button is-danger is-light has-text-weight-bold" style="border-radius: 8px;" data-modal-abrir="modalAnularCompra">
+                                <span class="icon"><span class="material-symbols-outlined">block</span></span>
+                                <span>Anular compra</span>
+                            </button>
+                        <?php endif; ?>
                     </div>
                 </div>
             </div>
@@ -203,9 +211,18 @@ $tasa = (float) ($compra['tasa_cambio'] ?? 0);
                 <?php if ($anulada): ?>
                     <div class="notification is-danger is-light mt-5 mb-0">
                         <p class="has-text-weight-bold mb-1">Esta compra fue anulada</p>
+                        <?php if (!empty($compra['fecha_anulacion'])): ?>
+                            <p>
+                                <?= esc(formatoFecha($compra['fecha_anulacion'], true)) ?>
+                                <?php if (!empty($compra['nombre_usuario_anula'])): ?>
+                                    · por <?= esc($compra['nombre_usuario_anula']) ?>
+                                <?php endif; ?>
+                            </p>
+                        <?php endif; ?>
                         <?php if (!empty($compra['motivo_anulacion'])): ?>
                             <p><strong>Motivo:</strong> <?= esc($compra['motivo_anulacion']) ?></p>
                         <?php endif; ?>
+                        <p class="is-size-7 mt-1">El stock recibido de estos productos fue descontado del inventario.</p>
                     </div>
                 <?php endif; ?>
 
@@ -218,5 +235,50 @@ $tasa = (float) ($compra['tasa_cambio'] ?? 0);
             b.addEventListener('click', function () { window.print(); });
         });
     </script>
+
+    <?php if (!empty($puedeAnular)): ?>
+        <!-- MODAL DE ANULACIÓN (solo administración) -->
+        <div class="modal no-print" id="modalAnularCompra">
+            <div class="modal-background" data-modal-cerrar></div>
+            <form class="modal-card" method="POST" action="<?= esc(urlAccion('movimiento', 'anularCompra')) ?>"
+                  data-confirmar="¿Anular la compra <?= esc($numeroOperacion) ?>? Esta acción descontará el stock recibido." data-ajax>
+                <?= campoCsrf() ?>
+                <input type="hidden" name="id_compra" value="<?= (int) $compra['id_compra'] ?>">
+
+                <header class="modal-card-head">
+                    <p class="modal-card-title">Anular compra <?= esc($numeroOperacion) ?></p>
+                    <button type="button" class="delete" aria-label="Cerrar" data-modal-cerrar></button>
+                </header>
+
+                <section class="modal-card-body">
+                    <div class="notification is-warning is-light">
+                        Se descontarán <strong><?= (int) $totalUnidades ?> <?= $totalUnidades === 1 ? 'unidad' : 'unidades' ?></strong>
+                        del inventario y la compra dejará de sumar en los indicadores.
+                        La nota de recepción se conserva como <strong>ANULADA</strong>; no se borra.
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="motivo_anulacion">Motivo de la anulación</label>
+                        <div class="control">
+                            <textarea class="textarea" name="motivo_anulacion" id="motivo_anulacion" rows="3"
+                                      minlength="5" maxlength="255" required
+                                      placeholder="Ej: Error en la carga de factura o devolución al proveedor"></textarea>
+                        </div>
+                        <p class="help">Entre 5 y 255 caracteres. Queda registrado junto con tu usuario.</p>
+                    </div>
+                </section>
+
+                <footer class="modal-card-foot is-justify-content-flex-end">
+                    <button type="button" class="button" data-modal-cerrar>Cancelar</button>
+                    <button type="submit" class="button is-danger has-text-weight-bold">Anular compra</button>
+                </footer>
+            </form>
+        </div>
+    <?php endif; ?>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="<?= esc(URL_BASE) ?>/assets/js/ajax.js?v=<?= time() ?>"></script>
+    <script src="<?= URL_BASE ?>/assets/js/detalleCompra.js?v=2"></script>
+
 </body>
 </html>

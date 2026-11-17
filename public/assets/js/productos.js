@@ -1,9 +1,7 @@
-console.log("¡El archivo productos.js está vivo y conectado!");
 // =====================================================================
 // 1. FUNCIONES GLOBALES (Deben estar afuera para que el HTML las vea)
 // =====================================================================
 function confirmarDesactivacion(formulario) {
-    console.log("¡Botón presionado! Llamando a SweetAlert..."); // <-- Agrega est
     Swal.fire({
         title: '¿Desactivar producto?',
         text: "El artículo dejará de estar visible en el catálogo principal.",
@@ -20,14 +18,12 @@ function confirmarDesactivacion(formulario) {
     });
 }
 
-
 // =====================================================================
 // 2. LÓGICA DEL DOM (Se ejecuta al cargar la página)
 // =====================================================================
 document.addEventListener('DOMContentLoaded', () => {
-    
+
     // --- LÓGICA DE ALERTAS PHP ---
-    // Verificamos si la variable global fue creada por el puente PHP
     if (typeof window.sweetErrorStock !== 'undefined') {
         Swal.fire({
             icon: 'error',
@@ -37,7 +33,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // --- LÓGICA DE INTERFAZ ---
+    // --- LÓGICA DE INTERFAZ (Buscador y pestañas de categoría) ---
     const searchInput = document.getElementById('product-search-input');
     const filterTabs = document.querySelectorAll('.filter-tab');
     const rows = document.querySelectorAll('.product-row');
@@ -83,12 +79,13 @@ document.addEventListener('DOMContentLoaded', () => {
             });
             this.classList.remove('is-light');
             this.classList.add('is-link');
-            
+
             currentCategory = this.getAttribute('data-filter') || 'all';
             applyFilters();
         });
     });
 
+    // --- MODAL DE CONFIRMACIÓN ---
     const modal = document.getElementById('delete-modal');
     const modalBg = document.getElementById('modal-bg');
     const cancelModal = document.getElementById('btn-cancel-modal');
@@ -119,37 +116,7 @@ document.addEventListener('DOMContentLoaded', () => {
         closeModal();
     });
 
-    // --- EXPORTAR: lo que se ve en la tabla (respeta el buscador y el filtro) ---
-    document.getElementById('btn-export-csv')?.addEventListener('click', function() {
-        const comillas = (t) => '"' + String(t).replace(/"/g, '""') + '"';
-        const headers = ['Producto', 'Codigo', 'Costo', 'Precio venta', 'Precio por cantidad', 'Stock', 'Stock minimo'];
-        const filas = [];
-        document.querySelectorAll('.product-row').forEach(row => {
-            if (row.style.display === 'none') { return; }
-            const celdas = row.querySelectorAll('td');
-            const escalas = Array.from(row.querySelectorAll('.tags .tag')).map(t => t.textContent.trim().replace(/\s+/g, ' ')).join(' | ');
-            filas.push([
-                row.getAttribute('data-name'),
-                row.getAttribute('data-code'),
-                celdas[2].textContent.trim(),
-                celdas[3].textContent.trim(),
-                escalas,
-                row.getAttribute('data-stock'),
-                row.getAttribute('data-minimo')
-            ].map(comillas).join(','));
-        });
-        const csv = '\uFEFF' + headers.map(comillas).join(',') + '\n' + filas.join('\n');
-        const enlace = document.createElement('a');
-        enlace.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
-        enlace.download = 'catalogo_productos_bonanza.csv';
-        document.body.appendChild(enlace);
-        enlace.click();
-        document.body.removeChild(enlace);
-    });
-
     // --- ALERTA DE STOCK MÍNIMO (SweetAlert) ---
-    // PHP deja en window.productosBajoMinimo los productos cuyo stock está por debajo del mínimo
-    // que fijó el administrador (se edita en "Editar producto"). Esos mismos productos van en rojo en la tabla.
     const bajo = Array.isArray(window.productosBajoMinimo) ? window.productosBajoMinimo : [];
     if (bajo.length > 0 && typeof Swal !== 'undefined') {
         const esc = (t) => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

@@ -197,14 +197,34 @@
                         </div>
                         
                         <div class="control">
-                            <div class="select">
-                                <select style="border-radius: 6px; background-color: #f8fafc;">
-                                    <option>Rango: Últimos 30 días (Pronto)</option>
+                            <div class="select" style="border-radius: 6px;">
+                                <select onchange="window.location.href = this.value" style="border-radius: 6px; background-color: #f8fafc;">
+                                    <option value="<?= esc(urlAccion('movimiento', 'tablaMovimientos', ['filtro' => $filtroActual ?? 'todas'])) ?>">Filtrar por Proveedor...</option>
+                                    <?php foreach ($proveedoresActivos ?? [] as $prov): ?>
+                                        <option value="<?= esc(urlAccion('movimiento', 'tablaMovimientos', ['filtro' => $filtroActual ?? 'todas', 'proveedor' => $prov['id_proveedor']])) ?>" 
+                                            <?= (isset($_GET['proveedor']) && (int)$_GET['proveedor'] === (int)$prov['id_proveedor']) ? 'selected' : '' ?>>
+                                            <?= esc($prov['razon_social']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="control">
+                            <div class="select" style="border-radius: 6px;">
+                                <select onchange="window.location.href = this.value" style="border-radius: 6px; background-color: #f8fafc;">
+                                    <option value="<?= esc(urlAccion('movimiento', 'tablaMovimientos', ['filtro' => $filtroActual ?? 'todas'])) ?>">Filtrar por Cliente...</option>
+                                    <?php foreach ($clientesActivos ?? [] as $cli): ?>
+                                        <option value="<?= esc(urlAccion('movimiento', 'tablaMovimientos', ['filtro' => $filtroActual ?? 'todas', 'cliente' => $cli['id_cliente']])) ?>"
+                                            <?= (isset($_GET['cliente']) && (int)$_GET['cliente'] === (int)$cli['id_cliente']) ? 'selected' : '' ?>>
+                                            <?= esc($cli['nombre_razon_social']) ?>
+                                        </option>
+                                    <?php endforeach; ?>
                                 </select>
                             </div>
                         </div>
                         
-                        <button class="button is-light" style="border-radius: 6px;">
+                        <button type="button" id="btn-abrir-exportar-pdf" class="button is-light has-text-weight-semibold" style="border-radius: 6px;">
                             <span class="icon"><span class="material-symbols-outlined">download</span></span>
                             <span>Exportar PDF</span>
                         </button>
@@ -278,6 +298,57 @@
     <!-- 2. SweetAlert2 y lógica del módulo -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="<?= esc(URL_BASE) ?>/assets/js/movimiento.js?v=<?= time() ?>"></script>
+
+    <!-- MODAL EXPORTAR REPORTE DE MOVIMIENTOS A PDF -->
+<div class="modal" id="modalExportarPdf">
+    <div class="modal-background" data-cerrar-modal-pdf></div>
+    <div class="modal-card" style="max-width: 480px; border-radius: 12px;">
+        <header class="modal-card-head has-background-white">
+            <p class="modal-card-title is-size-5 has-text-weight-bold">
+                Exportar Reporte de Movimientos
+            </p>
+            <button type="button" class="delete" aria-label="Cerrar" data-cerrar-modal-pdf></button>
+        </header>
+
+        <section class="modal-card-body">
+            <p class="is-size-7 has-text-grey mb-4">
+                Selecciona un rango de fechas para acotar el reporte, o déjalas en blanco para exportar todo el historial. Se respetarán los filtros activos en pantalla (tipo, búsqueda, proveedor o cliente).
+            </p>
+
+            <div class="columns is-mobile">
+                <div class="column">
+                    <div class="field">
+                        <label class="label is-small" for="pdf_fecha_desde">Desde</label>
+                        <div class="control">
+                            <input type="date" id="pdf_fecha_desde" class="input" value="<?= date('Y-m-01') ?>">
+                        </div>
+                    </div>
+                </div>
+                <div class="column">
+                    <div class="field">
+                        <label class="label is-small" for="pdf_fecha_hasta">Hasta</label>
+                        <div class="control">
+                            <input type="date" id="pdf_fecha_hasta" class="input" value="<?= date('Y-m-d') ?>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="buttons are-small mt-2 mb-0">
+                <button type="button" class="button is-light" id="btn-pdf-mes-actual">Mes actual</button>
+                <button type="button" class="button is-light" id="btn-pdf-todo-historial">Todo el historial (sin fechas)</button>
+            </div>
+        </section>
+
+        <footer class="modal-card-foot has-background-white is-justify-content-flex-end">
+            <button type="button" class="button" data-cerrar-modal-pdf>Cancelar</button>
+            <button type="button" id="btn-generar-pdf-movimientos" class="button is-link has-text-weight-bold">
+                <span class="icon"><span class="material-symbols-outlined">picture_as_pdf</span></span>
+                <span>Generar PDF</span>
+            </button>
+        </footer>
+    </div>
+</div>
 </body>
 </html>
 

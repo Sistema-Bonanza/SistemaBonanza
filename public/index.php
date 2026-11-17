@@ -175,6 +175,7 @@ $rutas = [
             'crearajax'          => ruta('POST', ROLES_TODOS, true, true),
             'actualizarproducto' => ruta('POST', ROLES_ADMIN, false), // LEGADO: sin token
             'eliminarproducto'   => ruta('POST', ROLES_ADMIN),        // LEGADO: enlace GET. Convertir a POST + token
+            'exportarexcel' => ruta('GET', ROLES_TODOS),
         ],
     ],
 
@@ -228,7 +229,9 @@ $rutas = [
             // Si sí, cambia ROLES_ADMIN por ROLES_TODOS.
             'guardarpresentacionajax' => ruta('POST', ROLES_TODOS, true, true),     // fetch: errores en JSON
             'buscarajax' => ruta('GET', ROLES_TODOS, true, true),
-            'verdetallecompra'        => ruta('GET',  ROLES_TODOS),                 // nota de recepción de una compra
+            'verdetallecompra'        => ruta('GET',  ROLES_TODOS),               // nota de recepción de una compra
+            'anularcompra'            => ruta('POST', ROLES_TODOS),
+            'exportarpdf'               => ruta('GET',  ROLES_TODOS),
         ],
     ],
 

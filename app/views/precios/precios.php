@@ -68,12 +68,6 @@ $situaciones = [
                             </p>
                         </div>
                     </div>
-                    <div class="is-flex is-flex-direction-column is-align-items-flex-end" style="gap: 6px;">
-                        <span class="tag is-medium has-text-weight-bold" style="background: rgba(255,255,255,0.15); color: white; border: 1px solid rgba(255,255,255,0.25);">
-                            <span class="material-symbols-outlined is-size-5 has-text-success mr-2">paid</span>
-                            Divisa Base: USD ($)
-                        </span>
-                    </div>
                 
                 </div>
             </div>

@@ -11,8 +11,10 @@ $direccionVal = $proveedor['direccion'] ?? '';
 $estadoVal = $proveedor['estado'] ?? 1;
 
 // Métricas del proveedor para la tarjeta informativa
-$totalRecepciones = $proveedor['total_recepciones'] ?? $totalRecepciones ?? 0;
-$ultimaEntrada = $proveedor['ultima_entrada'] ?? $ultimaEntrada ?? 'Sin entradas';
+$resumenRecepciones = $resumenRecepciones ?? [];
+$totalRecepciones   = (int) ($resumenRecepciones['total_recepciones'] ?? $proveedor['total_recepciones'] ?? 0);
+$ultimaEntradaRaw   = $resumenRecepciones['ultima_entrada'] ?? $proveedor['ultima_entrada'] ?? null;
+$ultimaEntrada      = !empty($ultimaEntradaRaw) ? formatoFecha($ultimaEntradaRaw, false) : 'Sin entradas';
 $iniciales = strtoupper(substr(htmlspecialchars($razonVal), 0, 2));
 ?>
 <!DOCTYPE html>
@@ -224,7 +226,8 @@ $iniciales = strtoupper(substr(htmlspecialchars($razonVal), 0, 2));
                                     <span class="material-symbols-outlined has-text-link is-size-6">inventory_2</span>
                                     <span class="is-size-7 has-text-dark font-medium">Total Recepciones</span>
                                 </div>
-                                <span class="is-size-7 font-semibold has-text-link"><?= htmlspecialchars($totalRecepciones) ?> Órdenes</span>
+                                <span class="is-size-7 font-semibold has-text-link">
+                                    <?= $totalRecepciones ?> <?= $totalRecepciones === 1 ? 'Orden' : 'Órdenes' ?></span>
                             </div>
 
                             <div class="is-flex is-align-items-center is-justify-content-space-between p-3" style="background-color: #f8fafc; border-radius: 8px; border: 1px solid #f1f5f9;">

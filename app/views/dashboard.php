@@ -201,7 +201,7 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
                                             <span class="tag is-success is-light is-rounded is-small">Stock: <?= (int) ($prod['stock_actual'] ?? $prod['stock'] ?? 0) ?></span>
                                         </div>
                                         <p class="is-size-7 has-text-weight-bold has-text-dark mb-1"><?= esc($prod['nombre']) ?></p>
-                                        <p class="is-size-7 has-text-grey mb-3">Cat: <strong><?= esc($nombreCat) ?></strong></p>
+                                        <p class="is-size-7 has-text-grey mb-3">Categoria: <strong><?= esc($nombreCat) ?></strong></p>
                                         
                                         <div class="is-flex is-justify-content-space-between is-align-items-flex-end pt-2" style="border-top: 1px solid #e2e8f0;">
                                             <div>
@@ -259,7 +259,7 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
                 </div>
             </div>
 
-            <!-- Totales y Botones -->
+            <!-- Totales y Botón de Limpieza -->
             <div class="pt-3" style="border-top: 2px solid #e2e8f0;">
                 <div class="is-flex is-justify-content-space-between mb-1">
                     <span class="is-size-7 has-text-grey">Subtotal</span>
@@ -270,14 +270,23 @@ $userRole = $_SESSION['role_name'] ?? 'Supervisor General';
                     <span class="is-size-7 has-text-weight-bold font-mono" id="cart-tax">$0.00</span>
                 </div>
                 <div class="is-flex is-justify-content-space-between is-align-items-baseline mb-4 pt-2" style="border-top: 1px solid #cbd5e1;">
-                    <span class="has-text-weight-bold has-text-dark">Total Liquidado</span>
+                    <span class="has-text-weight-bold has-text-dark">Total Estimado</span>
                     <span class="title is-4 has-text-link mb-0 font-mono" id="cart-total">$0.00</span>
                 </div>
-                
-                <div class="is-flex" style="gap: 10px;">
-                    <button type="button" class="button is-light is-small has-text-weight-bold is-fullwidth" onclick="resetCart()">Reset</button>
-                    <button type="button" class="button is-link is-small has-text-weight-bold is-fullwidth" onclick="triggerCheckout()">Generar Cotización</button>
-                </div>
+
+                <button type="button"
+                        class="button is-light is-small has-text-weight-bold is-fullwidth"
+                        style="border-radius: 8px;"
+                        onclick="resetCart()">
+                    <span class="icon is-small">
+                        <span class="material-symbols-outlined is-size-6">restart_alt</span>
+                    </span>
+                    <span>Limpiar cálculo</span>
+                </button>
+
+                <p class="is-size-7 has-text-grey has-text-centered mt-2 mb-0">
+                    Cálculo referencial rápido · No registra venta ni descuenta stock
+                </p>
             </div>
 
         </div>

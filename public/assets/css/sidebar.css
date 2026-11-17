@@ -1,3 +1,40 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+
+:root {
+    --font-cuerpo: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    --font-titulos: 'Plus Jakarta Sans', 'Inter', sans-serif;
+}
+
+html,
+body,
+button,
+input,
+optgroup,
+select,
+textarea,
+.table,
+.tag,
+.input,
+.select select {
+    font-family: var(--font-cuerpo) !important;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+/* Títulos principales, encabezados de tarjetas y cifras KPI */
+.title,
+.subtitle,
+.modal-card-title {
+    font-family: var(--font-titulos) !important;
+    letter-spacing: -0.015em;
+}
+
+/* Números tabulares para que montos, códigos y stocks queden alineados en columna */
+.table td,
+.table th,
+.tag {
+    font-variant-numeric: tabular-nums;
+}
 /* ==========================================
    PALETA DE COLORES DEL SIDEBAR (MODIFICABLE)
    ========================================== */
@@ -9,6 +46,7 @@
     --sidebar-hover: #334155;    /* Fondo al pasar el mouse */
     --bonanza-blue: #3b82f6;     /* Azul de acento para el botón activo */
 }
+
 
 /* ==========================================
    ESTILOS BASE

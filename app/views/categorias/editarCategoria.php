@@ -173,9 +173,10 @@
                                     <p class="has-text-white" style="font-size: 0.75rem; opacity: 0.9; line-height: 1.3;">Resumen taxonómico de almacén</p>
                                 </div>
                             </div>
-                            <span class="tag is-rounded has-text-weight-bold px-3 py-2 flex-shrink-0" style="background-color: rgba(255,255,255,0.15); color: #6ee7b7; border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem;">
-                                <span style="width: 8px; height: 8px; border-radius: 50%; background-color: #34d399; margin-right: 8px;"></span>Activo
-                            </span>
+                            <?php $catActiva = ((int)($categoria['estado'] ?? 1) === 1); ?>
+                                    <span class="tag is-rounded has-text-weight-bold px-3 py-2 flex-shrink-0" style="background-color: rgba(255,255,255,0.15); color: <?= $catActiva ? '#6ee7b7' : '#fca5a5' ?>; border: 1px solid rgba(255,255,255,0.1); font-size: 0.75rem;">
+                                        <span style="width: 8px; height: 8px; border-radius: 50%; background-color: <?= $catActiva ? '#34d399' : '#f87171' ?>; margin-right: 8px;"></span><?= $catActiva ? 'Activo' : 'Inactivo' ?>
+                                    </span>
                         </div>
 
                         <!-- Cuerpo de la Ficha -->
